@@ -230,3 +230,12 @@ document.addEventListener('turbo:load', maps);
 if (document.readyState !== 'loading') maps(); else document.addEventListener('DOMContentLoaded', maps);
 // Turbo keeps a snapshot of the page; a live Leaflet map in it would come back broken.
 document.addEventListener('turbo:before-cache', () => document.querySelectorAll('[data-cz-map][data-ready]').forEach((box) => { box.czMap?.remove(); delete box.dataset.ready; }));
+
+/*
+ * Phone menu: close it after choosing a section on the same page, or when tapping elsewhere.
+ */
+document.addEventListener('click', (e) => {
+    document.querySelectorAll('details.cz-mobile-nav[open]').forEach((menu) => {
+        if (!menu.contains(e.target) || e.target.closest('a')) menu.removeAttribute('open');
+    });
+});

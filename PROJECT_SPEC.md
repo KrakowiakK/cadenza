@@ -579,6 +579,7 @@ Zrobione i działające end-to-end (sprawdzone w przeglądarce; testy: `./cadenz
 | Wpisy przez czat (aktualności, wydarzenia, menu, produkty): kolekcje tworzone przez agenta, każdy wpis i zmiana to szkic do zatwierdzenia w panelu; lista aktualności, strona wpisu z Markdown (bez surowego HTML) | ✅ |
 | Formularze: miejsca na każdy termin / zajęcia / slot (`limit` na polu wyboru) | ✅ |
 | Wersje językowe: `translate_page` (model tłumaczy tylko listę tekstów, drzewo odtwarzane), przełącznik języka, menu na język, teksty strony w języku podstrony; walidacja kotwic do sekcji | ✅ |
+| Dokumenty do pobrania (PDF/DOCX/ODT/PPTX): `add_document`, blok `downloads`, typ propsa `file`; menu na telefonie (`<details>`, bez JS) | ✅ |
 | Mapa: podróże z GPS zdjęć (trasa w czasie, legenda) i miejsca z adresów (Nominatim z uproszczeniami) | ✅ |
 | Diagnostyka przez Symfony AI Mate, izolacja błędów renderu, model zapasowy, tolerancja błędów modeli (JsonRepair, lenient resolver), polityka narzędzi w kodzie | ✅ |
 | Uruchomienie jednym poleceniem, README EN, licencja MIT, lista zgłoszeń do upstreamu, scenariusz filmu | ✅ |

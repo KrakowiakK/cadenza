@@ -35,20 +35,39 @@
         <button type="button" data-cz-announcement-close aria-label="×" class="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1.5 opacity-70 transition hover:bg-white/15 hover:opacity-100">{{ cadenza_icon('x', 'size-4') }}</button>
     </div>
     {%- endif %}
+    {%- set navItems = cadenza_nav(doc, page is defined and page ? page : null) -%}
+    {%- set navItems = navItems|length > 1 ? navItems : [] -%}
+    {%- set translations = page is defined and page ? cadenza_translations(doc, page) : [] -%}
+    {%- set translations = translations|length > 1 ? translations : [] -%}
     <header class="sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur" style="view-transition-name:cz-header">
         <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-6">
-            <a href="/" class="cz-heading text-lg font-bold tracking-tight">{{ doc.name }}</a>
-            <nav class="flex items-center gap-1 overflow-x-auto text-sm">
-                {%- set navItems = cadenza_nav(doc, page is defined and page ? page : null) %}
-                {%- for item in navItems|length > 1 ? navItems : [] %}
+            <a href="/" class="cz-heading min-w-0 truncate text-lg font-bold tracking-tight">{{ doc.name }}</a>
+            {#- Wide screens: the menu in the bar. -#}
+            <nav class="hidden items-center gap-1 text-sm md:flex">
+                {%- for item in navItems %}
                     <a href="{{ item.href }}" class="rounded-md px-3 py-2 whitespace-nowrap transition hover:bg-muted {{ page is defined and page and page.path == item.href ? 'font-semibold text-foreground' : 'text-muted-foreground' }}">{% if item.members %}{{ cadenza_icon('lock', 'size-3 inline mr-1 opacity-60') }}{% endif %}{{ item.label }}</a>
                 {%- endfor %}
             </nav>
-            {%- set translations = page is defined and page ? cadenza_translations(doc, page) : [] -%}
-            {%- if translations|length > 1 %}
-            <div class="flex shrink-0 items-center gap-0.5 rounded-full border border-border/70 p-0.5 text-xs font-medium uppercase" aria-label="Language">
+            {%- if translations %}
+            <div class="hidden shrink-0 items-center gap-0.5 rounded-full border border-border/70 p-0.5 text-xs font-medium uppercase md:flex" aria-label="Language">
                 {%- for tr in translations %}<a href="{{ tr.href }}" hreflang="{{ tr.lang }}" lang="{{ tr.lang }}" class="rounded-full px-2.5 py-1 transition {{ tr.current ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground' }}">{{ tr.lang }}</a>{% endfor %}
             </div>
+            {%- endif %}
+            {#- Phones: one button, the menu and languages drop down (no JavaScript needed). -#}
+            {%- if navItems or translations %}
+            <details class="cz-mobile-nav relative shrink-0 md:hidden">
+                <summary class="flex cursor-pointer list-none items-center gap-1.5 rounded-full border border-border/70 px-3 py-1.5 text-sm font-medium [&::-webkit-details-marker]:hidden" aria-label="Menu">{{ cadenza_icon('menu', 'size-4') }}<span>{{ state.language == 'pl' ? 'Menu' : 'Menu' }}</span></summary>
+                <div class="absolute right-0 mt-2 w-64 rounded-2xl border border-border bg-background p-2 shadow-xl">
+                    {%- for item in navItems %}
+                        <a href="{{ item.href }}" class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-base {{ page is defined and page and page.path == item.href ? 'font-semibold' : '' }} hover:bg-muted">{% if item.members %}{{ cadenza_icon('lock', 'size-3.5 opacity-60') }}{% endif %}{{ item.label }}</a>
+                    {%- endfor %}
+                    {%- if translations %}
+                    <div class="mt-1 flex gap-1 border-t border-border px-1 pt-2 text-xs font-medium uppercase">
+                        {%- for tr in translations %}<a href="{{ tr.href }}" hreflang="{{ tr.lang }}" lang="{{ tr.lang }}" class="flex-1 rounded-lg px-2 py-2 text-center {{ tr.current ? 'bg-foreground text-background' : 'bg-muted' }}">{{ tr.lang }}</a>{% endfor %}
+                    </div>
+                    {%- endif %}
+                </div>
+            </details>
             {%- endif %}
         </div>
     </header>

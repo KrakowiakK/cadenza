@@ -46,6 +46,10 @@ appears first as a **sketch on the live page**; nothing goes live until you appr
 - **Other languages.** *“Lots of tourists come to Gdynia — make an English version.”* The page's texts are taken out
   of its tree, the model translates only that list, and the same page is rebuilt at `/en/…` with a language switcher,
   its own menu, and forms that speak English. Names of people, places and the business stay as they are.
+- **Documents to download.** Attach a PDF (a menu, rules, a price list) and say where it belongs: it is stored by the
+  site and shown with its type, size and number of pages.
+- **Made for phones too** — visitors get a compact menu with the language switch, the owner gets the whole studio in a
+  full-screen panel.
 - **Pages for invited people only.** *“Make the accommodation page visible only to our guests”* — the page gets a lock;
   the owner adds guests (or tells the agent *“invite Kasia and Piotr…”*) and copies each one's personal sign-in link
   (Symfony login links: signed, expiring, no passwords). Strangers see a closed door that does not reveal what is
