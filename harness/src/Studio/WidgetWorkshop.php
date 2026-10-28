@@ -41,7 +41,7 @@ final class WidgetWorkshop
         if ($tested) {
             // The original brief is what the result is judged against, also after a change.
             $purpose = $existing ? ($current['description'] ?? $brief) : $brief;
-            $findings = $this->test($name, (int) $result['version'], $shape, (string) $purpose, $status);
+            $findings = $this->test($name, (int) $result['version'], $shape, (string) $purpose, $language, $status);
             if (null !== $findings) {
                 $status('repairing');
                 try {
@@ -49,7 +49,7 @@ final class WidgetWorkshop
                     $saved = $this->site->defineWidget($name, '', '', $fixed, $shape);
                     if ($saved['ok'] ?? false) {
                         [$code, $result] = [$fixed, $saved];
-                        $findings = $this->test($name, (int) $result['version'], $shape, (string) $purpose, $status);
+                        $findings = $this->test($name, (int) $result['version'], $shape, (string) $purpose, $language, $status);
                     }
                 } catch (\Throwable) {
                     // the first version stays
@@ -63,13 +63,13 @@ final class WidgetWorkshop
     /**
      * @return string|null what is wrong, or null when it works and looks right
      */
-    private function test(string $name, int $version, string $shape, string $purpose, \Closure $status): ?string
+    private function test(string $name, int $version, string $shape, string $purpose, string $language, \Closure $status): ?string
     {
         $status('testing');
         $run = $this->tester->run($name, $version, $shape);
         $problems = array_map(static fn (string $e): string => '- Browser error: '.$e, $run['errors']);
         $status('looking');
-        if (null !== $seen = $this->tester->review($purpose, $run['screenshots'], $run['played'], $shape)) {
+        if (null !== $seen = $this->tester->review($purpose, $run['screenshots'], $run['played'], $shape, $language)) {
             $problems[] = $seen;
         }
 

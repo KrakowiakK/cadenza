@@ -117,7 +117,7 @@ final class WidgetTester
      *
      * @param list<string> $screenshots
      */
-    public function review(string $brief, array $screenshots, bool $played, string $shape = 'wide'): ?string
+    public function review(string $brief, array $screenshots, bool $played, string $shape = 'wide', string $language = 'pl'): ?string
     {
         [$platform, $model] = '' !== $this->reviewModel ? [$this->main, $this->reviewModel] : [$this->vision, $this->visionModel];
         if ([] === $screenshots || '' === $model) {
@@ -125,6 +125,7 @@ final class WidgetTester
         }
         $parts = [\sprintf("These are screenshots of a widget on a website: first right after loading, then %s.\nWhat it should be: %s\n\nLook carefully. List concrete problems a visitor would see: an empty or blank area where the content should be, things drawn outside their board or cut off, overlapping text or buttons, unreadable text, a game that did not start or did not react, a layout that does not fill its frame, text in a language other than the rest. A game over after these few random keys is normal, not a problem. Ignore taste. Answer with JSON only: {\"ok\": true} if it works and looks right, else {\"ok\": false, \"problems\": [\"…\", \"…\"]}.",
             $played ? 'after pressing Start (or clicking the middle), Space, and arrow keys for two seconds' : 'two seconds later', $brief)
+            .\sprintf("\nEvery text a visitor reads must be in the language with the code \"%s\"; any text in another language is a problem.", $language)
             .('background' === $shape ? "\nIt is a decorative background: the page shows its own title over it, so no text is expected here; sparse, soft shapes and empty space are intended." : '')];
         foreach ($screenshots as $file) {
             $parts[] = Image::fromFile($file);

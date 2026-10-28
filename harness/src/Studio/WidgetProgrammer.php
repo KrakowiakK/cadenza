@@ -37,8 +37,8 @@ final class WidgetProgrammer
         left after the score bar); on-screen buttons go beside the board or over its corner when there is no room
         below); test mentally at the phone size too. Follow resizes (ResizeObserver); canvases sharp on retina
         (devicePixelRatio, max 2).
-        No network: no fetch, no CDN, no external fonts or images. Photos of the site only by the /media/… addresses
-        given in the brief. Libraries, imported by these exact names: {libraries}.
+        No network: no fetch, no CDN, no external fonts or images. Photos only by the /media/… addresses given in the
+        brief — never guess other addresses. Libraries, imported by these exact names: {libraries}.
         e.g. import * as THREE from 'three'; import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import Chart from 'chart.js/auto'; import confetti from 'canvas-confetti'; import Matter from 'matter-js'.
         Prefer plain Canvas 2D, SVG and CSS when they are enough.

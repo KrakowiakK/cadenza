@@ -10,7 +10,7 @@ use App\Studio\WidgetProgrammer;
 use App\Studio\WidgetWorkshop;
 use Symfony\AI\Agent\Toolbox\Attribute\AsTool;
 
-#[AsTool('create_widget', 'Make something ALIVE with real code, when blocks are not enough: a game (snake, tetris, frogger, memory, a quiz against the clock), a 3D scene with three.js (a turning product, floating shapes, a 3D logo), an SVG or canvas animation, a living background for the opening, an interactive calculator or chart. Describe it in "brief" in English, precisely: what it shows, rules and controls, mood; mention /media/… photos to use. A programmer writes the code, it is tried in a browser and fixed; it runs sandboxed. To change one, call again with the same name and describe only the change (or what is broken). Then place it with propose_changes: {"type": "widget", "props": {"widget": name, "title": …, "caption": …}}, or as a hero\'s "widget" (a living background behind the title, shape "background").', method: 'create')]
+#[AsTool('create_widget', 'Make something ALIVE with real code, when blocks are not enough: a game (snake, tetris, frogger, memory, a quiz against the clock), a 3D scene with three.js (a turning product, floating shapes, a 3D logo), an SVG or canvas animation, a living background for the opening, an interactive calculator or chart. Describe it in "brief" in English, precisely: what it shows, rules and controls, mood; mention /media/… photos to use (find_images or the outline tell you which exist; if the owner's photo of something is not there, ask for it rather than taking another). A programmer writes the code, it is tried in a browser and fixed; it runs sandboxed. To change one, call again with the same name and describe only the change (or what is broken). Then place it with propose_changes: {"type": "widget", "props": {"widget": name, "title": …, "caption": …}}, or as a hero\'s "widget" (a living background behind the title, shape "background").', method: 'create')]
 #[AsTool('leaderboard', 'The shared leaderboard of a game widget (who has the best scores); clear: true empties it, e.g. for a new season. A game gets a leaderboard when its brief asks for one.', method: 'leaderboard')]
 #[AsTool('widget_status', 'The widgets of this site and the last error a browser reported for each — read it when the owner says a game or animation does not work.', method: 'status')]
 final class WidgetTools
@@ -31,7 +31,10 @@ final class WidgetTools
     public function create(string $brief, string $name = '', string $label = '', ?string $shape = null): string
     {
         // Models sometimes leave the name out: one is made from the label.
-        $name = trim(strtolower('' !== trim($name) ? $name : (string) preg_replace('/[^a-z0-9]+/', '-', strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $label ?: 'widget') ?: 'widget'))), '-');
+        if ('' === trim($name) && '' === trim($label)) {
+            return 'Give the widget a "name" (e.g. "tatra-flyover"; the same name again changes an existing one).';
+        }
+        $name = trim(strtolower('' !== trim($name) ? $name : (string) preg_replace('/[^a-z0-9]+/', '-', strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $label) ?: 'widget'))), '-');
         $pl = 'pl' === substr($this->turn->language, 0, 2);
         $label = '' !== trim($label) ? trim($label) : ucfirst(str_replace('-', ' ', $name));
         $steps = [
