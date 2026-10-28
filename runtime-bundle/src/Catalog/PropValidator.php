@@ -63,6 +63,11 @@ final class PropValidator
                 if (\is_int($value) || \is_float($value)) {
                     $value = (string) $value;
                 }
+                // {"title": "Spóźnienia", "text": "Wejdź cicho"} where a text is expected: its words, joined.
+                if (\is_array($value) && !array_is_list($value) && [] !== $value && array_filter($value, 'is_string') === $value) {
+                    $parts = array_values(array_filter(array_map('trim', $value), 'strlen'));
+                    $value = 2 === \count($parts) && 'markdown' === $schema['type'] ? '**'.$parts[0].'** — '.$parts[1] : implode(' — ', $parts);
+                }
 
                 return \is_string($value) ? [$value, null] : [null, $path.' must be a string.'];
             case 'image':

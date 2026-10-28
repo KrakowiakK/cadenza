@@ -73,6 +73,16 @@ final class OperationApplierTest extends TestCase
         self::assertSame('Gry', Document::findPage($result->document, '/')['nodes'][0]['props']['text']);
     }
 
+    public function testAnObjectWhereATextBelongsBecomesItsWords(): void
+    {
+        $result = $this->applier->apply(Document::empty('Test'), [['op' => 'page.create', 'path' => '/', 'title' => 'Home', 'nodes' => [
+            ['type' => 'list', 'props' => ['items' => ['Punktualność', ['title' => 'Telefony', 'text' => 'wyciszone']]]],
+        ]]]);
+
+        self::assertTrue($result->isValid(), implode(' ', $result->errors));
+        self::assertSame(['Punktualność', 'Telefony — wyciszone'], Document::findPage($result->document, '/')['nodes'][0]['props']['items']);
+    }
+
     public function testRejectsTheWholeBatchWhenOneOperationIsInvalid(): void
     {
         $doc = Document::empty();
