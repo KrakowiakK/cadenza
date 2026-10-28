@@ -52,6 +52,18 @@ final class OperationApplierTest extends TestCase
         self::assertSame('Parking?', $section['slots']['children'][1]['props']['items'][0]['question']);
     }
 
+    public function testAnIdAmongThePropsIsTheNodesId(): void
+    {
+        $result = $this->applier->apply(Document::empty('Test'), [
+            ['op' => 'page.create', 'path' => '/', 'title' => 'Home', 'nodes' => [
+                ['type' => 'heading', 'props' => ['id' => 'zapisy', 'text' => 'Zapisy']],
+            ]],
+        ]);
+
+        self::assertTrue($result->isValid(), implode(' ', $result->errors));
+        self::assertSame('zapisy', Document::findPage($result->document, '/')['nodes'][0]['id']);
+    }
+
     public function testRejectsTheWholeBatchWhenOneOperationIsInvalid(): void
     {
         $doc = Document::empty();

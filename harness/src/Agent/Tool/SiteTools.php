@@ -30,7 +30,7 @@ final class SiteTools
      */
     public function propose(array $operations, string $summary = '', ?int $reviseDraftId = null): string
     {
-        $summary = '' !== trim($summary) ? $summary : 'Zmiany na stronie';
+        $summary = '' !== trim($summary) ? $summary : self::summaryOf(Proposals::normalise($operations), str_starts_with($this->turn->language, 'pl'));
         $result = $this->proposals->propose($this->turn->conversation, $operations, $summary, $reviseDraftId);
         if (null === $result['proposal']) {
             return "The site rejected the batch, nothing was saved. Fix these errors and call propose_changes again with the whole corrected batch:\n- ".implode("\n- ", $result['errors']);
@@ -48,6 +48,32 @@ final class SiteTools
             json_encode($proposal->toArray()['changes']),
             implode('; ', \array_slice($result['created'], 0, 40)) ?: 'nothing new',
         );
+    }
+
+    /**
+     * What a batch does, in a few words, for when the model gave no summary.
+     *
+     * @param list<mixed> $operations
+     */
+    public static function summaryOf(array $operations, bool $pl): string
+    {
+        $parts = [];
+        foreach ($operations as $op) {
+            $parts[] = match (\is_array($op) ? ($op['op'] ?? null) : null) {
+                'page.create' => ($pl ? 'Nowa strona ' : 'New page ').'„'.($op['title'] ?? $op['path'] ?? '').'”',
+                'page.delete' => ($pl ? 'Usunięcie strony ' : 'Removing page ').($op['page'] ?? ''),
+                'theme.update' => $pl ? 'Nowy wygląd' : 'New look',
+                'site.update' => $pl ? 'Ustawienia strony' : 'Site settings',
+                'site.restore' => ($pl ? 'Powrót do wersji ' : 'Back to version ').($op['version'] ?? ''),
+                'node.remove' => $pl ? 'Usunięcie sekcji' : 'Removing a section',
+                'node.move' => $pl ? 'Nowa kolejność sekcji' : 'Sections reordered',
+                'node.insert' => $pl ? 'Nowa sekcja' : 'New section',
+                default => $pl ? 'Zmiany w treści' : 'Content changes',
+            };
+        }
+        $parts = array_values(array_unique($parts));
+
+        return [] === $parts ? ($pl ? 'Zmiany na stronie' : 'Changes') : implode(', ', \array_slice($parts, 0, 3));
     }
 
     /**

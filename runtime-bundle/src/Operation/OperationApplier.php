@@ -534,6 +534,11 @@ final class OperationApplier
             throw new OperationException(\sprintf('%s: unknown type "%s"; types: %s.', $path, $spec['type'], implode(', ', array_keys($this->catalog->all()))));
         }
         $type = $this->catalog->get($spec['type']);
+        // An "id" among the props is the node's own id (models put it there to link to the section: "#zapisy").
+        if (\is_string($spec['props']['id'] ?? null) && !isset($type->props['id'])) {
+            $spec['id'] ??= $spec['props']['id'];
+            unset($spec['props']['id']);
+        }
         if (null !== $wrapped = $this->inSection($type, $spec)) {
             return $this->buildNode($wrapped, $path, $keepId);
         }
