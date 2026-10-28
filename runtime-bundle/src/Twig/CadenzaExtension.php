@@ -51,7 +51,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
             new TwigFunction('cadenza_state', fn (): RenderState => $this->state),
             new TwigFunction('cadenza_media', fn (array $p): array => $this->media->query($p['source'] ?? null, $p['tag'] ?? null, $p['year'] ?? null, $p['sort'] ?? 'newest', (int) ($p['limit'] ?? 60), $p['album'] ?? null)),
             new TwigFunction('cadenza_collection', fn (string $slug): ?\Cadenza\Runtime\Entity\Collection => $this->collections->get($slug)),
-            new TwigFunction('cadenza_records', fn (\Cadenza\Runtime\Entity\Collection $c, int $limit = 500): array => $this->collections->records($c, $limit)),
+            new TwigFunction('cadenza_records', fn (\Cadenza\Runtime\Entity\Collection $c, int $limit = 500, ?string $sort = null, string $order = 'asc'): array => $this->collections->records($c, $limit, $this->state->owner && !$this->state->showBefore && !$this->state->embed, $sort, $order)),
             new TwigFunction('cadenza_categories', fn (\Cadenza\Runtime\Entity\Collection $c, string $field): array => $this->collections->categories($c, $field)),
             new TwigFunction('cadenza_format', static fn (string $type, mixed $value): string => Collections::format($type, $value)),
             new TwigFunction('cadenza_form_stats', fn (array $node): ?array => null !== $this->forms->published($node['id']) ? $this->forms->stats($node) : null),

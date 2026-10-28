@@ -56,3 +56,12 @@ Each entry is a draft for an issue: what we did, what happened, what we expected
 
 ### 9. Documented `trace` recipe is missing from the 3.6 release
 - *Actual*: `ux:install trace --kit=shadcn` → "The recipe "trace" does not exist." (present on the main branch).
+
+## 10. doctrine/migrations + SQLite: `make:migration` rebuilds a table without the columns it just added
+
+**Where:** `doctrine/dbal` SQLite schema comparator (seen with DBAL 4, Doctrine ORM 3, SQLite 3.4x).
+
+Adding two columns to an entity whose table has a foreign key with `ON DELETE CASCADE` generates `ALTER TABLE … ADD
+COLUMN` for both, followed by a table rebuild (`CREATE TEMPORARY TABLE … / DROP TABLE / CREATE TABLE … / INSERT …`)
+whose `CREATE TABLE` lacks the two new columns. Running it leaves the schema out of sync with the mapping
+(`doctrine:schema:validate` fails). Workaround: keep only the `ADD COLUMN` statements.

@@ -219,6 +219,54 @@ final class SiteClient
         return $this->json($this->mcp->get('site')->callTool('members_add', ['people' => $people]));
     }
 
+    /**
+     * @param list<array<string, mixed>> $fields
+     *
+     * @return array<string, mixed>
+     */
+    public function createCollection(string $slug, string $name, array $fields, ?string $titleField): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('collection_create', array_filter(['slug' => $slug, 'name' => $name, 'fields' => $fields, 'titleField' => $titleField], static fn (mixed $v): bool => null !== $v)));
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     *
+     * @return array<string, mixed>
+     */
+    public function saveRecord(string $collection, array $values, ?string $slug): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('record_save', array_filter(['collection' => $collection, 'values' => $values, 'slug' => $slug], static fn (mixed $v): bool => null !== $v && '' !== $v)));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function deleteRecord(string $collection, string $slug): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('record_delete', ['collection' => $collection, 'slug' => $slug]));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function findRecords(string $collection, ?string $text = null, int $limit = 40): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('records_find', array_filter(['collection' => $collection, 'text' => $text, 'limit' => $limit], static fn (mixed $v): bool => null !== $v)));
+    }
+
+    /**
+     * The owner's decision — only through the control server.
+     *
+     * @param list<string>|null $slugs
+     *
+     * @return array<string, mixed>
+     */
+    public function decideRecords(string $collection, bool $publish, ?array $slugs = null): array
+    {
+        return $this->json($this->mcp->get('control')->callTool('records_decide', array_filter(['collection' => $collection, 'publish' => $publish, 'slugs' => $slugs], static fn (mixed $v): bool => null !== $v)));
+    }
+
     private function text(CallToolResult $result): string
     {
         $text = '';

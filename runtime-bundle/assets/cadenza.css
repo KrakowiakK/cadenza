@@ -265,3 +265,16 @@ a.cz-card:hover, .cz-card-link:hover { transform: translateY(-3px); box-shadow: 
 .cz-pop-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 4px; }
 .cz-pop-meta { opacity: .65; font-size: 12px; }
 .leaflet-popup-content-wrapper { border-radius: calc(var(--radius) * 1.2); }
+
+/* Records waiting for the owner's approval (only the owner sees them) */
+.cz-record-pending { outline: 2px dashed color-mix(in oklch, #f59e0b 70%, transparent); outline-offset: 4px; }
+
+/* Long texts written in Markdown (posts, record pages) */
+.cz-article h2 { font-family: var(--font-heading, inherit); font-size: 1.6em; line-height: 1.2; margin: 1.6em 0 .6em; }
+.cz-article h3 { font-family: var(--font-heading, inherit); font-size: 1.25em; margin: 1.4em 0 .5em; }
+.cz-article ul, .cz-article ol { margin: 0 0 1em 1.4em; }
+.cz-article ul { list-style: disc; }
+.cz-article ol { list-style: decimal; }
+.cz-article li { margin: .3em 0; }
+.cz-article blockquote { border-left: 3px solid var(--primary); padding-left: 1em; font-style: italic; opacity: .85; margin: 1.2em 0; }
+.cz-article strong { font-weight: 650; }

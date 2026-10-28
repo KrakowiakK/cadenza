@@ -53,7 +53,11 @@ final class CadenzaRuntimeBundle extends AbstractBundle
                 'alias' => 'Cadenza',
             ]]],
         ]);
-        $builder->prependExtensionConfig('framework', [
+        if ($builder->hasExtension('twig_extra')) {
+            // Texts come from the agent and from spreadsheets: Markdown yes, raw HTML and javascript: links no.
+            $builder->prependExtensionConfig('twig_extra', ['commonmark' => ['html_input' => 'escape', 'allow_unsafe_links' => false]]);
+        }
+                $builder->prependExtensionConfig('framework', [
             'asset_mapper' => ['paths' => [$this->getPath().'/assets' => '@cadenza/runtime']],
             'messenger' => [
                 'buses' => [

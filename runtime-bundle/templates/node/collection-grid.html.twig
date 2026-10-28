@@ -16,13 +16,35 @@
             {%- if props.search %}<input type="search" data-search placeholder="⌕" class="ml-auto h-10 w-full rounded-full border border-current/15 bg-background px-4 text-sm outline-none focus:border-primary sm:w-64">{% endif %}
         </div>
         {%- endif %}
-        <div class="grid grid-cols-1 gap-6 {{ cols[props.columns] }}">
-            {%- for r in cadenza_records(c, props.limit) %}
+        {%- set pl = cadenza_state().document.language|default('en')|slice(0, 2) == 'pl' -%}
+        {%- set badges = {new: pl ? 'Szkic · nowy' : 'Draft · new', changed: pl ? 'Szkic · zmiany' : 'Draft · changed', removed: pl ? 'Do usunięcia' : 'To be removed'} -%}
+        {%- set records = cadenza_records(c, props.limit, props.sort, props.order) -%}
+        {%- if props.style == 'list' %}
+        {%- set dateField = c.fields|filter(f => f.type == 'date')|first -%}
+        {%- set bodyField = c.fields|filter(f => f.type in ['longtext', 'text'] and f.key != c.titleField)|first -%}
+        <div class="mx-auto max-w-3xl divide-y divide-current/10 border-y border-current/10">
+            {%- for r in records %}
                 {%- set tag = props.links ? 'a' : 'div' -%}
-                <{{ tag }}{% if props.links %} href="/{{ c.slug }}/{{ r.slug }}"{% endif %} class="cz-card group flex flex-col overflow-hidden" data-item data-category="{{ filter ? r.get(filter) : '' }}" data-text="{{ r.data|map(v => v is iterable ? '' : v)|join(' ')|lower }}">
+                <{{ tag }}{% if props.links %} href="/{{ c.slug }}/{{ r.slug }}"{% endif %} class="group relative flex gap-6 py-7 {{ r.pending ? 'cz-record-pending' : '' }}" data-item data-category="{{ filter ? r.get(filter) : '' }}" data-text="{{ r.data|map(v => v is iterable ? '' : v)|join(' ')|lower }}">
+                    <div class="min-w-0 flex-1">
+                        {%- if dateField and r.get(dateField.key) %}<p class="cz-eyebrow mb-2">{{ r.get(dateField.key)|format_date('long', locale: pl ? 'pl' : 'en') }}</p>{% endif %}
+                        <h3 class="cz-heading text-xl font-semibold transition group-hover:text-primary md:text-2xl">{{ r.title }}</h3>
+                        {%- if bodyField and r.get(bodyField.key) %}{% set excerpt = r.get(bodyField.key)|striptags|replace({'#': '', '*': ''}) %}<p class="mt-2 opacity-70">{{ excerpt|length > 220 ? excerpt|slice(0, 220)|split(' ')|slice(0, -1)|join(' ') ~ '…' : excerpt }}</p>{% endif %}
+                        {%- if r.pending %}<span class="mt-3 inline-block rounded-full bg-amber-400/25 px-2.5 py-0.5 text-xs font-medium text-amber-900 dark:text-amber-200">{{ badges[r.pending] }}</span>{% endif %}
+                    </div>
+                    {%- if r.image %}<img src="{{ r.image }}" alt="" loading="lazy" class="cz-img hidden size-28 shrink-0 object-cover sm:block">{% endif %}
+                </{{ tag }}>
+            {%- endfor %}
+        </div>
+        {%- else %}
+        <div class="grid grid-cols-1 gap-6 {{ cols[props.columns] }}">
+            {%- for r in records %}
+                {%- set tag = props.links ? 'a' : 'div' -%}
+                <{{ tag }}{% if props.links %} href="/{{ c.slug }}/{{ r.slug }}"{% endif %} class="cz-card group flex flex-col overflow-hidden {{ r.pending ? 'cz-record-pending' : '' }}" data-item data-category="{{ filter ? r.get(filter) : '' }}" data-text="{{ r.data|map(v => v is iterable ? '' : v)|join(' ')|lower }}">
                     {%- if r.image %}<div class="aspect-[4/3] overflow-hidden"><img src="{{ r.image }}" alt="{{ r.title }}" loading="lazy" class="h-full w-full object-cover transition duration-500 group-hover:scale-105"></div>{% endif %}
                     <div class="flex flex-1 flex-col p-5">
                         <h3 class="cz-heading text-lg font-semibold">{{ r.title }}</h3>
+                        {%- if r.pending %}<span class="mt-2 inline-block self-start rounded-full bg-amber-400/25 px-2.5 py-0.5 text-xs font-medium text-amber-900 dark:text-amber-200">{{ badges[r.pending] }}</span>{% endif %}
                         {%- for key in props.fields %}
                             {%- set f = c.field(key) -%}
                             {%- if f and r.get(key) is not null and key != c.titleField %}
@@ -36,6 +58,7 @@
                 </{{ tag }}>
             {%- endfor %}
         </div>
+        {%- endif %}
     </div>
 {%- endif %}
 {% include '@CadenzaRuntime/node/_section_close.html.twig' %}

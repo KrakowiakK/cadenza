@@ -1,9 +1,38 @@
 {% extends '@CadenzaRuntime/layout.html.twig' %}
 {% block title %}{{ record.title }} · {{ collection.name }} · {{ cadenza_state().document.name }}{% endblock %}
 {% block main %}
+{%- set pl = cadenza_state().document.language|default('en')|slice(0, 2) == 'pl' -%}
+{%- set types = collection.fields|map(f => f.type) -%}
+{#- A post (news, a story, an event): long text and no price. Otherwise a product / item page. -#}
+{%- set article = 'longtext' in types and 'price' not in types -%}
+{%- set dateField = collection.fields|filter(f => f.type == 'date')|first -%}
+{%- if record.pending %}
+<div class="border-b border-amber-300/60 bg-amber-50 px-6 py-2.5 text-center text-sm text-amber-950 dark:bg-amber-950/60 dark:text-amber-100">
+    {{ cadenza_icon('pencil', 'size-4 inline mr-1') }}{{ {new: pl ? 'Szkic — odwiedzający zobaczą go po zatwierdzeniu w panelu.' : 'Draft — visitors will see it once you approve it in the panel.', changed: pl ? 'Zmiany czekają na zatwierdzenie — odwiedzający widzą jeszcze poprzednią wersję.' : 'Changes wait for your approval — visitors still see the previous version.', removed: pl ? 'Do usunięcia po zatwierdzeniu.' : 'To be removed once you approve.'}[record.pending] }}
+</div>
+{%- endif %}
 <section class="cz-section">
-    <div class="mx-auto max-w-6xl px-6">
+    <div class="mx-auto px-6 {{ article ? 'max-w-3xl' : 'max-w-6xl' }}">
         <a href="javascript:history.back()" class="text-sm opacity-60 hover:opacity-100">← {{ collection.name }}</a>
+        {%- if article %}
+            <article class="mt-8">
+                {%- if dateField and record.get(dateField.key) %}<p class="cz-eyebrow mb-4">{{ record.get(dateField.key)|format_date('long', locale: pl ? 'pl' : 'en') }}</p>{% endif %}
+                <h1 class="cz-display text-4xl md:text-6xl">{{ record.title }}</h1>
+                {%- if record.image %}<img src="{{ record.image }}" alt="{{ record.title }}" class="cz-img mt-10 aspect-[16/9] w-full object-cover shadow-xl">{% endif %}
+                {%- for f in collection.fields %}
+                    {%- set v = record.get(f.key) -%}
+                    {%- if f.type == 'longtext' and v %}<div class="cz-prose cz-article mt-10 text-lg leading-relaxed">{{ v|markdown_to_html }}</div>{% endif %}
+                {%- endfor %}
+                <dl class="mt-10 flex flex-wrap gap-x-8 gap-y-3 border-t border-current/10 pt-6 text-sm">
+                    {%- for f in collection.fields %}
+                        {%- set v = record.get(f.key) -%}
+                        {%- if f.key not in [collection.titleField, collection.imageField, dateField.key|default('')] and f.type != 'longtext' and v is not null and v != '' %}
+                            <div><dt class="opacity-60">{{ f.label }}</dt><dd class="font-medium">{% if f.type == 'url' %}<a href="{{ v }}" class="text-primary hover:underline" target="_blank" rel="noopener">{{ v|length > 40 ? v|slice(0, 40) ~ '…' : v }}</a>{% else %}{{ cadenza_format(f.type, v) }}{% endif %}</dd></div>
+                        {%- endif %}
+                    {%- endfor %}
+                </dl>
+            </article>
+        {%- else %}
         <div class="mt-6 grid gap-12 {{ record.image ? 'md:grid-cols-2' : '' }}">
             {%- if record.image %}<img src="{{ record.image }}" alt="{{ record.title }}" class="cz-img aspect-square w-full object-cover shadow-xl">{% endif %}
             <div>
@@ -12,7 +41,7 @@
                     {%- set v = record.get(f.key) -%}
                     {%- if f.key != collection.titleField and f.key != collection.imageField and v is not null and v != '' %}
                         {%- if f.type == 'price' %}<p class="cz-price mt-6 text-3xl font-semibold text-primary">{{ cadenza_format(f.type, v) }}</p>
-                        {%- elseif f.type == 'longtext' %}<div class="cz-prose mt-6 text-lg leading-relaxed opacity-80">{{ v|nl2br }}</div>
+                        {%- elseif f.type == 'longtext' %}<div class="cz-prose mt-6 text-lg leading-relaxed opacity-80">{{ v|markdown_to_html }}</div>
                         {%- endif %}
                     {%- endif %}
                 {%- endfor %}
@@ -26,6 +55,7 @@
                 </dl>
             </div>
         </div>
+        {%- endif %}
     </div>
 </section>
 {% endblock %}

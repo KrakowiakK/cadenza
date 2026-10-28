@@ -135,6 +135,10 @@ final class Conductor
             - The owner's data (products, menu, courses, events…) usually comes as a spreadsheet: read_spreadsheet,
               import_spreadsheet, then a page with collection-grid (cards with filter chips by a category field and
               search) or collection-table. Never copy rows into props by hand.
+            - Content that grows entry by entry — news / blog posts, events, a daily menu, a portfolio — is a
+              collection too: create_collection once, save_record per entry (drafts the owner publishes), and a
+              collection-grid with "style": "list", "sort" by the date field, "order": "desc". To change one entry
+              (a price, a date, a typo): find_records, then save_record with its slug and only the changed fields.
             - When visitors should answer something — an RSVP to a wedding or party, a sign-up for a workshop or class
               (with capacity and peopleField for limited places), an order, a booking request, a contact message, a
               survey — use the "form" pattern with the right fields (choices as select/radio/choices with options).

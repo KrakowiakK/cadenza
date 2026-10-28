@@ -34,16 +34,172 @@ final class Collections
     }
 
     /**
+     * Records as visitors see them, or — for the owner — as they will be once the waiting changes are approved.
+     *
      * @return list<Record>
      */
-    public function records(Collection $collection, int $limit = 500): array
+    public function records(Collection $collection, int $limit = 500, bool $owner = false, ?string $sort = null, string $order = 'asc'): array
     {
-        return $this->em->getRepository(Record::class)->findBy(['collection' => $collection], ['position' => 'ASC'], $limit);
+        $records = $this->em->getRepository(Record::class)->findBy(['collection' => $collection], ['position' => 'ASC']);
+        $records = $owner
+            ? array_map(static fn (Record $r): Record => $r->preview(), $records)
+            : array_values(array_filter($records, static fn (Record $r): bool => $r->isPublished()));
+        if (null !== $sort && null !== $field = $collection->field($sort)) {
+            $numeric = \in_array($field['type'], ['number', 'price'], true);
+            usort($records, static function (Record $a, Record $b) use ($sort, $numeric, $order): int {
+                $x = $a->get($sort);
+                $y = $b->get($sort);
+                $r = match (true) {
+                    null === $x || null === $y => (null === $x) <=> (null === $y),
+                    $numeric => (float) $x <=> (float) $y,
+                    default => strnatcasecmp((string) $x, (string) $y),
+                };
+
+                return 'desc' === $order && null !== $x && null !== $y ? -$r : $r;
+            });
+        }
+
+        return \array_slice($records, 0, $limit);
     }
 
-    public function record(Collection $collection, string $slug): ?Record
+    public function record(Collection $collection, string $slug, bool $owner = false): ?Record
     {
-        return $this->em->getRepository(Record::class)->findOneBy(['collection' => $collection, 'slug' => $slug]);
+        $record = $this->em->getRepository(Record::class)->findOneBy(['collection' => $collection, 'slug' => $slug]);
+
+        return match (true) {
+            null === $record => null,
+            $owner => $record->preview(),
+            $record->isPublished() => $record,
+            default => null,
+        };
+    }
+
+    /**
+     * A new, empty collection the agent fills record by record (news, events, a menu, a portfolio…).
+     *
+     * @param list<array{key?: string, label: string, type?: string}> $fields
+     */
+    public function create(string $slug, string $name, array $fields, ?string $titleField = null, ?string $imageField = null): Collection
+    {
+        $slug = (new AsciiSlugger())->slug($slug)->lower()->toString() ?: 'items';
+        if (null !== $this->get($slug)) {
+            throw new \InvalidArgumentException(\sprintf('A collection "%s" already exists; add records to it.', $slug));
+        }
+        $defined = [];
+        foreach ($fields as $field) {
+            $label = trim((string) ($field['label'] ?? $field['key'] ?? ''));
+            if ('' === $label) {
+                continue;
+            }
+            $key = (new AsciiSlugger())->slug((string) ($field['key'] ?? $label), '_')->lower()->toString();
+            $type = \in_array($field['type'] ?? 'text', Collection::TYPES, true) ? ($field['type'] ?? 'text') : 'text';
+            $defined[$key] = ['key' => $key, 'label' => $label, 'type' => $type];
+        }
+        if ([] === $defined) {
+            throw new \InvalidArgumentException('A collection needs at least one field, e.g. [{"label": "Title"}].');
+        }
+        $keys = array_keys($defined);
+        $titleField = \in_array($titleField, $keys, true) ? $titleField : $keys[0];
+        $imageField = \in_array($imageField, $keys, true) ? $imageField : (array_values(array_filter($defined, static fn (array $f): bool => 'image' === $f['type']))[0]['key'] ?? null);
+        $collection = new Collection($slug, $name, array_values($defined), $titleField, $imageField);
+        $this->em->persist($collection);
+        $this->em->flush();
+
+        return $collection;
+    }
+
+    /**
+     * Writes a record as a draft: a new one (no slug, or an unknown slug) or changes to an existing one. Only the
+     * given fields change; values are converted to the field types. Nothing is live before publish().
+     *
+     * @param array<string, mixed> $values by field key or label
+     */
+    public function save(Collection $collection, array $values, ?string $slug = null): Record
+    {
+        $byName = [];
+        foreach ($collection->getFields() as $field) {
+            $byName[$field['key']] = $field;
+            $byName[mb_strtolower($field['label'])] = $field;
+        }
+        $record = null !== $slug && '' !== $slug ? $this->record($collection, $slug, true) : null;
+        $data = $record?->getData() ?? [];
+        foreach ($values as $name => $value) {
+            $field = $byName[$name] ?? $byName[mb_strtolower((string) $name)] ?? throw new \InvalidArgumentException(\sprintf('No field "%s"; fields: %s.', $name, implode(', ', array_column($collection->getFields(), 'key'))));
+            if ('image' === $field['type'] && null !== $value && '' !== $value && !preg_match('~^(/media/[A-Za-z0-9._-]+|https?://\S+)$~', (string) $value)) {
+                throw new \InvalidArgumentException(\sprintf('"%s" must be an image from the media library (/media/…).', $field['key']));
+            }
+            $data[$field['key']] = \is_array($value) ? implode(', ', array_map('strval', $value)) : SpreadsheetReader::normalise($field['type'], $value);
+        }
+        if (null === ($data[$collection->getTitleField()] ?? null)) {
+            throw new \InvalidArgumentException(\sprintf('"%s" (the title) is required.', $collection->getTitleField()));
+        }
+        if (null === $record) {
+            $slugger = new AsciiSlugger();
+            $base = $slugger->slug((string) ($slug ?: $data[$collection->getTitleField()]))->lower()->toString() ?: 'item';
+            $recordSlug = $base;
+            for ($n = 2; null !== $this->em->getRepository(Record::class)->findOneBy(['collection' => $collection, 'slug' => $recordSlug]); ++$n) {
+                $recordSlug = $base.'-'.$n;
+            }
+            $position = (int) $this->em->createQuery('SELECT COALESCE(MAX(r.position), -1) FROM '.Record::class.' r WHERE r.collection = :c')->setParameter('c', $collection)->getSingleScalarResult() + 1;
+            $record = Record::staged($collection, $recordSlug, $data, $position);
+            $this->em->persist($record);
+        } else {
+            $record->stage($data);
+        }
+        $this->em->flush();
+
+        return $record->preview();
+    }
+
+    public function delete(Collection $collection, string $slug): Record
+    {
+        $record = $this->record($collection, $slug, true) ?? throw new \InvalidArgumentException(\sprintf('No record "%s".', $slug));
+        if (!$record->isPublished()) {
+            $this->em->remove($record);
+        } else {
+            $record->stageDeletion();
+        }
+        $this->em->flush();
+
+        return $record;
+    }
+
+    /**
+     * Records with changes waiting for the owner.
+     *
+     * @return list<Record>
+     */
+    public function pending(?Collection $collection = null): array
+    {
+        $qb = $this->em->getRepository(Record::class)->createQueryBuilder('r')->where('r.draft IS NOT NULL')->orderBy('r.position', 'ASC');
+        if (null !== $collection) {
+            $qb->andWhere('r.collection = :c')->setParameter('c', $collection);
+        }
+
+        return array_map(static fn (Record $r): Record => $r->preview(), $qb->getQuery()->getResult());
+    }
+
+    /**
+     * The owner's decision on waiting changes (all of a collection, or the given records).
+     *
+     * @param list<string>|null $slugs
+     */
+    public function decide(Collection $collection, bool $approve, ?array $slugs = null): int
+    {
+        $count = 0;
+        foreach ($this->pending($collection) as $record) {
+            if (null !== $slugs && !\in_array($record->getSlug(), $slugs, true)) {
+                continue;
+            }
+            $keep = $approve ? $record->publish() : $record->discard();
+            if (!$keep) {
+                $this->em->remove($record);
+            }
+            ++$count;
+        }
+        $this->em->flush();
+
+        return $count;
     }
 
     /**

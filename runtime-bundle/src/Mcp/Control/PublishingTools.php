@@ -17,7 +17,24 @@ final class PublishingTools
     public function __construct(
         private readonly SiteManager $site,
         private readonly SiteVersionRepository $versions,
+        private readonly \Cadenza\Runtime\Collection\Collections $collections,
     ) {
+    }
+
+    /**
+     * @param list<string>|null $slugs
+     *
+     * @return array<string, mixed>
+     */
+    #[McpTool(name: 'records_decide', description: 'The owner publishes or rejects the waiting record changes of a collection (all, or the given slugs).')]
+    public function recordsDecide(string $collection, bool $publish, ?array $slugs = null): array
+    {
+        $c = $this->collections->get($collection);
+        if (null === $c) {
+            return ['ok' => false, 'error' => 'No such collection.'];
+        }
+
+        return ['ok' => true, 'count' => $this->collections->decide($c, $publish, $slugs)];
     }
 
     /**

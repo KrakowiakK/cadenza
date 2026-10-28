@@ -126,7 +126,7 @@ final class PatternNodeTypes implements NodeTypeProviderInterface
             'image' => ['type' => 'image', 'default' => null],
         ]);
 
-        yield new NodeType('collection-grid', 'Collection grid', 'Pattern: records of a collection (from the owner\'s spreadsheet) as cards — products, dishes, events, courses — with optional search and filter chips; each card can open the record\'s own page.', 'pattern', $head + [
+        yield new NodeType('collection-grid', 'Collection grid', 'Pattern: records of a collection (from the owner\'s spreadsheet, or written by you: news, events, a portfolio) as cards or a news list — products, dishes, events, courses — with optional search and filter chips; each card can open the record\'s own page.', 'pattern', $head + [
             'collection' => ['type' => 'string', 'required' => true, 'description' => 'collection slug'],
             'fields' => ['type' => 'list', 'of' => 'string', 'default' => [], 'description' => 'field keys shown on cards under the title (e.g. price, category)'],
             'filterBy' => ['type' => 'string', 'default' => null, 'description' => 'category field for filter chips'],
@@ -134,6 +134,9 @@ final class PatternNodeTypes implements NodeTypeProviderInterface
             'columns' => ['type' => 'enum', 'values' => [2, 3, 4], 'default' => 3],
             'links' => ['type' => 'bool', 'default' => true, 'description' => 'cards open the record page'],
             'limit' => ['type' => 'int', 'default' => 60],
+            'sort' => ['type' => 'string', 'default' => null, 'description' => 'field key to sort by, e.g. the date of news posts'],
+            'order' => ['type' => 'enum', 'values' => ['asc', 'desc'], 'default' => 'asc', 'description' => 'desc = newest / biggest first'],
+            'style' => ['type' => 'enum', 'values' => ['cards', 'list'], 'default' => 'cards', 'description' => 'list = news / blog / events: date, title, a short excerpt'],
         ]);
 
         yield new NodeType('collection-table', 'Collection table', 'Pattern: records of a collection as a sortable table with search (price lists, timetables, results, inventories).', 'pattern', $head + [

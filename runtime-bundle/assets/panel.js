@@ -13,7 +13,7 @@ const I18N = {
         hello: 'Hi! I am Cadenza. Tell me what your site should be — or point at anything on the page and tell me what to change.',
         suggestions: ['A website for my café with a menu and opening hours', 'A portfolio for my travel photos', 'A page that explains photosynthesis for high school'],
         showSketch: 'Show sketch', approve: 'Approve', reject: 'Reject', revise: 'Ask for changes',
-        approved: 'Published', rejected: 'Rejected', pending: 'Waiting for your decision', sketch: 'Sketch',
+        approved: 'Published', rejected: 'Rejected', recordsTitle: 'Entries waiting', recordNew: 'new', recordChanged: 'changed', recordRemoved: 'to remove', pending: 'Waiting for your decision', sketch: 'Sketch',
         added: 'added', changed: 'changed', removed: 'removed', pages: 'pages', themeChanged: 'theme', siteChanged: 'site',
         before: 'Before', after: 'After', published: 'Published — the change is live.', discarded: 'Draft rejected.',
         error: 'Something went wrong', harnessDown: 'Cannot reach the Cadenza studio (harness). Is it running?',
@@ -44,7 +44,7 @@ const I18N = {
         hello: 'Cześć! Jestem Cadenza. Opowiedz, jaka ma być Twoja strona — albo wskaż coś na stronie i powiedz, co zmienić.',
         suggestions: ['Strona mojej kawiarni z menu i godzinami otwarcia', 'Portfolio moich zdjęć z podróży', 'Strona, która wytłumaczy fotosyntezę na poziomie matury'],
         showSketch: 'Pokaż szkic', approve: 'Zatwierdź', reject: 'Odrzuć', revise: 'Popraw',
-        approved: 'Opublikowano', rejected: 'Odrzucono', pending: 'Czeka na Twoją decyzję', sketch: 'Szkic',
+        approved: 'Opublikowano', rejected: 'Odrzucono', recordsTitle: 'Wpisy do zatwierdzenia', recordNew: 'nowy', recordChanged: 'zmiana', recordRemoved: 'do usunięcia', pending: 'Czeka na Twoją decyzję', sketch: 'Szkic',
         added: 'nowe', changed: 'zmienione', removed: 'usunięte', pages: 'strony', themeChanged: 'motyw', siteChanged: 'ustawienia strony',
         before: 'Przed', after: 'Po', published: 'Opublikowano — zmiana jest na stronie.', discarded: 'Szkic odrzucony.',
         error: 'Coś poszło nie tak', harnessDown: 'Nie mogę połączyć się ze studiem Cadenzy (harness). Czy działa?',
@@ -450,6 +450,43 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         this.scrollDown();
     }
 
+    /**
+     * Entries the agent wrote as drafts (posts, prices, events): one card per collection, refreshed as it writes.
+     */
+    recordsCard(container, data) {
+        let card = this.root.querySelector(`[data-records="${CSS.escape(data.collection)}"]`);
+        if (!card) {
+            card = document.createElement('div');
+            card.dataset.records = data.collection;
+            container.append(card);
+        }
+        if (!data.items.length) { card.remove(); return; }
+        const kinds = { new: t('recordNew'), changed: t('recordChanged'), removed: t('recordRemoved') };
+        card.className = 'rounded-xl border border-amber-400/60 bg-amber-50/60 p-3 dark:bg-amber-950/30';
+        card.innerHTML = `
+<div class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">${t('recordsTitle')} · ${data.items.length}</div>
+<ul class="mt-2 space-y-1.5">${data.items.map((i) => `<li class="flex items-center gap-2"><span class="shrink-0 rounded-full bg-amber-400/25 px-2 py-0.5 text-[11px] text-amber-900 dark:text-amber-200">${escapeHtml(kinds[i.pending] ?? i.pending)}</span><a href="${escapeHtml(i.url)}" data-turbo-frame="_top" class="min-w-0 truncate font-medium hover:underline">${escapeHtml(i.title)}</a></li>`).join('')}</ul>
+<div class="mt-3 flex flex-wrap gap-1.5">
+  <button type="button" data-do="publish" class="flex items-center gap-1.5 rounded-lg bg-foreground px-2.5 py-1.5 text-xs font-semibold text-background hover:opacity-90">${icon('check', 'size-3.5')}${t('approve')}</button>
+  <button type="button" data-do="discard" class="rounded-lg px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted">${t('reject')}</button>
+</div>`;
+        const decide = async (publish) => {
+            card.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+            try {
+                await this.api('/api/records/decide', { collection: data.collection, publish, slugs: data.items.map((i) => i.slug) });
+                card.className = 'rounded-xl border border-border p-3 opacity-80';
+                card.querySelector('div.mt-3').outerHTML = `<p class="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">${publish ? `<span class="text-emerald-600">${icon('check', 'size-3.5')}</span>${t('approved')}` : t('rejected')}</p>`;
+                await this.visit(location.pathname + location.search);
+            } catch (e) {
+                this.toast(e.message, 'error');
+                card.querySelectorAll('button').forEach((b) => { b.disabled = false; });
+            }
+        };
+        card.querySelector('[data-do="publish"]').addEventListener('click', () => decide(true));
+        card.querySelector('[data-do="discard"]').addEventListener('click', () => decide(false));
+        this.scrollDown();
+    }
+
     refreshWaiting() {
         if (this.busy) return;
         const pending = [...this.proposals.values()].filter((p) => p.status !== 'applied' && p.status !== 'rejected').length;
@@ -623,6 +660,9 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
                 break;
             case 'variants':
                 this.variantsCard(turn.part('cards'), data);
+                break;
+            case 'records':
+                this.recordsCard(turn.part('cards'), data);
                 break;
             case 'generated':
                 turn.part('cards').insertAdjacentHTML('beforeend', `<img src="${escapeHtml(data.url)}" alt="" title="${escapeHtml(data.prompt)}" class="cz-msg w-full rounded-xl">`);

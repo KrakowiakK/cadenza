@@ -65,7 +65,7 @@ final class PageController
 
         $page = Document::findPage($document, '/'.$path);
         // /{collection}/{record}: every record of a collection has its own page.
-        if (null === $page && preg_match('~^([a-z0-9-]+)/([a-z0-9-]+)$~', $path, $m) && null !== ($collection = $this->collections->get($m[1])) && null !== ($record = $this->collections->record($collection, $m[2]))) {
+        if (null === $page && preg_match('~^([a-z0-9-]+)/([a-z0-9-]+)$~', $path, $m) && null !== ($collection = $this->collections->get($m[1])) && null !== ($record = $this->collections->record($collection, $m[2], $this->state->owner))) {
             return new Response($this->twig->render('@CadenzaRuntime/record.html.twig', ['collection' => $collection, 'record' => $record, 'page' => null]));
         }
         if (null === $page) {

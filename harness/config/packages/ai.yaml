@@ -14,6 +14,7 @@ ai:
                 - 'App\Agent\Tool\FormTools'
                 - 'App\Agent\Tool\StatsTools'
                 - 'App\Agent\Tool\MemberTools'
+                - 'App\Agent\Tool\RecordTools'
         # Used when the main model does not answer in time (local servers can be busy).
         studio_fallback:
             platform: 'ai.platform.generic.fallback'
@@ -29,6 +30,7 @@ ai:
                 - 'App\Agent\Tool\FormTools'
                 - 'App\Agent\Tool\StatsTools'
                 - 'App\Agent\Tool\MemberTools'
+                - 'App\Agent\Tool\RecordTools'
         studio_vision:
             platform: 'ai.platform.generic.vision'
             model: '%env(CADENZA_LLM_VISION_MODEL)%'
@@ -43,3 +45,4 @@ ai:
                 - 'App\Agent\Tool\FormTools'
                 - 'App\Agent\Tool\StatsTools'
                 - 'App\Agent\Tool\MemberTools'
+                - 'App\Agent\Tool\RecordTools'
