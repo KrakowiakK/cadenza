@@ -46,7 +46,47 @@ final class Conductor
         private readonly EntityManagerInterface $em,
         private readonly UploadStore $uploads,
         private readonly ImageGenerator $generator,
+        #[Autowire(service: 'ai.platform.generic.default')]
+        private readonly \Symfony\AI\Platform\PlatformInterface $platform,
     ) {
+    }
+
+    /**
+     * Words of another language in a reply to a Polish owner — free models slip into English, German or Russian
+     * ("draft", "weitere", "живого") now and then.
+     *
+     * @return list<string>
+     */
+    public static function foreignWords(string $text, string $language): array
+    {
+        if ('pl' !== substr($language, 0, 2)) {
+            return [];
+        }
+        preg_match_all('~[\p{Cyrillic}\p{Greek}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}\p{Arabic}]+|(?<![\p{L}/_.-])(?:weitere|und|oder|nicht|ajout\p{L}*|the|owners?|site|drafts?|sketch|widgets?|live|preview|layout|feedback|create_\w+|propose_\w+)(?![\p{L}/_-]|\.\p{L})~iu', $text, $m);
+
+        return array_values(array_unique($m[0]));
+    }
+
+    /**
+     * One quick pass that puts the foreign words of a reply into the owner's language and changes nothing else.
+     */
+    private function polish(string $text, string $language): string
+    {
+        $words = self::foreignWords($text, $language);
+        if ([] === $words) {
+            return $text;
+        }
+        try {
+            $fixed = trim($this->platform->invoke($this->model, new MessageBag(Message::forSystem('You correct texts. Answer with the corrected text only.'), Message::ofUser(\sprintf(
+                "This Polish message has words in another language (%s). Replace them with natural Polish words (\"szkic\" for draft/sketch, \"strona\" for site, \"widżet\" for widget, drop tool names), fix obvious typos, change nothing else, keep the formatting:\n\n%s",
+                implode(', ', $words), $text))), str_contains($this->model, '/') ? ['reasoning' => ['enabled' => false]] : [])->asText());
+        } catch (\Throwable) {
+            return $text;
+        }
+        $fixed = trim((string) preg_replace('~<think>.*?</think>~s', '', $fixed));
+
+        // A correction, not a new text: anything far longer or shorter is not trusted.
+        return '' !== $fixed && abs(mb_strlen($fixed) - mb_strlen($text)) < max(80, mb_strlen($text) / 4) ? $fixed : $text;
     }
 
     /**
@@ -59,7 +99,11 @@ final class Conductor
         $this->turn->viewedDraftId = $context['draftId'] ?? null;
         $this->turn->selection = $context['selection'] ?? [];
         // The owner's language: what they write in beats the browser setting.
-        $this->turn->language = preg_match('/[ąćęłńśźż]|\b(jest|się|mój|moja|strona|chcę|zrób)\b/iu', $message) ? 'pl' : ($context['language'] ?? 'en');
+        $this->turn->language = match (true) {
+            (bool) preg_match('/[ąćęłńśźż]|\b(jest|się|mój|moja|strona|chcę|zrób|dodaj|zmień)\b/iu', $message) => 'pl',
+            (bool) preg_match('/\b(the|please|would|could|add|make|my|our|is|are)\b/i', $message) => 'en',
+            default => $context['language'] ?? 'en',
+        };
         $context['language'] = $this->turn->language;
 
         $this->turn->emit('status', ['text' => 'pl' === ($context['language'] ?? 'en') ? 'Czytam stronę' : 'Reading the site']);
@@ -107,12 +151,17 @@ final class Conductor
             throw new \RuntimeException('The model returned an empty answer.');
         }
         if ('' === $text) {
-            // Work was done but the model said nothing about it: the owner still gets a word.
+            // Work was done but the model said nothing about it: ask for the words once.
+            $text = trim((string) preg_replace('~<think>.*?</think>~s', '', $this->callAgent($bag->with(Message::ofUser('You did the work but said nothing. Answer me now, without calling tools, in 1–3 sentences: what you did or what you found.')), $context)));
+        }
+        if ('' === $text) {
+            // Still nothing: the owner gets a word anyway.
             $pl = 'pl' === ($context['language'] ?? 'en');
             $text = [] !== $this->turn->proposals
                 ? ($pl ? 'Szkic jest gotowy — zobacz go na stronie i zatwierdź albo napisz, co zmienić.' : 'The sketch is ready — have a look on the page and approve it, or tell me what to change.')
-                : ($pl ? 'Gotowe — zmiana jest już na stronie. Daj znać, czy tak jest dobrze.' : 'Done — the change is on the site already. Let me know if it is right.');
+                : ($pl ? 'Gotowe. Napisz, jeśli mam coś jeszcze zrobić.' : 'Done. Tell me if there is anything else.');
         }
+        $text = $this->polish($text, $this->turn->language);
 
         $conversation->addAssistantTurn(trim($text), array_map(static fn ($p) => $p->getId(), $this->turn->proposals));
         $this->em->flush();
