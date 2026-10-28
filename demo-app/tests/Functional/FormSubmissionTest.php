@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Functional;
 
 use Cadenza\Runtime\Draft\SiteManager;
+use Cadenza\Runtime\Entity\Account;
 use Cadenza\Runtime\Entity\Submission;
 use Cadenza\Runtime\Site\Document;
 use Doctrine\ORM\EntityManagerInterface;
@@ -78,9 +79,13 @@ final class FormSubmissionTest extends WebTestCase
         $client->request('GET', '/?cadenza_guest=1');
         self::assertSelectorNotExists('form[data-cz-form]');
 
-        $client->request('GET', '/_cadenza/form/rsvp/answers.xlsx?cadenza_guest=1');
+        $client->request('GET', '/_cadenza/form/rsvp/answers.xlsx');
         self::assertResponseStatusCodeSame(403);
-        $client->request('GET', '/_cadenza/form/rsvp/answers.xlsx?cadenza_owner='.$container->getParameter('cadenza.token'));
+        $owner = new Account('owner@example.com', [Account::OWNER]);
+        $em->persist($owner);
+        $em->flush();
+        $client->loginUser($owner);
+        $client->request('GET', '/_cadenza/form/rsvp/answers.xlsx');
         self::assertResponseIsSuccessful();
         self::assertStringContainsString('attachment', (string) $client->getResponse()->headers->get('Content-Disposition'));
     }

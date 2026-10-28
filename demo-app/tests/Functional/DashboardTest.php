@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Functional;
 
 use Cadenza\Runtime\Draft\SiteManager;
+use Cadenza\Runtime\Entity\Account;
 use Cadenza\Runtime\Site\Document;
 use Cadenza\Runtime\Stats\SiteStats;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,7 +39,11 @@ final class DashboardTest extends WebTestCase
         $client->request('GET', '/menu?cadenza_guest=1', [], [], $visitor);
         $client->request('GET', '/menu?cadenza_guest=1', [], [], ['HTTP_USER_AGENT' => 'Googlebot/2.1']);
         $client->request('GET', '/menu?cadenza_guest=1', [], [], $visitor + ['HTTP_SEC_PURPOSE' => 'prefetch']);
-        $client->request('GET', '/menu?cadenza_owner='.$container->getParameter('cadenza.token'), [], [], $visitor);
+        $owner = new Account('owner@example.com', [Account::OWNER]);
+        $em->persist($owner);
+        $em->flush();
+        $client->loginUser($owner);
+        $client->request('GET', '/menu', [], [], $visitor);
 
         $visits = static::getContainer()->get(SiteStats::class)->visits(30);
         self::assertSame(3, $visits['today']);
@@ -47,7 +52,7 @@ final class DashboardTest extends WebTestCase
 
         $client->request('GET', '/_cadenza/dashboard?cadenza_guest=1');
         self::assertResponseStatusCodeSame(404);
-        $client->request('GET', '/_cadenza/dashboard?cadenza_owner='.$container->getParameter('cadenza.token'));
+        $client->request('GET', '/_cadenza/dashboard');
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('[data-cz-chart] svg');
         self::assertSelectorNotExists('.cz-node-error');

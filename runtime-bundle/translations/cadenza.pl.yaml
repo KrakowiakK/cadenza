@@ -1,0 +1,32 @@
+account:
+    login: Zaloguj się
+    login_lead: Panel właściciela strony
+    email: E-mail
+    password: Hasło
+    remember: Zapamiętaj mnie na tym urządzeniu
+    submit: Zaloguj
+    forgot: 'Nie pamiętasz hasła? Na komputerze, na którym działa strona: bin/console cadenza:owner'
+    setup: Utwórz konto właściciela
+    setup_lead: 'Pierwsze uruchomienie: to konto otwiera studio, szkice i pulpit. Odwiedzający go nie potrzebują.'
+    name: Imię (opcjonalnie)
+    repeat: Powtórz hasło
+    create: Utwórz konto i wejdź
+    setup_foot: Ten ekran działa tylko, dopóki nie ma właściciela, i tylko z komputera, na którym działa strona.
+    logout: Wyloguj
+    signed_in_as: Zalogowano jako
+    last_login: Poprzednie logowanie
+    change_password: Zmień hasło
+    current: Obecne hasło
+    new: Nowe hasło
+    save: Zapisz
+    sign_in_link: Logowanie
+    error:
+        invalid: Nieprawidłowy e-mail lub hasło.
+        too_many: Za dużo nieudanych prób — spróbuj za kilka minut.
+        csrf: Sesja wygasła, spróbuj jeszcze raz.
+        mismatch: Hasła się różnią.
+        too_short: Hasło musi mieć co najmniej 10 znaków.
+        like_email: Hasło jest zbyt podobne do e-maila.
+        invalid_email: To nie jest adres e-mail.
+        wrong_current: Obecne hasło się nie zgadza.
+    saved: Hasło zmienione.

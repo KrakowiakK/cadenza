@@ -20,20 +20,18 @@ final class CadenzaRuntimeBundle extends AbstractBundle
     {
         $definition->rootNode()
             ->children()
-                ->scalarNode('owner_mode')->defaultValue('token')->info('"always" for local development, "token" otherwise')->end()
-                ->scalarNode('token')->isRequired()->cannotBeEmpty()->info('Shared secret with the Cadenza harness; also the owner login token')->end()
+                ->scalarNode('token')->isRequired()->cannotBeEmpty()->info('Shared secret with the Cadenza harness (MCP and studio API); also allows creating the first owner account from another machine')->end()
                 ->scalarNode('harness_url')->defaultValue('http://127.0.0.1:8011')->end()
                 ->scalarNode('notify_email')->defaultNull()->info('Where to send a note when a visitor sends a form (needs MAILER_DSN)')->end()
             ->end();
     }
 
     /**
-     * @param array{owner_mode: string, token: string, harness_url: string, notify_email: ?string} $config
+     * @param array{token: string, harness_url: string, notify_email: ?string} $config
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         $container->parameters()
-            ->set('cadenza.owner_mode', $config['owner_mode'])
             ->set('cadenza.token', $config['token'])
             ->set('cadenza.harness_url', rtrim($config['harness_url'], '/'))
             ->set('cadenza.notify_email', $config['notify_email'] ?: null);

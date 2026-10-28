@@ -3,3 +3,6 @@ workers:
     messenger_consume:
         cmd: ['symfony', 'console', 'messenger:consume', 'async', 'scheduler_cadenza']
         watch: ['config', 'src', 'templates', 'vendor/cadenza']
+    # New classes in templates (also the runtime bundle's) are compiled as you save
+    tailwind:
+        cmd: ['symfony', 'console', 'tailwind:build', '--watch']

@@ -5,7 +5,9 @@ security:
 
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        users_in_memory: { memory: null }
+        # The site's accounts: the owner, and members when the owner opens a members' area.
+        cadenza_accounts:
+            entity: { class: Cadenza\Runtime\Entity\Account, property: email }
 
     firewalls:
         dev:
@@ -13,19 +15,28 @@ security:
             pattern: ^/(_profiler(/|$)|(_wdt|assets|build)/)
             security: false
         main:
+            # Lazy: visitors who never sign in get no session and no cookie.
             lazy: true
-            provider: users_in_memory
-
-            # Activate different ways to authenticate:
-            # https://symfony.com/doc/current/security.html#the-firewall
-
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
+            provider: cadenza_accounts
+            form_login:
+                login_path: cadenza_login
+                check_path: cadenza_login
+                enable_csrf: true
+                default_target_path: /
+                use_referer: true
+            logout:
+                path: cadenza_logout
+                target: /
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 2592000 # 30 days
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
 
     # Note: Only the *first* matching rule is applied
-    access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+    # Cadenza decides per page and per action (OwnerResolver), so no path rules are needed here.
+    access_control: []
 
 when@test:
     security:

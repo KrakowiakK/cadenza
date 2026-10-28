@@ -6,6 +6,7 @@ namespace App\Tests\Functional;
 
 use Cadenza\Runtime\Catalog\Catalog;
 use Cadenza\Runtime\Draft\SiteManager;
+use Cadenza\Runtime\Entity\Account;
 use Cadenza\Runtime\Site\Document;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
@@ -42,6 +43,10 @@ final class RenderEveryNodeTypeTest extends WebTestCase
         $result = $site->propose([['op' => 'theme.update', 'direction' => 'warm'], ['op' => 'page.create', 'path' => '/', 'title' => 'Everything', 'nodes' => $nodes]], 'All node types');
         self::assertTrue($result->isValid(), implode("\n", $result->errors));
 
+        $owner = new Account('owner@example.com', [Account::OWNER]);
+        $em->persist($owner);
+        $em->flush();
+        $client->loginUser($owner);
         $client->request('GET', '/?cz_draft='.$result->draft->getId());
         self::assertResponseIsSuccessful();
         self::assertSelectorNotExists('.cz-node-error');

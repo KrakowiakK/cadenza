@@ -29,6 +29,7 @@ final class PageController
         private readonly RenderState $state,
         private readonly Environment $twig,
         private readonly \Cadenza\Runtime\Collection\Collections $collections,
+        private readonly \Cadenza\Runtime\Account\Accounts $accounts,
     ) {
     }
 
@@ -37,6 +38,10 @@ final class PageController
     {
         $this->state->owner = $this->owner->isOwner($request);
         $document = $this->site->document();
+        // First run: a blank site without an owner — whoever started it creates the owner account first.
+        if ([] === $document['pages'] && !$this->state->owner && !$this->accounts->hasOwner()) {
+            return new \Symfony\Component\HttpFoundation\RedirectResponse('/_cadenza/setup');
+        }
 
         $draftId = $request->query->getInt('cz_draft');
         if ($this->state->owner && $draftId > 0 && null !== $draft = $this->versions->draft($draftId)) {
@@ -61,14 +66,13 @@ final class PageController
         $page = Document::findPage($document, '/'.$path);
         // /{collection}/{record}: every record of a collection has its own page.
         if (null === $page && preg_match('~^([a-z0-9-]+)/([a-z0-9-]+)$~', $path, $m) && null !== ($collection = $this->collections->get($m[1])) && null !== ($record = $this->collections->record($collection, $m[2]))) {
-            return $this->owner->remember($request, new Response($this->twig->render('@CadenzaRuntime/record.html.twig', ['collection' => $collection, 'record' => $record, 'page' => null])));
+            return new Response($this->twig->render('@CadenzaRuntime/record.html.twig', ['collection' => $collection, 'record' => $record, 'page' => null]));
         }
         if (null === $page) {
             $response = new Response($this->twig->render('@CadenzaRuntime/missing.html.twig', ['path' => Document::normalisePath($path)]), [] === $document['pages'] ? 200 : 404);
         } else {
             $response = new Response($this->twig->render('@CadenzaRuntime/page.html.twig', ['page' => $page]));
         }
-        $response = $this->owner->remember($request, $response);
         if ($this->state->owner) {
             $response->headers->set('Cache-Control', 'no-store');
         }

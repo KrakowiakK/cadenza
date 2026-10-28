@@ -1,0 +1,18 @@
+{% extends '@CadenzaRuntime/layout.html.twig' %}
+{% block title %}Login · {{ cadenza_state().document.name }}{% endblock %}
+{% block main %}
+{%- set lang = cadenza_state().document.language|default('pl')|slice(0, 2) -%}
+{%- set field = 'h-11 w-full rounded-[calc(var(--radius)*0.8)] border border-input bg-background px-3.5 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20' -%}
+{%- set message = error ? ('account.error.' ~ (error starts with 'Too many' ? 'too_many' : 'invalid'))|trans({}, 'cadenza', lang) : null -%}
+{% set body %}
+<form method="post" action="/_cadenza/login" data-turbo="false" class="grid gap-4">
+    {%- if message %}<p class="rounded-lg bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive" role="alert">{{ message }}</p>{% endif %}
+    <label class="grid gap-1.5 text-sm font-medium">{{ ('account.email'|trans({}, 'cadenza', lang)) }}<input type="email" name="_username" value="{{ email }}" autocomplete="username" required autofocus class="{{ field }}"></label>
+    <label class="grid gap-1.5 text-sm font-medium">{{ ('account.password'|trans({}, 'cadenza', lang)) }}<input type="password" name="_password" autocomplete="current-password" required class="{{ field }}"></label>
+    <label class="flex items-center gap-2 text-sm text-muted-foreground"><input type="checkbox" name="_remember_me" checked class="size-4 accent-[var(--primary)]">{{ ('account.remember'|trans({}, 'cadenza', lang)) }}</label>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+    <twig:Button type="submit" class="h-11 w-full text-base">{{ ('account.submit'|trans({}, 'cadenza', lang)) }}</twig:Button>
+</form>
+{% endset %}
+{% include '@CadenzaRuntime/account/_card.html.twig' with {icon: 'lock-keyhole', heading: ('account.login'|trans({}, 'cadenza', lang)), lead: ('account.login_lead'|trans({}, 'cadenza', lang)), body: body, foot: ('account.forgot'|trans({}, 'cadenza', lang))} %}
+{% endblock %}

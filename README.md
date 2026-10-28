@@ -67,8 +67,12 @@ CADENZA_LLM_API_KEY=hf_...
 ```
 
 ```bash
-./cadenza start        # → open http://127.0.0.1:8010 — the Cadenza bar is at the bottom
+./cadenza start        # → open http://127.0.0.1:8010
 ```
+
+The first visit asks you to create the **owner account** (e-mail and password; possible only from the computer that runs
+the site, or with the setup token). Then the Cadenza bar is at the bottom; later you sign in at `/_cadenza/login`, and a
+forgotten password is reset with `bin/console cadenza:owner` in `demo-app/`.
 
 Try: *“Jak mogłaby wyglądać strona mojego studia jogi?”*, attach [`examples/glina-cennik.xlsx`](examples/glina-cennik.xlsx)
 and ask for a shop, or click the phone icon and send photos from your phone (same Wi-Fi, or deploy it).
@@ -126,6 +130,7 @@ script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in th
 | **MCP Bundle — client** | the studio drives the site only through MCP |
 | **Symfony AI Mate** | the agent reads the app's logs and profiler, even when the app does not boot |
 | **Messenger, Scheduler, Workflow** | imports and events (`MediaImported`, `FormSubmitted`); daily sync of connected accounts; the proposal state machine |
+| **Security, Translation** | the owner's sign-in (form login, login throttling, remember-me, stateless CSRF), first-run setup; texts in the site's language |
 | **RateLimiter, Mailer** | visitors' forms: a sliding window per address against bots, an optional note to the owner |
 | **UX Toolkit (shadcn), Twig/Live Components, Turbo, Icons** | patterns, the panel, View Transitions between versions |
 | **Doctrine, Uid, HttpClient, PhpSpreadsheet** | drafts and versions, media, collections; spreadsheets in (collections) and out (form answers) |
@@ -165,7 +170,8 @@ examples/                sample files to try
 
 - A full page from a free cloud model takes 1–4 minutes; local or paid models are much faster.
 - Generating new code blocks with the agent (spec §6.4) and Panther-based visual review are designed but not built.
-- Single owner, local by design: the owner token in `.env.local`; run behind HTTPS before exposing it.
+- One owner account per site (Symfony Security: form login with CSRF, throttling, remember-me); run behind HTTPS
+  before exposing it. The studio talks to the site with a shared token kept in `.env.local`.
 - Instagram Login needs a Meta app and a Business/Creator account; the export ZIP works for everyone.
 - Maps use OpenStreetMap tiles and Nominatim (fine for a small site; a busy one should use its own tile/geocoding
   provider). Form answers can contain visitors' personal data: the agent reads them only when the owner asks.

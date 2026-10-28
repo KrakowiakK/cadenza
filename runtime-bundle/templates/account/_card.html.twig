@@ -1,0 +1,14 @@
+{#- A centered card in the site's own look, for the sign-in screens. -#}
+<div class="flex min-h-[70vh] items-center justify-center px-6 py-16">
+    <div class="w-full max-w-sm">
+        <div class="mb-8 text-center">
+            <span class="mx-auto mb-5 flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">{{ cadenza_icon(icon, 'size-6') }}</span>
+            <h1 class="text-2xl font-semibold tracking-tight">{{ heading }}</h1>
+            {%- if lead %}<p class="mt-2 text-sm text-muted-foreground">{{ lead }}</p>{% endif %}
+        </div>
+        <div class="rounded-[calc(var(--radius)*1.2)] border border-border bg-card p-6 text-card-foreground shadow-sm">
+            {{ body|raw }}
+        </div>
+        {%- if foot is defined and foot %}<p class="mt-6 text-center text-xs text-muted-foreground">{{ foot }}</p>{% endif %}
+    </div>
+</div>

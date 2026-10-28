@@ -49,6 +49,6 @@ final class DashboardController
         ]));
         $response->headers->set('Cache-Control', 'no-store');
 
-        return $this->owner->remember($request, $response);
+        return $response;
     }
 }

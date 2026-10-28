@@ -1632,8 +1632,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     ignore_not_found?: bool|Param, // Ignore error when an icon is not found. Set to 'true' to fail silently. // Default: false
  * }
  * @psalm-type CadenzaRuntimeConfig = array{
- *     owner_mode?: scalar|Param|null, // "always" for local development, "token" otherwise // Default: "token"
- *     token?: scalar|Param|null, // Shared secret with the Cadenza harness; also the owner login token
+ *     token?: scalar|Param|null, // Shared secret with the Cadenza harness (MCP and studio API); also allows creating the first owner account from another machine
  *     harness_url?: scalar|Param|null, // Default: "http://127.0.0.1:8011"
  *     notify_email?: scalar|Param|null, // Where to send a note when a visitor sends a form (needs MAILER_DSN) // Default: null
  * }

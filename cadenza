@@ -50,7 +50,6 @@ setup() {
     step "Configuration (.env.local files, never committed)"
     env_local "$APP/.env.local" DATABASE_URL '"sqlite:///%kernel.project_dir%/var/data_%kernel.environment%.db"'
     env_local "$APP/.env.local" CADENZA_TOKEN "$token"
-    env_local "$APP/.env.local" CADENZA_OWNER_MODE always
     env_local "$APP/.env.local" CADENZA_HARNESS_URL "http://127.0.0.1:$STUDIO_PORT"
     env_local "$STUDIO/.env.local" DATABASE_URL '"sqlite:///%kernel.project_dir%/var/data_%kernel.environment%.db"'
     env_local "$STUDIO/.env.local" CADENZA_TOKEN "$token"
@@ -93,7 +92,8 @@ start() {
     fi
     echo
     bold "Cadenza is running"
-    echo "  Your site:  http://127.0.0.1:$APP_PORT   ← open this; the Cadenza bar is at the bottom"
+    echo "  Your site:  http://127.0.0.1:$APP_PORT   ← open this; the first time you create the owner account"
+    echo "              then the Cadenza bar is at the bottom (sign in later at /_cadenza/login)"
     echo "  Studio:     http://127.0.0.1:$STUDIO_PORT (API used by the panel)"
 }
 

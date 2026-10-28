@@ -51,7 +51,14 @@
     <footer class="border-t border-border/60 py-10 text-sm text-muted-foreground" style="view-transition-name:cz-footer">
         <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6">
             <span>{{ doc.footer.text|default('© ' ~ 'now'|date('Y') ~ ' ' ~ doc.name) }}</span>
-            {%- if doc.tagline %}<span>{{ doc.tagline }}</span>{% endif %}
+            <span class="flex items-center gap-4">
+                {%- if doc.tagline %}<span>{{ doc.tagline }}</span>{% endif %}
+                {%- if not state.embed %}
+                    {%- set lang = doc.language|default('pl')|slice(0, 2) -%}
+                    {%- if state.owner %}<a href="/_cadenza/dashboard" class="text-xs opacity-70 hover:opacity-100">{{ cadenza_icon('layout-dashboard', 'size-3.5 inline') }}</a><a href="{{ path('cadenza_logout') }}" data-turbo="false" class="text-xs opacity-70 hover:opacity-100">{{ 'account.logout'|trans({}, 'cadenza', lang) }}</a>
+                    {%- elseif not app.user %}<a href="/_cadenza/login" class="text-xs opacity-40 hover:opacity-100" rel="nofollow">{{ 'account.sign_in_link'|trans({}, 'cadenza', lang) }}</a>{% endif %}
+                {%- endif %}
+            </span>
         </div>
     </footer>
     {%- if state.owner and not state.embed %}{% include '@CadenzaRuntime/panel/_panel.html.twig' %}{% endif %}

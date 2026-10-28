@@ -1,0 +1,32 @@
+account:
+    login: Sign in
+    login_lead: The site owner's studio
+    email: E-mail
+    password: Password
+    remember: Keep me signed in on this device
+    submit: Sign in
+    forgot: 'Forgot the password? On the computer that runs the site: bin/console cadenza:owner'
+    setup: Create the owner account
+    setup_lead: 'First run: this account opens the studio, sketches and the dashboard. Visitors do not need one.'
+    name: Name (optional)
+    repeat: Repeat the password
+    create: Create and enter
+    setup_foot: This screen works only while there is no owner, and only from the computer that runs the site.
+    logout: Sign out
+    signed_in_as: Signed in as
+    last_login: Previous sign-in
+    change_password: Change password
+    current: Current password
+    new: New password
+    save: Save
+    sign_in_link: Sign in
+    error:
+        invalid: Wrong e-mail or password.
+        too_many: Too many failed attempts — try again in a few minutes.
+        csrf: The session expired, please try again.
+        mismatch: The passwords differ.
+        too_short: The password needs at least 10 characters.
+        like_email: The password is too similar to the e-mail.
+        invalid_email: That is not an e-mail address.
+        wrong_current: The current password does not match.
+    saved: Password changed.
