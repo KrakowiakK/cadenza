@@ -36,16 +36,7 @@ final class LenientArgumentsListener
         if (null === $listArgument || !\is_string($args[$listArgument] ?? null)) {
             return;
         }
-        $raw = trim($args[$listArgument]);
-        $decoded = json_decode($raw, true);
-        if (!\is_array($decoded)) {
-            // Common damage: Markdown code fences, or the whole JSON escaped once more.
-            $raw = preg_replace('/^```(?:json)?\s*|\s*```$/', '', $raw) ?? $raw;
-            $decoded = json_decode($raw, true) ?? json_decode(stripcslashes($raw), true);
-            if (\is_string($decoded)) {
-                $decoded = json_decode($decoded, true);
-            }
-        }
+        $decoded = \App\Agent\JsonRepair::decode($args[$listArgument]);
         if (\is_array($decoded) && !array_is_list($decoded)) {
             $decoded = [$decoded];
         }

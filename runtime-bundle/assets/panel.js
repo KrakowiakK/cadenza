@@ -625,7 +625,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
             }
             case 'model':
                 this.showModel(data.label);
-                this.addNote(t('fallbackUsed'));
+                if (!data.quiet) this.addNote(t('fallbackUsed'));
                 break;
             case 'error': {
                 const box = turn.part('text');

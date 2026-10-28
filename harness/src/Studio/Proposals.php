@@ -23,6 +23,31 @@ final class Proposals
     ) {
     }
 
+    /**
+     * Models sometimes send each operation as a JSON string, or the whole list wrapped once more.
+     *
+     * @param array<mixed> $operations
+     *
+     * @return list<mixed>
+     */
+    public static function normalise(array $operations): array
+    {
+        $out = [];
+        foreach (array_values($operations) as $op) {
+            if (\is_string($op)) {
+                $decoded = \App\Agent\JsonRepair::decode($op);
+                if (\is_array($decoded) && array_is_list($decoded)) {
+                    array_push($out, ...self::normalise($decoded));
+                    continue;
+                }
+                $op = \is_array($decoded) ? $decoded : $op;
+            }
+            $out[] = $op;
+        }
+
+        return $out;
+    }
+
     public function flush(): void
     {
         $this->em->flush();
@@ -44,7 +69,7 @@ final class Proposals
             }
         }
 
-        $result = $this->site->propose(array_values($operations), $summary, $reviseDraftId);
+        $result = $this->site->propose(self::normalise($operations), $summary, $reviseDraftId);
         if (!($result['ok'] ?? false)) {
             return ['proposal' => null, 'errors' => array_values((array) ($result['errors'] ?? ['unknown error'])), 'created' => []];
         }

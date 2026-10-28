@@ -11,3 +11,8 @@ ai:
                 base_url: '%env(CADENZA_LLM_FALLBACK_BASE_URL)%'
                 api_key: '%env(default::CADENZA_LLM_FALLBACK_API_KEY)%'
                 model_catalog: 'Symfony\AI\Platform\Bridge\Generic\FallbackModelCatalog'
+            # A model that can see images, used for messages with photos or drawn sketches.
+            vision:
+                base_url: '%env(CADENZA_LLM_VISION_BASE_URL)%'
+                api_key: '%env(default::CADENZA_LLM_VISION_API_KEY)%'
+                model_catalog: 'Symfony\AI\Platform\Bridge\Generic\FallbackModelCatalog'

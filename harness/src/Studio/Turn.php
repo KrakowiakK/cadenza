@@ -17,6 +17,7 @@ final class Turn
     public string $path = '/';
     public ?int $viewedDraftId = null;
     public string $language = 'en';
+    public int $toolCalls = 0;
 
     /** @var list<array<string, string>> */
     public array $selection = [];
@@ -35,6 +36,7 @@ final class Turn
         $this->conversation = $conversation;
         $this->emitter = $emitter;
         $this->proposals = [];
+        $this->toolCalls = 0;
     }
 
     /**

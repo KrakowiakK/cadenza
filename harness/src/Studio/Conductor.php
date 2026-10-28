@@ -24,13 +24,22 @@ final class Conductor
 {
     private const HISTORY_TURNS = 16;
 
+    private bool $useFallback = false;
+    private bool $useVision = false;
+
     public function __construct(
         #[Autowire(service: 'ai.agent.studio')]
         private readonly AgentInterface $agent,
         #[Autowire(service: 'ai.agent.studio_fallback')]
         private readonly AgentInterface $fallbackAgent,
+        #[Autowire(service: 'ai.agent.studio_vision')]
+        private readonly AgentInterface $visionAgent,
+        #[Autowire('%env(CADENZA_LLM_VISION_MODEL)%')]
+        private readonly string $visionModel,
         #[Autowire('%env(CADENZA_LLM_FALLBACK_MODEL)%')]
         private readonly string $fallbackModel,
+        #[Autowire('%env(CADENZA_LLM_MODEL)%')]
+        private readonly string $model,
         private readonly SiteClient $site,
         private readonly Turn $turn,
         private readonly ProposalRepository $proposals,
@@ -49,7 +58,9 @@ final class Conductor
         $this->turn->path = $context['path'] ?? '/';
         $this->turn->viewedDraftId = $context['draftId'] ?? null;
         $this->turn->selection = $context['selection'] ?? [];
-        $this->turn->language = $context['language'] ?? 'en';
+        // The owner's language: what they write in beats the browser setting.
+        $this->turn->language = preg_match('/[ąćęłńśźż]|\b(jest|się|mój|moja|strona|chcę|zrób)\b/iu', $message) ? 'pl' : ($context['language'] ?? 'en');
+        $context['language'] = $this->turn->language;
 
         $this->turn->emit('status', ['text' => 'pl' === ($context['language'] ?? 'en') ? 'Czytam stronę' : 'Reading the site']);
         $bag = new MessageBag(
@@ -64,22 +75,25 @@ final class Conductor
             }
         }
         $bag = $bag->with(Message::ofUser(...$parts));
+        // Images in the message: answer with the model that can see them.
+        $this->useVision = \count($parts) > 1;
+        if ($this->useVision) {
+            $this->turn->emit('model', ['label' => strtok($this->visionModel, '?').' (vision)', 'quiet' => true]);
+        }
 
         $conversation->addUserTurn($message, $this->turn->selection, $this->turn->path, array_map(fn (array $a): array => ['id' => $a['id'], 'kind' => $a['kind'] ?? 'photo', 'name' => $a['name'] ?? null, 'url' => $this->uploads->url($a['id'])], $attachments), \is_array($context['event'] ?? null));
         $this->em->flush();
 
-        try {
-            $text = trim($this->agent->call($bag)->asText());
-        } catch (\Throwable $e) {
-            if (!$this->isUnreachable($e)) {
-                throw $e;
-            }
-            // The main model is busy or down: carry on with the fallback model instead of failing the owner's turn.
-            $this->turn->emit('model', ['label' => $this->fallbackModel.' (fallback)', 'reason' => $e->getMessage()]);
-            $this->turn->emit('status', ['text' => 'pl' === ($context['language'] ?? 'en') ? 'Główny model nie odpowiada — przełączam na zapasowy' : 'Main model is not answering — switching to the fallback']);
-            $text = trim($this->fallbackAgent->call($bag)->asText());
-        }
+        $text = trim($this->callAgent($bag, $context));
         $text = preg_replace('~<think>.*?</think>~s', '', $text) ?? $text;
+
+        // Some models announce work ("I'll prepare…") and stop. Nudge once: the owner asked for action.
+        if (0 === $this->turn->toolCalls && self::announcesWork($text)) {
+            $this->turn->emit('status', ['text' => 'pl' === ($context['language'] ?? 'en') ? 'Biorę się do pracy' : 'Getting to work']);
+            $bag = $bag->with(Message::ofAssistant($text))->with(Message::ofUser('Do it now: call the tools (propose_changes or propose_variants) in this reply instead of describing what you will do.'));
+            $text = trim($this->callAgent($bag, $context));
+            $text = preg_replace('~<think>.*?</think>~s', '', $text) ?? $text;
+        }
 
         $conversation->addAssistantTurn(trim($text), array_map(static fn ($p) => $p->getId(), $this->turn->proposals));
         $this->em->flush();
@@ -110,7 +124,8 @@ final class Conductor
               language of the owner and their site, icons.
             - ORDER OF WORK: call propose_changes right away (the owner waits to see something); images come after.
             - Images: image props accept only /media/… paths from the site's media library. The owner's own images
-              first (attached photos → use_image; paths already in the library). Otherwise, AFTER the sketch exists,
+              first (attached photos → use_image; library images ONLY when their description/album clearly fits
+              this content — never a random personal photo). Otherwise, AFTER the sketch exists,
               call offer_images for 1–2 key slots (e.g. the hero image) with the new node ids from the
               propose_changes result — the owner picks and the sketch updates by itself. Leave other image props empty
               or use a "stub" node. {$this->generationHint()} Never invent image URLs.
@@ -129,8 +144,9 @@ final class Conductor
               one by one in props.
             - When the owner points at elements (selection with node ids), change exactly those.
             - When the owner asks how the site could look, wants ideas or options, or starts a new site from scratch,
-              use propose_variants with 3 truly different variants (different design direction, hero variant,
-              patterns and order). Otherwise one proposal with propose_changes.
+              use propose_variants: write the content once (a complete page from patterns) and give 3 design
+              directions that fit the business, e.g. "directions": ["warm", "elegant", "minimal"]. Otherwise one proposal with propose_changes.
+            - Never only announce work ("I will prepare…"): call the tool in the same reply.
             - Small follow-up tweaks to a sketch the owner is reviewing: extend it with reviseDraftId.
               A new, unrelated change: a new proposal.
             - One propose_changes call per proposal with the whole batch. If it returns errors, fix and call again.
@@ -199,6 +215,47 @@ final class Conductor
         }
 
         return $messages;
+    }
+
+    /**
+     * @param array<string, mixed> $context
+     */
+    private function callAgent(MessageBag $bag, array $context): string
+    {
+        if ($this->useFallback) {
+            return $this->fallbackAgent->call($bag, self::options($this->fallbackModel))->asText();
+        }
+        try {
+            return $this->useVision
+                ? $this->visionAgent->call($bag, self::options($this->visionModel))->asText()
+                : $this->agent->call($bag, self::options($this->model))->asText();
+        } catch (\Throwable $e) {
+            if (!$this->isUnreachable($e)) {
+                throw $e;
+            }
+            // The main model is busy or down: carry on with the fallback model instead of failing the owner's turn.
+            $this->useFallback = true;
+            $this->turn->emit('model', ['label' => $this->fallbackModel.' (fallback)', 'reason' => $e->getMessage()]);
+            $this->turn->emit('status', ['text' => 'pl' === ($context['language'] ?? 'en') ? 'Główny model nie odpowiada — przełączam na zapasowy' : 'Main model is not answering — switching to the fallback']);
+
+            return $this->fallbackAgent->call($bag, self::options($this->fallbackModel))->asText();
+        }
+    }
+
+    /**
+     * Provider-specific knobs that cannot travel in the model name: OpenRouter turns reasoning off with an object.
+     *
+     * @return array<string, mixed>
+     */
+    private static function options(string $model): array
+    {
+        return str_contains($model, ':free') || str_contains($model, '/') ? ['reasoning' => ['enabled' => false]] : [];
+    }
+
+    private static function announcesWork(string $text): bool
+    {
+        return '' !== $text && mb_strlen($text) < 600
+            && 1 === preg_match('/\b(przygotuj|przygotow|zrobię|zbuduj|stworzę|dodam|zaraz|za chwil|pokażę|I\'ll|I will|let me|I am going to|I\'m going to)/iu', $text);
     }
 
     private function isUnreachable(\Throwable $e): bool

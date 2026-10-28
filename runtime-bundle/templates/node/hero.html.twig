@@ -1,4 +1,9 @@
 {%- set variant = props.variant ?? (props.image and props.imagePosition == 'right' ? 'split' : (props.image and props.imagePosition != 'none' ? 'image' : 'typographic')) -%}
+{%- set hasImage = props.image or props.images is not empty -%}
+{#- Without a photo: the owner's sketch shows where it will go; the published site falls back to the typographic layout. -#}
+{%- set placeholder = not hasImage and variant != 'typographic' and cadenza_state().owner and cadenza_state().isSketch -%}
+{%- if not hasImage and not placeholder -%}{%- set variant = 'typographic' -%}{%- endif -%}
+{%- if placeholder and variant == 'image' -%}{%- set variant = 'split' -%}{%- endif -%}
 {%- set heights = {sm: 'py-20', md: 'py-24 md:py-36', lg: 'py-32 md:py-48', screen: 'min-h-[88vh] flex items-center py-24'} -%}
 {%- set centered = props.align == 'center' and variant in ['image', 'typographic'] -%}
 {%- set actions -%}
@@ -23,7 +28,8 @@
         <div>{{ text }}</div>
         <div class="relative">
             <div class="absolute -inset-4 -z-10 rounded-[calc(var(--radius)*2)] bg-primary/10 blur-2xl"></div>
-            {%- if props.image %}<img src="{{ props.image }}" alt="" class="cz-img aspect-[4/5] w-full object-cover shadow-2xl md:aspect-[4/5]">{% else %}<div class="cz-img aspect-[4/5] w-full bg-muted"></div>{% endif %}
+            {%- if props.image %}<img src="{{ props.image }}" alt="" class="cz-img aspect-[4/5] w-full object-cover shadow-2xl md:aspect-[4/5]">
+            {%- else %}<div class="cz-img flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 border-2 border-dashed border-current/15 bg-muted/60 text-muted-foreground">{{ cadenza_icon('image-plus', 'size-10 opacity-50') }}<span class="text-sm">{{ app.request.locale starts with 'pl' or cadenza_state().document.name matches '/[ąćęłńóśźż]/i' ? 'Tu będzie zdjęcie' : 'Photo goes here' }}</span></div>{% endif %}
         </div>
     </div>
 </section>
@@ -36,7 +42,7 @@
             {%- for src in imgs %}
                 <img src="{{ src }}" alt="" class="cz-img absolute object-cover shadow-2xl ring-4 ring-background {{ ['left-0 top-6 h-64 w-[58%] -rotate-3 md:h-80', 'right-0 top-0 h-56 w-[48%] rotate-3 md:h-72', 'bottom-0 left-[22%] h-52 w-[52%] rotate-1 md:h-64'][loop.index0] }}">
             {%- else %}
-                <div class="cz-img absolute inset-8 bg-muted"></div>
+                <div class="cz-img absolute inset-8 flex items-center justify-center border-2 border-dashed border-current/15 bg-muted/60 text-muted-foreground">{{ cadenza_icon('images', 'size-10 opacity-50') }}</div>
             {%- endfor %}
         </div>
     </div>

@@ -21,3 +21,13 @@ ai:
                 - 'App\Agent\Tool\ImageTools'
                 - 'App\Agent\Tool\ConnectorTools'
                 - 'App\Agent\Tool\DiagnosticsTools'
+        studio_vision:
+            platform: 'ai.platform.generic.vision'
+            model: '%env(CADENZA_LLM_VISION_MODEL)%'
+            max_tool_calls: 24
+            tools:
+                - 'App\Agent\Tool\SiteTools'
+                - 'App\Agent\Tool\UiTools'
+                - 'App\Agent\Tool\ImageTools'
+                - 'App\Agent\Tool\ConnectorTools'
+                - 'App\Agent\Tool\DiagnosticsTools'

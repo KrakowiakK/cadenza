@@ -45,6 +45,7 @@ final class ToolTraceSubscriber
     public function onRequested(ToolCallRequested $event): void
     {
         $name = $event->getToolCall()->getName();
+        ++$this->turn->toolCalls;
         $id = $name.'-'.++$this->counter;
         $this->running[$name][] = $id;
         $this->turn->emit('tool', ['id' => $id, 'name' => $name, 'label' => $this->label($name), 'state' => 'start', 'detail' => $this->detail($name, $event->getToolCall()->getArguments())]);

@@ -94,7 +94,7 @@ final class ChatController
     #[Route('/api/info', methods: ['GET'])]
     public function info(): JsonResponse
     {
-        return new JsonResponse(['model' => $this->modelLabel]);
+        return new JsonResponse(['model' => $this->modelLabel, 'apiKey' => '' !== (string) ($_SERVER['CADENZA_LLM_API_KEY'] ?? $_ENV['CADENZA_LLM_API_KEY'] ?? getenv('CADENZA_LLM_API_KEY') ?: '')]);
     }
 
     #[Route('/api/conversations/{id}', methods: ['GET'])]

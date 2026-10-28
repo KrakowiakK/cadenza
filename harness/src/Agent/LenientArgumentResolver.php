@@ -48,7 +48,7 @@ final class LenientArgumentResolver implements ToolCallArgumentResolverInterface
             } elseif (\is_string($value) && \in_array('bool', $types, true) && !\in_array('string', $types, true)) {
                 $coerced = \in_array(strtolower(trim($value)), ['1', 'true', 'yes'], true);
             } elseif (\is_string($value) && \in_array('array', $types, true) && !\in_array('string', $types, true)) {
-                $decoded = json_decode(trim($value), true);
+                $decoded = JsonRepair::decode($value);
                 $coerced = \is_array($decoded) ? $decoded : array_values(array_filter(array_map('trim', explode(',', $value)), 'strlen'));
             } elseif (\is_int($value) && \in_array('string', $types, true) && !\in_array('int', $types, true)) {
                 $coerced = (string) $value;
