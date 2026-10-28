@@ -1,0 +1,23 @@
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+<div class="{{ props.layout == 'columns' and props.categories|length > 1 ? 'grid gap-x-16 gap-y-12 md:grid-cols-2' : 'mx-auto max-w-3xl space-y-12' }}">
+    {%- for category in props.categories %}
+        <div>
+            <h3 class="cz-heading mb-5 border-b border-current/15 pb-3 text-xl font-semibold">{{ category.name }}</h3>
+            <ul class="space-y-5">
+                {%- for item in category.items|default([]) %}
+                    <li>
+                        <div class="flex items-baseline gap-3">
+                            <span class="font-medium">{{ item.name }}</span>
+                            {%- if item.tag %}<span class="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-primary">{{ item.tag }}</span>{% endif %}
+                            <span class="mx-1 flex-1 translate-y-[-4px] border-b border-dotted border-current/25"></span>
+                            {%- if item.price %}<span class="cz-price font-semibold">{{ item.price }}</span>{% endif %}
+                        </div>
+                        {%- if item.description %}<p class="mt-1 text-sm opacity-70">{{ item.description }}</p>{% endif %}
+                    </li>
+                {%- endfor %}
+            </ul>
+        </div>
+    {%- endfor %}
+</div>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

@@ -1,0 +1,17 @@
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+<div class="grid items-center gap-10 md:grid-cols-2 md:gap-16">
+    <div class="{{ props.imageSide == 'left' ? 'md:order-2' : '' }}">
+        {%- if props.eyebrow %}<p class="cz-eyebrow mb-4">{{ props.eyebrow }}</p>{% endif %}
+        <h2 class="cz-display text-3xl md:text-4xl">{{ props.title }}</h2>
+        {%- if props.text %}<div class="cz-prose cz-lead mt-5 text-lg opacity-80">{{ props.text|markdown_to_html }}</div>{% endif %}
+        {%- if props.bullets is not empty %}
+            <ul class="mt-6 space-y-3">{% for b in props.bullets %}<li class="flex gap-3"><span class="mt-1 text-primary">{{ cadenza_icon('check', 'size-5') }}</span><span>{{ b }}</span></li>{% endfor %}</ul>
+        {%- endif %}
+        {%- if props.buttonLabel %}<div class="mt-8"><twig:Button as="a" href="{{ props.buttonHref }}" class="cz-btn h-11 px-6 text-base">{{ props.buttonLabel }} {{ cadenza_icon('arrow-right', 'size-4') }}</twig:Button></div>{% endif %}
+    </div>
+    <div class="{{ props.imageSide == 'left' ? 'md:order-1' : '' }}">
+        {%- if props.image %}<img src="{{ props.image }}" alt="" loading="lazy" class="cz-img aspect-[4/3] w-full object-cover shadow-xl">
+        {%- else %}<div class="cz-img flex aspect-[4/3] items-center justify-center bg-muted text-muted-foreground">{{ cadenza_icon('image', 'size-10 opacity-40') }}</div>{% endif %}
+    </div>
+</div>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

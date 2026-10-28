@@ -1,0 +1,12 @@
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+<ol class="grid gap-8 {{ props.items|length >= 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : (props.items|length == 3 ? 'md:grid-cols-3' : 'md:grid-cols-2') }}">
+    {%- for item in props.items %}
+        <li class="relative">
+            <div class="cz-display mb-4 text-5xl text-primary/80">{{ '%02d'|format(loop.index) }}</div>
+            <h3 class="cz-heading text-lg font-semibold">{{ item.title }}</h3>
+            {%- if item.text|default(false) %}<p class="mt-2 opacity-70">{{ item.text }}</p>{% endif %}
+        </li>
+    {%- endfor %}
+</ol>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

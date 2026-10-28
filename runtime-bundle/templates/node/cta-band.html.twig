@@ -1,0 +1,26 @@
+{%- set buttons -%}
+    {%- if props.buttonLabel %}<twig:Button as="a" href="{{ props.buttonHref }}" variant="{{ props.variant == 'band' ? 'secondary' : 'default' }}" class="cz-btn h-12 px-7 text-base">{{ props.buttonLabel }}</twig:Button>{% endif %}
+    {%- if props.secondaryLabel %}<twig:Button as="a" href="{{ props.secondaryHref }}" variant="{{ props.variant == 'band' ? 'ghost' : 'outline' }}" class="cz-btn h-12 px-7 text-base {{ props.variant == 'band' ? 'text-primary-foreground hover:bg-white/10' : '' }}">{{ props.secondaryLabel }}</twig:Button>{% endif %}
+{%- endset -%}
+{%- if props.variant == 'band' %}
+<section class="cz-section bg-primary text-primary-foreground">
+    <div class="mx-auto max-w-4xl px-6 text-center">
+        <h2 class="cz-display text-3xl md:text-5xl">{{ props.title }}</h2>
+        {%- if props.text %}<p class="cz-lead mx-auto mt-5 max-w-2xl text-lg opacity-85">{{ props.text|nl2br }}</p>{% endif %}
+        <div class="mt-9 flex flex-wrap justify-center gap-3">{{ buttons }}</div>
+    </div>
+</section>
+{%- else %}
+<section class="cz-section">
+    <div class="mx-auto max-w-6xl px-6">
+        <div class="cz-card overflow-hidden {{ props.variant == 'split' and props.image ? 'grid md:grid-cols-2' : '' }}">
+            <div class="p-10 md:p-16 {{ props.variant == 'split' and props.image ? '' : 'text-center' }}">
+                <h2 class="cz-display text-3xl md:text-4xl">{{ props.title }}</h2>
+                {%- if props.text %}<p class="cz-lead mt-5 text-lg opacity-75 {{ props.variant == 'split' ? '' : 'mx-auto max-w-2xl' }}">{{ props.text|nl2br }}</p>{% endif %}
+                <div class="mt-9 flex flex-wrap gap-3 {{ props.variant == 'split' and props.image ? '' : 'justify-center' }}">{{ buttons }}</div>
+            </div>
+            {%- if props.variant == 'split' and props.image %}<img src="{{ props.image }}" alt="" loading="lazy" class="h-full min-h-64 w-full object-cover">{% endif %}
+        </div>
+    </div>
+</section>
+{%- endif %}

@@ -69,6 +69,29 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
     }
 
     /**
+     * Every prop and every field of list items exists in templates (null when not set), so optional fields never
+     * break rendering.
+     *
+     * @param array<string, array<string, mixed>> $schema
+     * @param array<string, mixed>                $props
+     *
+     * @return array<string, mixed>
+     */
+    private static function complete(array $schema, array $props): array
+    {
+        foreach ($schema as $name => $prop) {
+            if (!\array_key_exists($name, $props)) {
+                $props[$name] = $prop['default'] ?? null;
+            }
+            if ('list' === $prop['type'] && isset($prop['items']) && \is_array($props[$name])) {
+                $props[$name] = array_map(static fn (mixed $item): mixed => \is_array($item) ? self::complete($prop['items'], $item) : $item, $props[$name]);
+            }
+        }
+
+        return $props;
+    }
+
+    /**
      * Lucide icon by name; unknown names render nothing instead of failing the page.
      */
     public function icon(?string $name, string $class = 'size-4'): string
@@ -131,7 +154,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         }
         $type = $this->catalog->get($node['type']);
         $node['__page'] = $page;
-        $props = array_merge($type->defaults(), $node['props'] ?? []);
+        $props = self::complete($type->props, array_merge($type->defaults(), $node['props'] ?? []));
 
         $state = $removed ? 'removed' : $this->state->stateOf($node['id']);
         // Inside an added or removed node, children carry the same state: mark only the outermost one.

@@ -23,6 +23,11 @@ final class Proposals
     ) {
     }
 
+    public function flush(): void
+    {
+        $this->em->flush();
+    }
+
     /**
      * @param list<array<string, mixed>> $operations
      *

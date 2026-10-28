@@ -1,0 +1,4 @@
+{#- Opening of a pattern section: background and spacing. Close with _section_close. -#}
+{%- set bgs = {default: 'bg-background', muted: 'bg-muted', primary: 'bg-primary text-primary-foreground', secondary: 'bg-secondary text-secondary-foreground', accent: 'bg-accent text-accent-foreground', dark: 'dark bg-background text-foreground'} -%}
+<section class="cz-section relative {{ bgs[props.background|default('default')] }}">
+<div class="mx-auto w-full max-w-6xl px-6">

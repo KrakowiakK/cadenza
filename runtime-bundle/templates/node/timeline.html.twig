@@ -1,0 +1,14 @@
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+<ol class="relative mx-auto max-w-3xl border-l border-current/20 pl-8">
+    {%- for item in props.items %}
+        <li class="relative pb-12 last:pb-0">
+            <span class="absolute -left-[2.45rem] top-1 size-3.5 rounded-full border-2 border-background bg-primary ring-4 ring-primary/15"></span>
+            <p class="cz-eyebrow mb-2">{{ item.date }}</p>
+            <h3 class="cz-heading text-xl font-semibold">{{ item.title }}</h3>
+            {%- if item.text|default(false) %}<p class="mt-2 opacity-75">{{ item.text|nl2br }}</p>{% endif %}
+            {%- if item.image|default(false) %}<img src="{{ item.image }}" alt="" loading="lazy" class="cz-img mt-4 aspect-video w-full object-cover">{% endif %}
+        </li>
+    {%- endfor %}
+</ol>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

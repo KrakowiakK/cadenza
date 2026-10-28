@@ -31,6 +31,7 @@ const I18N = {
         connectedOk: 'Connected', connectFailed: 'Connection failed',
         fromPhone: 'Photos from your phone', scanQr: 'Scan with your phone camera and pick photos from the gallery.', waitingPhone: 'Waiting for the phone…',
         phoneOpened: 'Phone connected — pick photos', receiving: 'Receiving', photos: 'photos', phoneDone: 'Photos received',
+        variants: 'Variants', choose: 'Choose this one', chosen: 'Chosen', open: 'Open',
         retry: 'Try again', modelBusy: 'The model did not answer in time.', fallbackUsed: 'Main model busy — answered by the fallback model',
         instagramPhone: 'Your Instagram photos are in your phone\'s gallery — the fastest way:', exportAll: 'Everything from Instagram at once (export)', openExport: 'Open Instagram export',
     },
@@ -61,6 +62,7 @@ const I18N = {
         connectedOk: 'Połączono', connectFailed: 'Nie udało się połączyć',
         fromPhone: 'Zdjęcia z telefonu', scanQr: 'Zeskanuj aparatem telefonu i wybierz zdjęcia z galerii.', waitingPhone: 'Czekam na telefon…',
         phoneOpened: 'Telefon połączony — wybierz zdjęcia', receiving: 'Odbieram', photos: 'zdjęć', phoneDone: 'Odebrano zdjęcia',
+        variants: 'Warianty', choose: 'Wybieram ten', chosen: 'Wybrany', open: 'Otwórz',
         retry: 'Spróbuj ponownie', modelBusy: 'Model nie odpowiedział na czas.', fallbackUsed: 'Główny model zajęty — odpowiada model zapasowy',
         instagramPhone: 'Twoje zdjęcia z Instagrama są w galerii telefonu — najszybciej tak:', exportAll: 'Wszystko z Instagrama naraz (eksport)', openExport: 'Otwórz eksport Instagrama',
     },
@@ -406,6 +408,10 @@ class Studio {
     }
 
     proposalCard(container, p) {
+        if (p.variantGroup && !p.variantPicked && p.status === 'sketched' && !this.pickedVariants?.has(p.proposalId)) {
+            this.proposals.set(p.proposalId, p);
+            return;
+        }
         let card = this.root.querySelector(`[data-proposal="${CSS.escape(p.proposalId)}"]`);
         if (!card) {
             card = document.createElement('div');
@@ -602,6 +608,9 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
                 break;
             case 'phone':
                 this.phoneCard(turn.part('cards'), data);
+                break;
+            case 'variants':
+                this.variantsCard(turn.part('cards'), data);
                 break;
             case 'generated':
                 turn.part('cards').insertAdjacentHTML('beforeend', `<img src="${escapeHtml(data.url)}" alt="" title="${escapeHtml(data.prompt)}" class="cz-msg w-full rounded-xl">`);
@@ -847,6 +856,58 @@ ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-30
             this.send(t('exportUploaded'));
         });
         container.append(card);
+        this.scrollDown();
+    }
+
+    variantsCard(container, data) {
+        this.pickedVariants ??= new Set();
+        const card = document.createElement('div');
+        card.className = 'cz-msg -mx-1 flex flex-col gap-3';
+        card.innerHTML = `<div class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">${t('variants')}</div>` + data.items.map((v) => {
+            const url = new URL(v.focusPath || '/', location.origin);
+            url.searchParams.set('cz_draft', v.draftId);
+            url.searchParams.set('cz_embed', '1');
+            return `<div data-variant="${escapeHtml(v.proposalId)}" class="overflow-hidden rounded-xl border border-border bg-background transition">
+  <div class="relative h-44 overflow-hidden bg-muted">
+    <iframe src="${escapeHtml(url.pathname + url.search)}" loading="lazy" tabindex="-1" class="pointer-events-none absolute left-0 top-0 h-[1408px] w-[1280px] origin-top-left border-0" style="transform: scale(0.3125)"></iframe>
+  </div>
+  <div class="flex items-start gap-2 p-3">
+    <div class="min-w-0 flex-1"><div class="font-semibold">${escapeHtml(v.variantName ?? '')}</div><div class="text-xs text-muted-foreground">${escapeHtml(v.summary)}</div></div>
+  </div>
+  <div class="flex gap-1.5 px-3 pb-3">
+    <button type="button" data-do="open" class="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs hover:bg-muted">${icon('eye', 'size-3.5')}${t('open')}</button>
+    <button type="button" data-do="pick" class="flex items-center gap-1 rounded-lg bg-foreground px-2.5 py-1.5 text-xs font-semibold text-background">${icon('check', 'size-3.5')}${t('choose')}</button>
+  </div>
+</div>`;
+        }).join('');
+        container.append(card);
+        // Thumbnails are 1280 px wide pages scaled to the card width.
+        const fit = () => card.querySelectorAll('iframe').forEach((f) => { f.style.transform = `scale(${f.parentElement.clientWidth / 1280})`; });
+        requestAnimationFrame(fit);
+        new ResizeObserver(fit).observe(card);
+        for (const v of data.items) {
+            const el = card.querySelector(`[data-variant="${CSS.escape(v.proposalId)}"]`);
+            el.querySelector('[data-do="open"]').addEventListener('click', () => this.showSketch(v.draftId, v.focusPath));
+            el.querySelector('[data-do="pick"]').addEventListener('click', async () => {
+                try {
+                    const res = await this.api(`/api/variants/${encodeURIComponent(data.groupId)}/pick`, { proposalId: v.proposalId });
+                    this.pickedVariants.add(v.proposalId);
+                    card.querySelectorAll('[data-variant]').forEach((other) => {
+                        const mine = other === el;
+                        other.classList.toggle('opacity-40', !mine);
+                        other.classList.toggle('ring-2', mine);
+                        other.classList.toggle('ring-violet-500', mine);
+                        other.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+                    });
+                    el.querySelector('[data-do="pick"]').innerHTML = icon('check', 'size-3.5') + t('chosen');
+                    for (const p of this.proposals.values()) if (p.variantGroup === data.groupId && p.proposalId !== v.proposalId) p.status = 'rejected';
+                    this.proposalCard(card.parentElement, { ...res.proposal, variantPicked: true });
+                    await this.showSketch(res.proposal.draftId, res.proposal.focusPath);
+                } catch (e) {
+                    this.toast(t('error') + ': ' + e.message, 'error');
+                }
+            });
+        }
         this.scrollDown();
     }
 

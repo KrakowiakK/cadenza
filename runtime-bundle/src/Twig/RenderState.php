@@ -15,6 +15,8 @@ final class RenderState
     public ?int $draftId = null;
     public bool $owner = false;
     public bool $showBefore = false;
+    /** Rendered inside a preview frame (variant thumbnails): no studio UI. */
+    public bool $embed = false;
     public ?string $draftSummary = null;
 
     /** Published version shown read-only (timeline preview). */

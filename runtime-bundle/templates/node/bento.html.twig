@@ -1,0 +1,20 @@
+{%- set spans = {small: '', wide: 'sm:col-span-2', tall: 'sm:row-span-2', large: 'sm:col-span-2 sm:row-span-2'} -%}
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+<div class="grid auto-rows-[minmax(11rem,auto)] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    {%- for item in props.items %}
+        {%- set tag = item.href|default(false) ? 'a' : 'div' -%}
+        <{{ tag }}{% if item.href|default(false) %} href="{{ item.href }}"{% endif %} class="cz-card group relative flex flex-col justify-end overflow-hidden p-6 {{ spans[item.size|default('small')] }} {{ item.image|default(false) ? 'min-h-56 text-white' : '' }}">
+            {%- if item.image|default(false) %}
+                <img src="{{ item.image }}" alt="" loading="lazy" class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
+            {%- endif %}
+            <div class="relative">
+                {%- if item.icon|default(false) and not item.image|default(false) %}<div class="mb-auto inline-flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">{{ cadenza_icon(item.icon, 'size-5') }}</div>{% endif %}
+                <h3 class="cz-heading mt-6 text-xl font-semibold">{{ item.title }}</h3>
+                {%- if item.text|default(false) %}<p class="mt-2 text-sm {{ item.image|default(false) ? 'text-white/85' : 'opacity-70' }}">{{ item.text }}</p>{% endif %}
+            </div>
+        </{{ tag }}>
+    {%- endfor %}
+</div>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

@@ -185,3 +185,68 @@ body { font-family: var(--cz-font-body); }
 /* Keep the studio above the Symfony debug toolbar in development. */
 body:has(.sf-toolbar) #cz-panel .cz-bar { bottom: 3.25rem; }
 body:has(.sf-toolbar) #cz-panel .cz-sheet { bottom: 3rem; }
+
+/* ------------------------------------------------------------------------------------------------------------
+   Design directions — html[data-cz-style]. Patterns use semantic hooks (.cz-heading, .cz-eyebrow, .cz-card,
+   .cz-section, .cz-img, .cz-btn, .cz-display) and each direction gives them a character.
+   ------------------------------------------------------------------------------------------------------------ */
+:root { --cz-section-y: 1; --cz-display-weight: 700; --cz-display-tracking: -0.02em; --cz-heading-transform: none; }
+.cz-section { padding-block: calc(4rem * var(--cz-section-y)); }
+@media (min-width: 768px) { .cz-section { padding-block: calc(6rem * var(--cz-section-y)); } }
+.cz-display { font-family: var(--cz-font-heading); font-weight: var(--cz-display-weight); letter-spacing: var(--cz-display-tracking); text-transform: var(--cz-heading-transform); line-height: 1.04; text-wrap: balance; }
+.cz-heading { text-wrap: balance; }
+.cz-lead { text-wrap: pretty; }
+.cz-eyebrow { font-size: .78rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--primary); }
+.cz-card { background: var(--card); color: var(--card-foreground); border-radius: var(--radius); box-shadow: 0 0 0 1px color-mix(in oklch, var(--foreground) 9%, transparent); transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s; }
+a.cz-card:hover, .cz-card-link:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px color-mix(in oklch, var(--foreground) 12%, transparent), 0 18px 40px -20px color-mix(in oklch, var(--foreground) 35%, transparent); }
+.cz-img { border-radius: var(--radius); }
+.cz-price { font-variant-numeric: tabular-nums; }
+
+/* minimal */
+[data-cz-style="minimal"] { --cz-section-y: 1.1; --cz-display-weight: 600; --cz-display-tracking: -0.035em; }
+[data-cz-style="minimal"] .cz-card { box-shadow: 0 0 0 1px var(--border); }
+
+/* editorial */
+[data-cz-style="editorial"] { --cz-section-y: 1; --cz-display-weight: 500; --cz-display-tracking: -0.025em; }
+[data-cz-style="editorial"] .cz-eyebrow { color: var(--accent); display: inline-flex; align-items: center; gap: .75rem; }
+[data-cz-style="editorial"] .cz-eyebrow::before { content: ''; width: 2.25rem; height: 1px; background: currentColor; }
+[data-cz-style="editorial"] .cz-card { box-shadow: none; border-top: 1px solid var(--foreground); border-radius: 0; background: transparent; padding-top: .25rem; }
+[data-cz-style="editorial"] main > .cz-node + .cz-node > .cz-section { border-top: 1px solid var(--border); }
+[data-cz-style="editorial"] .cz-display em, [data-cz-style="editorial"] .cz-heading em { font-style: italic; color: var(--accent); }
+
+/* warm craft */
+[data-cz-style="warm"] { --cz-section-y: 1; --cz-display-weight: 600; --cz-display-tracking: -0.02em; }
+[data-cz-style="warm"] .cz-card { box-shadow: 0 1px 0 color-mix(in oklch, var(--foreground) 6%, transparent), 0 14px 34px -22px color-mix(in oklch, var(--primary) 55%, transparent); }
+[data-cz-style="warm"] .cz-img { border-radius: calc(var(--radius) * 1.6); }
+[data-cz-style="warm"] .cz-eyebrow { font-family: var(--cz-font-heading); font-style: italic; text-transform: none; letter-spacing: 0; font-size: 1.05rem; font-weight: 500; }
+
+/* bold */
+[data-cz-style="bold"] { --cz-section-y: 1.05; --cz-display-weight: 700; --cz-display-tracking: -0.04em; --cz-heading-transform: uppercase; }
+[data-cz-style="bold"] .cz-card { box-shadow: none; border: 2px solid var(--foreground); }
+[data-cz-style="bold"] a.cz-card:hover { box-shadow: 6px 6px 0 var(--primary); transform: translate(-3px, -3px); }
+[data-cz-style="bold"] .cz-eyebrow { background: var(--primary); color: var(--primary-foreground); padding: .3rem .6rem; border-radius: 999px; display: inline-block; }
+
+/* elegant */
+[data-cz-style="elegant"] { --cz-section-y: 1.2; --cz-display-weight: 400; --cz-display-tracking: -0.01em; }
+[data-cz-style="elegant"] .cz-heading, [data-cz-style="elegant"] h2, [data-cz-style="elegant"] h3 { font-weight: 500; }
+[data-cz-style="elegant"] .cz-eyebrow { letter-spacing: .32em; font-weight: 500; color: var(--muted-foreground); }
+[data-cz-style="elegant"] .cz-card { box-shadow: none; border: 1px solid var(--border); }
+[data-cz-style="elegant"] body { letter-spacing: .005em; }
+
+/* fresh */
+[data-cz-style="fresh"] { --cz-section-y: .95; --cz-display-weight: 700; --cz-display-tracking: -0.03em; }
+[data-cz-style="fresh"] .cz-card { box-shadow: 0 10px 30px -18px color-mix(in oklch, var(--primary) 60%, transparent); }
+[data-cz-style="fresh"] .cz-eyebrow { background: color-mix(in oklch, var(--accent) 70%, transparent); color: var(--accent-foreground); padding: .3rem .7rem; border-radius: 999px; display: inline-block; letter-spacing: .06em; }
+
+/* Scroll reveal (site.js) */
+.cz-reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1); }
+.cz-reveal.cz-in { opacity: 1; transform: none; }
+
+/* Marquee (logos, testimonials) */
+.cz-marquee { mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent); overflow: hidden; }
+.cz-marquee > div { display: flex; width: max-content; animation: cz-marquee 40s linear infinite; }
+.cz-marquee:hover > div { animation-play-state: paused; }
+@keyframes cz-marquee { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .cz-reveal { opacity: 1; transform: none; } .cz-marquee > div { animation: none; } }
+@keyframes cz-hero-zoom { from { transform: scale(1.12); } to { transform: scale(1.03); } }
+.cz-embed .cz-reveal { opacity: 1; transform: none; }

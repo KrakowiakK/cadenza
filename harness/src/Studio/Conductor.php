@@ -128,6 +128,9 @@ final class Conductor
               media_overview to plan albums (e.g. one gallery per top hashtag or year). Never list imported images
               one by one in props.
             - When the owner points at elements (selection with node ids), change exactly those.
+            - When the owner asks how the site could look, wants ideas or options, or starts a new site from scratch,
+              use propose_variants with 3 truly different variants (different design direction, hero variant,
+              patterns and order). Otherwise one proposal with propose_changes.
             - Small follow-up tweaks to a sketch the owner is reviewing: extend it with reviseDraftId.
               A new, unrelated change: a new proposal.
             - One propose_changes call per proposal with the whole batch. If it returns errors, fix and call again.

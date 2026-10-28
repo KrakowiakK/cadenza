@@ -55,6 +55,7 @@ final class PageController
             $document = $version->getDocument();
         }
         $this->state->document = $document;
+        $this->state->embed = $request->query->getBoolean('cz_embed');
 
         $page = Document::findPage($document, '/'.$path);
         if (null === $page) {

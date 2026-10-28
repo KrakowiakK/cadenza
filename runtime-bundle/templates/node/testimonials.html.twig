@@ -1,0 +1,23 @@
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+{%- macro quote(t) -%}
+    <figure class="cz-card flex h-full w-[22rem] max-w-full shrink-0 flex-col p-7">
+        <blockquote class="flex-1 leading-relaxed">“{{ t.text }}”</blockquote>
+        <figcaption class="mt-6 flex items-center gap-3">
+            {%- if t.avatar|default(false) %}<img src="{{ t.avatar }}" alt="" class="size-10 rounded-full object-cover">{% else %}<span class="flex size-10 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">{{ t.author|first }}</span>{% endif %}
+            <div><div class="font-semibold">{{ t.author }}</div>{% if t.role|default(false) %}<div class="text-sm opacity-60">{{ t.role }}</div>{% endif %}</div>
+        </figcaption>
+    </figure>
+{%- endmacro -%}
+{%- if props.style == 'spotlight' and props.items is not empty %}
+    {%- set t = props.items|first %}
+    <figure class="mx-auto max-w-4xl text-center">
+        <blockquote class="cz-display text-2xl leading-snug md:text-4xl">“{{ t.text }}”</blockquote>
+        <figcaption class="mt-8"><span class="font-semibold">{{ t.author }}</span>{% if t.role|default(false) %}<span class="opacity-60"> · {{ t.role }}</span>{% endif %}</figcaption>
+    </figure>
+{%- elseif props.style == 'marquee' %}
+    <div class="cz-marquee -mx-6"><div class="gap-5 px-3">{% for i in 1..2 %}{% for t in props.items %}{{ _self.quote(t) }}{% endfor %}{% endfor %}</div></div>
+{%- else %}
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 [&>figure]:w-full">{% for t in props.items %}{{ _self.quote(t) }}{% endfor %}</div>
+{%- endif %}
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

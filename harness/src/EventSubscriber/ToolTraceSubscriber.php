@@ -17,6 +17,7 @@ final class ToolTraceSubscriber
 {
     private const LABELS = [
         'propose_changes' => ['en' => 'Preparing a sketch', 'pl' => 'Przygotowuję szkic'],
+        'propose_variants' => ['en' => 'Preparing variants', 'pl' => 'Przygotowuję warianty'],
         'read_page' => ['en' => 'Reading the page', 'pl' => 'Czytam stronę'],
         'read_outline' => ['en' => 'Looking through the site', 'pl' => 'Przeglądam stronę'],
         'show_page' => ['en' => 'Opening a page', 'pl' => 'Przechodzę na stronę'],

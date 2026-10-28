@@ -38,22 +38,34 @@ final class EditorGuide
             - {"op": "node.replace", "id": "<node id>", "node": {...}}                  (same place, new content)
             - {"op": "node.move", "id": "<node id>", "after": "<node id>"}              (or before / parent+slot+index / page+index)
             - {"op": "node.remove", "id": "<node id>"}                                  (or "ids": [...])
+            - {"op": "theme.update", "direction": "editorial"}   (best first step for a new site: choose a design direction)
             - {"op": "theme.update", "preset": "warm", "mode": "light", "fontHeading": "Fraunces", "fontBody": "Inter", "radius": "lg", "tokens": {"primary": "#b45309"}}
             - {"op": "site.update", "name": "Café Aroma", "tagline": "...", "footer": "...", "nav": [{"label": "Menu", "href": "/menu"}] or null for automatic}
 
-            Composition tips: a page is a vertical list of blocks. Start pages with a hero, wrap content in "section" nodes
-            (they give width, spacing and background), alternate section backgrounds (default / muted) for rhythm, use
-            "features", "cards in a grid-3 section", "stats", "quote", "faq", "cta" for richer pages. Use real, specific
-            copy in the user's language, never lorem ipsum. Images: image props accept only paths from the site's media
-            library (/media/…); bring images in through the media tools first, otherwise leave image props empty.
-            Use a "stub" node for anything that would need a capability that does not exist yet.
+            How to compose beautiful pages:
+            - First choose a design direction (theme.update {"direction": …}) that fits the business and mood.
+            - Build a page as a sequence of PATTERNS (category "pattern"): hero → 3–6 patterns → cta-band. Patterns
+              are complete designed sections with their own background, heading and responsive layout — do not wrap
+              them in "section". Use the "section" node only for custom compositions of small content nodes.
+            - Vary rhythm: alternate pattern backgrounds (default / muted / one strong "primary" or "dark" band), mix
+              text-heavy and visual patterns, alternate imageSide of consecutive feature-split.
+            - Pick patterns for the content: menu for prices, visit for address/hours, steps for "how it works",
+              timeline for history/schedules, bento for an overview, testimonials for social proof, pricing for
+              packages, team for people, logos for partners/press.
+            - Hero: "split" or "image" when there is a good photo, "typographic" when there is none, "collage" for
+              several photos. Keep titles short and specific; one idea per section.
+            - Real, specific copy in the language of the site; never lorem ipsum.
+            - Images: image props accept only paths from the site's media library (/media/…); leave them empty until
+              images are chosen. Use a "stub" node for anything that needs a capability that does not exist yet.
             TXT;
     }
 
     public function catalog(): string
     {
-        $lines = ['## Node types'];
-        foreach ($this->catalog->all() as $type) {
+        $lines = ['## Node types (patterns first)'];
+        $types = $this->catalog->all();
+        uasort($types, static fn ($a, $b): int => ('pattern' === $b->category) <=> ('pattern' === $a->category));
+        foreach ($types as $type) {
             $d = $type->describe();
             $lines[] = \sprintf('### %s (%s) — %s', $type->name, $type->category, $type->description);
             foreach ($d['props'] ?? [] as $prop => $desc) {
@@ -69,7 +81,11 @@ final class EditorGuide
 
     public function theme(): string
     {
-        $lines = ['## Theme', 'Presets:'];
+        $lines = ['## Theme', 'Design directions (theme.update {"direction": …} sets palette, fonts, shapes and the whole character at once; then fine-tune with preset/fonts/tokens if needed):'];
+        foreach (Theme::DIRECTIONS as $name => $direction) {
+            $lines[] = \sprintf('  - %s: %s', $name, $direction['label']);
+        }
+        $lines[] = 'Colour presets:';
         foreach (Theme::PRESETS as $name => $preset) {
             $lines[] = \sprintf('  - %s: %s', $name, $preset['label']);
         }

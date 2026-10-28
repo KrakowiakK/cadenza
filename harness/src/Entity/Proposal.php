@@ -32,6 +32,13 @@ class Proposal
     #[ORM\Column(nullable: true)]
     private ?int $publishedVersion = null;
 
+    /** Proposals offered together as alternatives ("variants") share a group; the owner keeps one. */
+    #[ORM\Column(length: 26, nullable: true)]
+    private ?string $variantGroup = null;
+
+    #[ORM\Column(length: 80, nullable: true)]
+    private ?string $variantName = null;
+
     /**
      * @param array<string, int|bool> $changes
      */
@@ -105,6 +112,17 @@ class Proposal
         $this->focusPath = $focusPath;
     }
 
+    public function asVariant(string $group, string $name): void
+    {
+        $this->variantGroup = $group;
+        $this->variantName = mb_substr($name, 0, 80);
+    }
+
+    public function getVariantGroup(): ?string
+    {
+        return $this->variantGroup;
+    }
+
     public function markPublished(int $version): void
     {
         $this->publishedVersion = $version;
@@ -123,6 +141,8 @@ class Proposal
             'focusPath' => $this->focusPath,
             'status' => $this->status,
             'version' => $this->publishedVersion,
+            'variantGroup' => $this->variantGroup,
+            'variantName' => $this->variantName,
         ];
     }
 }

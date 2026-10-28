@@ -19,7 +19,7 @@ final class Outline
         $theme = $doc['theme'];
         $lines = [
             \sprintf('Site "%s"%s', $doc['name'], $doc['tagline'] ? ' — '.$doc['tagline'] : ''),
-            \sprintf('Theme: preset=%s mode=%s fonts=%s/%s radius=%s%s', $theme['preset'], $theme['mode'], $theme['fontHeading'], $theme['fontBody'], $theme['radius'], $theme['tokens'] ? ' tokens='.json_encode($theme['tokens']) : ''),
+            \sprintf('Theme: direction=%s preset=%s mode=%s fonts=%s/%s radius=%s%s', $theme['style'] ?? 'none', $theme['preset'], $theme['mode'], $theme['fontHeading'], $theme['fontBody'], $theme['radius'], $theme['tokens'] ? ' tokens='.json_encode($theme['tokens']) : ''),
             'Navigation: '.(\is_array($doc['nav']['items']) ? json_encode($doc['nav']['items'], \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES) : 'automatic (all pages)'),
         ];
         if ([] === $doc['pages']) {

@@ -1,0 +1,15 @@
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+<div class="grid items-stretch gap-6 {{ props.plans|length >= 3 ? 'lg:grid-cols-3' : 'md:grid-cols-2' }} {{ props.plans|length == 2 ? 'mx-auto max-w-4xl' : '' }}">
+    {%- for plan in props.plans %}
+        <div class="cz-card relative flex flex-col p-8 {{ plan.highlighted|default(false) ? 'ring-2 ring-primary lg:-my-4 lg:py-12' : '' }}">
+            {%- if plan.highlighted|default(false) %}<span class="absolute -top-3 left-8 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">★</span>{% endif %}
+            <h3 class="cz-heading text-lg font-semibold">{{ plan.name }}</h3>
+            {%- if plan.description|default(false) %}<p class="mt-1 text-sm opacity-70">{{ plan.description }}</p>{% endif %}
+            <p class="mt-6 flex items-baseline gap-1"><span class="cz-display cz-price text-4xl">{{ plan.price }}</span>{% if plan.period|default(false) %}<span class="text-sm opacity-60">{{ plan.period }}</span>{% endif %}</p>
+            <ul class="mt-6 flex-1 space-y-3 text-sm">{% for f in plan.features|default([]) %}<li class="flex gap-2"><span class="text-primary">{{ cadenza_icon('check', 'size-4') }}</span>{{ f }}</li>{% endfor %}</ul>
+            {%- if plan.buttonLabel|default(false) %}<twig:Button as="a" href="{{ plan.buttonHref|default('#') }}" variant="{{ plan.highlighted|default(false) ? 'default' : 'outline' }}" class="cz-btn mt-8 h-11 w-full text-base">{{ plan.buttonLabel }}</twig:Button>{% endif %}
+        </div>
+    {%- endfor %}
+</div>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

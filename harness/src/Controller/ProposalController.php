@@ -35,6 +35,27 @@ final class ProposalController
         return null === $proposal ? new JsonResponse(['error' => 'Unknown proposal.'], 404) : $this->apply($proposal, $decision);
     }
 
+    /**
+     * The owner keeps one variant: the others are discarded, the kept one stays a sketch to approve or refine.
+     */
+    #[Route('/api/variants/{group}/pick', methods: ['POST'])]
+    public function pickVariant(string $group, \Symfony\Component\HttpFoundation\Request $request): JsonResponse
+    {
+        $keep = (string) ($request->toArray()['proposalId'] ?? '');
+        $kept = null;
+        foreach ($this->proposals->findBy(['variantGroup' => $group]) as $proposal) {
+            if ($proposal->getId() === $keep) {
+                $kept = $proposal;
+            } elseif ($this->proposalStateMachine->can($proposal, 'reject')) {
+                $this->site->discard($proposal->getDraftId());
+                $this->proposalStateMachine->apply($proposal, 'reject');
+            }
+        }
+        $this->em->flush();
+
+        return null === $kept ? new JsonResponse(['error' => 'Unknown variant.'], 404) : new JsonResponse(['ok' => true, 'proposal' => $kept->toArray()]);
+    }
+
     #[Route('/api/drafts/{draftId}/{decision}', requirements: ['draftId' => '\d+', 'decision' => 'approve|reject'], methods: ['POST'])]
     public function decideDraft(int $draftId, string $decision): JsonResponse
     {

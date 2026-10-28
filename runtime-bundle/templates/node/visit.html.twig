@@ -1,0 +1,23 @@
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+<div class="grid items-stretch gap-10 {{ props.image ? 'md:grid-cols-2' : '' }}">
+    <div class="{{ props.image ? '' : 'mx-auto max-w-3xl w-full' }}">
+        {%- if props.eyebrow %}<p class="cz-eyebrow mb-4">{{ props.eyebrow }}</p>{% endif %}
+        {%- if props.title %}<h2 class="cz-display text-3xl md:text-5xl">{{ props.title }}</h2>{% endif %}
+        {%- if props.intro %}<p class="cz-lead mt-4 text-lg opacity-75">{{ props.intro|nl2br }}</p>{% endif %}
+        <div class="mt-10 grid gap-8 sm:grid-cols-2">
+            <div class="space-y-4">
+                {%- if props.address %}<div class="flex gap-3">{{ cadenza_icon('map-pin', 'size-5 text-primary shrink-0 mt-0.5') }}<span>{{ props.address|nl2br }}</span></div>
+                <a href="https://www.openstreetmap.org/search?query={{ props.address|url_encode }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline">{{ cadenza_icon('map', 'size-4') }} Mapa / Map ↗</a>{% endif %}
+                {%- if props.phone %}<div class="flex gap-3">{{ cadenza_icon('phone', 'size-5 text-primary shrink-0') }}<a class="hover:underline" href="tel:{{ props.phone|replace({' ': ''}) }}">{{ props.phone }}</a></div>{% endif %}
+                {%- if props.email %}<div class="flex gap-3">{{ cadenza_icon('mail', 'size-5 text-primary shrink-0') }}<a class="hover:underline" href="mailto:{{ props.email }}">{{ props.email }}</a></div>{% endif %}
+            </div>
+            {%- if props.hours is not empty %}
+                <dl class="cz-card space-y-2 p-5">
+                    {%- for row in props.hours %}<div class="flex justify-between gap-4"><dt class="opacity-70">{{ row.days }}</dt><dd class="cz-price font-medium">{{ row.time }}</dd></div>{% endfor %}
+                </dl>
+            {%- endif %}
+        </div>
+    </div>
+    {%- if props.image %}<img src="{{ props.image }}" alt="" loading="lazy" class="cz-img h-full min-h-72 w-full object-cover">{% endif %}
+</div>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

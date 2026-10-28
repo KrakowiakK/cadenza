@@ -14,6 +14,21 @@ final class Theme
 
     public const FONTS = ['Inter', 'DM Sans', 'Outfit', 'Poppins', 'Nunito', 'Space Grotesk', 'Playfair Display', 'Fraunces', 'Lora', 'Merriweather', 'Libre Baskerville', 'Cormorant Garamond', 'Caveat', 'JetBrains Mono'];
 
+    /**
+     * Design directions: one decision that sets the character of the whole site — palette, type, shape and the
+     * treatment of headings, cards, sections and motion (see cadenza.css, [data-cz-style]).
+     *
+     * @var array<string, array{label: string, preset: string, fontHeading: string, fontBody: string, radius: string}>
+     */
+    public const DIRECTIONS = [
+        'minimal' => ['label' => 'Minimal — calm, lots of white space, thin lines, nothing loud', 'preset' => 'neutral', 'fontHeading' => 'Inter', 'fontBody' => 'Inter', 'radius' => 'md'],
+        'editorial' => ['label' => 'Editorial — magazine feel, large serif headlines, hairline rules, flat cards', 'preset' => 'editorial', 'fontHeading' => 'Fraunces', 'fontBody' => 'Inter', 'radius' => 'none'],
+        'warm' => ['label' => 'Warm craft — soft rounded shapes, cream tones, gentle shadows (cafés, bakeries, crafts)', 'preset' => 'warm', 'fontHeading' => 'Fraunces', 'fontBody' => 'DM Sans', 'radius' => 'lg'],
+        'bold' => ['label' => 'Bold — big uppercase headlines, strong contrast bands, pill buttons (events, sport, music)', 'preset' => 'midnight', 'fontHeading' => 'Space Grotesk', 'fontBody' => 'Inter', 'radius' => 'full'],
+        'elegant' => ['label' => 'Elegant — refined serif, light weights, wide letter spacing, centred (weddings, beauty, hotels)', 'preset' => 'rose', 'fontHeading' => 'Cormorant Garamond', 'fontBody' => 'Lora', 'radius' => 'none'],
+        'fresh' => ['label' => 'Fresh — friendly rounded type, colour accents, playful cards (kids, education, outdoors)', 'preset' => 'ocean', 'fontHeading' => 'Outfit', 'fontBody' => 'Nunito', 'radius' => 'lg'],
+    ];
+
     public const RADII = ['none' => '0rem', 'sm' => '0.3rem', 'md' => '0.625rem', 'lg' => '1rem', 'full' => '1.5rem'];
 
     /** @var array<string, array{label: string, light: array<string, string>, dark: array<string, string>}> */
@@ -71,6 +86,7 @@ final class Theme
         $vars['--radius'] = self::RADII[$theme['radius'] ?? 'md'] ?? self::RADII['md'];
         $vars['--cz-font-heading'] = '"'.($theme['fontHeading'] ?? 'Inter').'", ui-sans-serif, system-ui, sans-serif';
         $vars['--cz-font-body'] = '"'.($theme['fontBody'] ?? 'Inter').'", ui-sans-serif, system-ui, sans-serif';
+        $vars['--cz-font-heading-serif'] = \in_array($theme['fontHeading'] ?? 'Inter', ['Playfair Display', 'Fraunces', 'Lora', 'Merriweather', 'Libre Baskerville', 'Cormorant Garamond'], true) ? '1' : '0';
 
         return $vars;
     }
@@ -83,7 +99,7 @@ final class Theme
         $families = array_unique([$theme['fontHeading'] ?? 'Inter', $theme['fontBody'] ?? 'Inter']);
 
         return 'https://fonts.googleapis.com/css2?'.implode('&', array_map(
-            static fn (string $f): string => 'family='.str_replace(' ', '+', $f).':wght@400;500;600;700',
+            static fn (string $f): string => 'family='.str_replace(' ', '+', $f).':ital,wght@0,300;0,400;0,500;0,600;0,700;1,400',
             $families,
         )).'&display=swap';
     }

@@ -50,7 +50,7 @@ final class ToolPolicyListener
 
             return;
         }
-        if ('propose_changes' === $name) {
+        if (\in_array($name, ['propose_changes', 'propose_variants'], true)) {
             $reason = match (true) {
                 $this->waitingForOwner => 'Wait: the owner is sending photos / importing content. Do not build anything this turn; you will get a message when it is done. Reply briefly now.',
                 ++$this->proposalAttempts > self::PROPOSAL_ATTEMPTS => 'Too many attempts this turn. Stop, and tell the owner in one sentence what you could not do.',

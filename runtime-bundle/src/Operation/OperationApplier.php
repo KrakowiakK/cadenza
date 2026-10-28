@@ -240,6 +240,10 @@ final class OperationApplier
     private function themeUpdate(array $doc, array $op): array
     {
         $theme = $doc['theme'];
+        if (isset($op['direction'])) {
+            $direction = Theme::DIRECTIONS[$op['direction']] ?? throw new OperationException(\sprintf('unknown direction "%s"; directions: %s.', $op['direction'], implode(', ', array_keys(Theme::DIRECTIONS))));
+            $theme = ['style' => $op['direction'], 'preset' => $direction['preset'], 'mode' => $theme['mode'] ?? 'light', 'tokens' => [], 'fontHeading' => $direction['fontHeading'], 'fontBody' => $direction['fontBody'], 'radius' => $direction['radius']];
+        }
         if (isset($op['preset'])) {
             if (!isset(Theme::PRESETS[$op['preset']])) {
                 throw new OperationException(\sprintf('unknown preset "%s"; presets: %s.', $op['preset'], implode(', ', array_keys(Theme::PRESETS))));

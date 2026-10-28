@@ -23,12 +23,14 @@ final class CoreNodeTypes implements NodeTypeProviderInterface
             'gap' => ['type' => 'enum', 'values' => ['sm', 'md', 'lg'], 'default' => 'md'],
         ], ['children']);
 
-        yield new NodeType('hero', 'Hero', 'Big opening block of a page: title, subtitle, optional image and call-to-action buttons in the "actions" slot.', 'layout', [
+        yield new NodeType('hero', 'Hero', 'Big opening of a page: title, subtitle and call-to-action buttons in the "actions" slot. Variants: image (photo behind the text), split (text + photo side by side), collage (text + up to 3 photos), typographic (large text, no photo).', 'pattern', [
+            'variant' => ['type' => 'enum', 'values' => ['image', 'split', 'collage', 'typographic'], 'default' => null],
             'eyebrow' => ['type' => 'string', 'default' => null, 'description' => 'small text above the title'],
             'title' => ['type' => 'string', 'required' => true],
             'subtitle' => ['type' => 'text', 'default' => null],
             'image' => ['type' => 'image', 'default' => null],
-            'imagePosition' => ['type' => 'enum', 'values' => ['background', 'right', 'none'], 'default' => 'background'],
+            'images' => ['type' => 'list', 'of' => 'image', 'default' => [], 'description' => 'for the collage variant'],
+            'imagePosition' => ['type' => 'enum', 'values' => ['background', 'right', 'none'], 'default' => 'background', 'description' => 'legacy; prefer variant'],
             'align' => ['type' => 'enum', 'values' => ['start', 'center'], 'default' => 'center'],
             'height' => ['type' => 'enum', 'values' => ['sm', 'md', 'lg', 'screen'], 'default' => 'md'],
         ], ['actions']);

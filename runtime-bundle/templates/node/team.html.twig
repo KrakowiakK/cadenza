@@ -1,0 +1,14 @@
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+<div class="grid gap-10 sm:grid-cols-2 {{ props.people|length >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3' }}">
+    {%- for p in props.people %}
+        <div class="text-center">
+            {%- if p.photo|default(false) %}<img src="{{ p.photo }}" alt="{{ p.name }}" loading="lazy" class="cz-img mx-auto aspect-square w-full max-w-60 object-cover">
+            {%- else %}<div class="cz-img mx-auto flex aspect-square w-full max-w-60 items-center justify-center bg-muted text-4xl font-semibold text-muted-foreground">{{ p.name|first }}</div>{% endif %}
+            <h3 class="cz-heading mt-5 text-lg font-semibold">{{ p.name }}</h3>
+            {%- if p.role|default(false) %}<p class="text-sm text-primary">{{ p.role }}</p>{% endif %}
+            {%- if p.bio|default(false) %}<p class="mt-2 text-sm opacity-70">{{ p.bio }}</p>{% endif %}
+        </div>
+    {%- endfor %}
+</div>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}
