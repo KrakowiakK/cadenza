@@ -12,6 +12,7 @@ const I18N = {
         idle: 'Ready', thinking: 'Thinking', working: 'Working', waiting: 'Waiting for you',
         hello: 'Hi! I am Cadenza. Tell me what your site should be — or point at anything on the page and tell me what to change.',
         suggestions: ['A website for my café with a menu and opening hours', 'A portfolio for my travel photos', 'A page that explains photosynthesis for high school'],
+        suggestionsSite: ['How does my site look on a phone?', 'What is waiting for my approval?', 'Add a little game for my visitors'],
         showSketch: 'Show sketch', approve: 'Approve', reject: 'Reject', revise: 'Ask for changes',
         approved: 'Published', rejected: 'Rejected', recordsTitle: 'Entries waiting', otherSketches: 'Sketches from earlier conversations', more: 'more', recordNew: 'new', recordChanged: 'changed', recordRemoved: 'to remove', pending: 'Waiting for your decision', sketch: 'Sketch',
         added: 'added', changed: 'changed', removed: 'removed', pages: 'pages', themeChanged: 'theme', siteChanged: 'site',
@@ -43,6 +44,7 @@ const I18N = {
         idle: 'Gotowa', thinking: 'Myślę', working: 'Pracuję', waiting: 'Czekam na Ciebie',
         hello: 'Cześć! Jestem Cadenza. Opowiedz, jaka ma być Twoja strona — albo wskaż coś na stronie i powiedz, co zmienić.',
         suggestions: ['Strona mojej kawiarni z menu i godzinami otwarcia', 'Portfolio moich zdjęć z podróży', 'Strona, która wytłumaczy fotosyntezę na poziomie matury'],
+        suggestionsSite: ['Jak moja strona wygląda na telefonie?', 'Co czeka na moje zatwierdzenie?', 'Dodaj małą grę dla odwiedzających'],
         showSketch: 'Pokaż szkic', approve: 'Zatwierdź', reject: 'Odrzuć', revise: 'Popraw',
         approved: 'Opublikowano', rejected: 'Odrzucono', recordsTitle: 'Wpisy do zatwierdzenia', otherSketches: 'Szkice z wcześniejszych rozmów', more: 'więcej', recordNew: 'nowy', recordChanged: 'zmiana', recordRemoved: 'do usunięcia', pending: 'Czeka na Twoją decyzję', sketch: 'Szkic',
         added: 'nowe', changed: 'zmienione', removed: 'usunięte', pages: 'strony', themeChanged: 'motyw', siteChanged: 'ustawienia strony',
@@ -383,7 +385,7 @@ class Studio {
         const turn = this.addAssistantText(t('hello'));
         const list = document.createElement('div');
         list.className = 'flex flex-col gap-1.5';
-        list.innerHTML = t('suggestions').map((s) => `<button type="button" class="rounded-xl border border-border px-3 py-2 text-left text-[13px] hover:bg-muted">${escapeHtml(s)}</button>`).join('');
+        list.innerHTML = t(this.root.dataset.hasPages === '1' ? 'suggestionsSite' : 'suggestions').map((s) => `<button type="button" class="rounded-xl border border-border px-3 py-2 text-left text-[13px] hover:bg-muted">${escapeHtml(s)}</button>`).join('');
         list.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => this.send(b.textContent)));
         turn.part('cards').append(list);
     }
@@ -794,7 +796,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         box = document.createElement('div');
         box.dataset.czPhoneView = '';
         box.className = 'cz-ui fixed bottom-4 left-4 z-[60] flex flex-col items-center gap-2';
-        box.innerHTML = `<div class="rounded-[2.2rem] border-[10px] border-neutral-900 bg-neutral-900 shadow-2xl"><iframe title="${escapeHtml(t('phoneView'))}" class="block rounded-[1.5rem] bg-white" style="width:390px;height:min(760px,calc(100vh - 6rem))"></iframe></div>`
+        box.innerHTML = `<div style="border:10px solid #171717;border-radius:2.4rem;background:#171717;box-shadow:0 30px 70px -20px rgba(0,0,0,.55)"><iframe title="${escapeHtml(t('phoneView'))}" style="display:block;width:390px;max-width:calc(100vw - 3rem);height:min(760px,calc(100vh - 6rem));border:0;border-radius:1.7rem;background:#fff"></iframe></div>`
             + `<button type="button" class="flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs shadow">${icon('x', 'size-3.5')}${escapeHtml(t('hide'))}</button>`;
         box.querySelector('iframe').src = url.pathname + url.search;
         box.querySelector('button').addEventListener('click', () => this.phoneView(false));

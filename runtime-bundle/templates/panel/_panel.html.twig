@@ -1,2 +1,2 @@
 {# The owner's studio: built once by panel.js and kept across Turbo navigations. #}
-<div id="cz-panel" class="cz-ui" data-turbo-permanent data-state="closed" data-site-name="{{ cadenza_state().document.name }}"></div>
+<div id="cz-panel" class="cz-ui" data-turbo-permanent data-state="closed" data-site-name="{{ cadenza_state().document.name }}" data-has-pages="{{ cadenza_state().document.pages|default([])|length > 0 ? 1 : 0 }}"></div>
