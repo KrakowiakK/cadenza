@@ -22,6 +22,11 @@ final class PropValidator
         $normalised = [];
 
         foreach ($props as $name => $value) {
+            // Any block can be hidden for a while: visitors do not see it, the owner sees it faded.
+            if ('hidden' === $name && !isset($type->props['hidden'])) {
+                $normalised['hidden'] = true === $value || 'true' === $value || 1 === $value ? true : null;
+                continue;
+            }
             if (!isset($type->props[$name])) {
                 $errors[] = \sprintf('%s has no prop "%s" (props: %s).', $type->name, $name, implode(', ', array_keys($type->props)) ?: 'none');
                 continue;

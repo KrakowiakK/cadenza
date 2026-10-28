@@ -193,6 +193,10 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
             return \sprintf('<div class="cz-missing">Unknown node type “%s”</div>', htmlspecialchars($node['type']));
         }
         $type = $this->catalog->get($node['type']);
+        $hidden = true === ($node['props']['hidden'] ?? null) && !$removed;
+        if ($hidden && !$this->state->owner) {
+            return '';
+        }
         $node['__page'] = $page;
         $props = self::complete($type->props, array_merge($type->defaults(), $node['props'] ?? []));
 
@@ -216,6 +220,11 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         // Patterns and sections bring their own width and spacing; a plain block placed directly on the page gets them here.
         if ($topLevel && !\in_array($type->category, ['pattern', 'meta'], true) && 'section' !== $type->name) {
             $inner = '<div class="mx-auto w-full max-w-6xl px-6 py-6 md:py-8">'.$inner.'</div>';
+        }
+
+        if ($hidden) {
+            $inner = \sprintf('<div class="cz-ui pointer-events-none relative z-10 mx-auto -mb-4 mt-4 w-fit rounded-full bg-foreground px-3 py-1 text-xs font-medium text-background">%s</div><div style="opacity:.4;filter:grayscale(.6)">%s</div>',
+                'pl' === $this->state->language() ? 'Ukryte — goście tego nie widzą' : 'Hidden — visitors do not see this', $inner);
         }
 
         return \sprintf(

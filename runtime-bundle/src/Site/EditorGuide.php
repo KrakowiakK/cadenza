@@ -44,6 +44,7 @@ final class EditorGuide
             - {"op": "theme.update", "preset": "warm", "mode": "light", "fontHeading": "Fraunces", "fontBody": "Inter", "radius": "lg", "tokens": {"primary": "#b45309"}}
             - {"op": "site.update", "name": "Café Aroma", "tagline": "...", "language": "pl", "announcement": {"text": "Closed on Monday", "href": null, "until": "2027-05-01"} or null, "footer": "...", "nav": [{"label": "Menu", "href": "/menu"}] or null for automatic}
             - {"op": "site.restore", "version": 14}   (the whole site as it was in published version 14 — to undo; the history is in site_overview)
+            - {"op": "node.update", "id": "nab12c", "props": {"hidden": true}}   (any block: hide it for a while, visitors do not see it; false shows it again)
 
             How to compose beautiful pages:
             - First choose a design direction (theme.update {"direction": …}) that fits the business and mood.

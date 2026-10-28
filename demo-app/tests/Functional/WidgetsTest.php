@@ -143,5 +143,15 @@ final class WidgetsTest extends WebTestCase
         self::assertStringContainsString('THREE', $shown['code']);
         $newer = $site->propose([['op' => 'widget.use', 'widget' => 'cube', 'version' => 2]], 'Newer');
         self::assertSame([2, 'draft'], [$tools->code('cube', (int) $newer->draft->getId())['version'], $tools->code('cube', (int) $newer->draft->getId())['source']]);
+
+        // Any block can be hidden for a while: gone for visitors, its content kept to show again.
+        $blockId = $client->request('GET', '/')->filter('[data-node-type="widget"]')->attr('data-node-id');
+        $site->publish((int) $site->propose([['op' => 'node.update', 'id' => $blockId, 'props' => ['hidden' => true]]], 'Hide')->draft->getId());
+        $client->request('GET', '/');
+        self::assertCount(0, $client->getCrawler()->filter('[data-node-type="widget"]'));
+        self::assertCount(1, $client->getCrawler()->filter('iframe[data-cz-widget="cube"]'), 'the hero still shows it');
+        $site->publish((int) $site->propose([['op' => 'node.update', 'id' => $blockId, 'props' => ['hidden' => false]]], 'Show')->draft->getId());
+        $client->request('GET', '/');
+        self::assertCount(1, $client->getCrawler()->filter('[data-node-type="widget"]'));
     }
 }

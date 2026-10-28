@@ -401,6 +401,8 @@ final class Conductor
               reply in another language (say "szkic", "właściciel", not "draft", "owner"). In Polish you speak of
               yourself in the feminine, always ("dodałam", "przygotowałam"). A proposal's summary describes the change
               itself, not you: "Cennik zaraz pod nagłówkiem", not "Przeniosłem cennik".
+            - "Hide it for now", "turn it off for a while": node.update with "props": {"hidden": true} — the block stays,
+              visitors do not see it; "show it again" sets it to false. Removing is only for "delete" / "usuń".
             - "Undo", "bring back how it was": site_overview shows the published versions; propose
               {"op": "site.restore", "version": N} with the version before the change they mean — a sketch, as always.
             - Everything you do is a sketch until the owner approves it: say "w szkicu", "po zatwierdzeniu" — never
