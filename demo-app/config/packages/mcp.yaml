@@ -1,0 +1,16 @@
+mcp:
+    servers:
+        # What any agent may do: read the site and propose drafts (sketches).
+        agent:
+            name: 'cadenza-site'
+            instructions: 'Read the site and propose changes as drafts. Drafts become live only when the owner approves them.'
+            http:
+                path: /_cadenza/mcp/agent
+            registry: ['Cadenza\Runtime\Mcp\Agent\']
+        # Owner decisions, used by the Cadenza harness after the owner approved in the panel.
+        control:
+            name: 'cadenza-site-control'
+            http:
+                path: /_cadenza/mcp/control
+            registry:
+                tools: ['Cadenza\Runtime\Mcp\Control\']

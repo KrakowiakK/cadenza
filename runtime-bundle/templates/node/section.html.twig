@@ -1,0 +1,13 @@
+{%- set widths = {narrow: 'max-w-2xl', normal: 'max-w-5xl', wide: 'max-w-7xl', full: 'max-w-none'} -%}
+{%- set paddings = {none: 'py-0', sm: 'py-6', md: 'py-10', lg: 'py-16', xl: 'py-24'} -%}
+{%- set backgrounds = {default: '', muted: 'bg-muted', primary: 'bg-primary text-primary-foreground', secondary: 'bg-secondary text-secondary-foreground', accent: 'bg-accent text-accent-foreground', card: 'bg-card text-card-foreground', image: 'relative bg-cover bg-center text-white'} -%}
+{%- set layouts = {stack: 'flex flex-col', 'columns-2': 'grid md:grid-cols-2', 'columns-3': 'grid md:grid-cols-3', 'grid-2': 'grid sm:grid-cols-2', 'grid-3': 'grid sm:grid-cols-2 lg:grid-cols-3', 'grid-4': 'grid sm:grid-cols-2 lg:grid-cols-4', split: 'grid md:grid-cols-2 items-center'} -%}
+{%- set gaps = {sm: 'gap-3', md: 'gap-6', lg: 'gap-10'} -%}
+<section class="{{ paddings[props.padding] }} {{ backgrounds[props.background] }}"
+    {%- if props.background == 'image' and props.backgroundImage %} style="background-image:url('{{ props.backgroundImage|e('css') }}')"{% endif %}>
+    {%- if props.background == 'image' %}<div class="absolute inset-0 bg-black/50"></div>{% endif %}
+    <div class="relative mx-auto px-6 {{ widths[props.width] }} {{ layouts[props.layout] }} {{ gaps[props.gap] }} {{ props.align == 'center' ? 'text-center justify-items-center items-center' : '' }}">
+        {{ cadenza_slot(node, 'children') }}
+        {%- if node.slots.children is empty %}<div class="cz-empty-slot">Empty section</div>{% endif -%}
+    </div>
+</section>

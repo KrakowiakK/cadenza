@@ -1,0 +1,5 @@
+<div class="rounded-2xl bg-primary px-8 py-14 text-center text-primary-foreground md:px-16">
+    <h2 class="cz-heading text-3xl font-bold md:text-4xl">{{ props.title }}</h2>
+    {%- if props.text %}<p class="mx-auto mt-4 max-w-2xl text-lg opacity-85">{{ props.text|nl2br }}</p>{% endif %}
+    {%- if props.buttonLabel %}<div class="mt-8"><twig:Button as="a" href="{{ props.buttonHref }}" variant="secondary" class="h-11 px-6 text-base">{{ props.buttonLabel }}</twig:Button></div>{% endif %}
+</div>

@@ -1,0 +1,8 @@
+{% extends '@CadenzaRuntime/layout.html.twig' %}
+{% block main %}
+    {%- if page.nodes is empty and not cadenza_state().isSketch %}
+        {% include '@CadenzaRuntime/_blank.html.twig' with {headline: page.title} %}
+    {%- else %}
+        {{ cadenza_nodes(page) }}
+    {%- endif %}
+{% endblock %}

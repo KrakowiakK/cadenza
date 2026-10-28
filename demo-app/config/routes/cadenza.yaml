@@ -1,0 +1,3 @@
+cadenza_runtime:
+    resource: '@CadenzaRuntimeBundle/src/Controller/'
+    type: attribute

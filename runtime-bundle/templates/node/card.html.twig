@@ -1,0 +1,14 @@
+{%- set tag = props.href ? 'a' : 'div' -%}
+<{{ tag }}{% if props.href %} href="{{ props.href }}"{% endif %} class="block h-full {{ props.href ? 'transition hover:-translate-y-1' : '' }}">
+<twig:Card class="h-full">
+    {%- if props.image %}<img src="{{ props.image }}" alt="" class="aspect-[4/3] w-full object-cover">{% endif %}
+    {%- if props.title or props.description or props.icon %}
+    <twig:Card:Header>
+        {%- if props.icon %}<div class="mb-2 inline-flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">{{ cadenza_icon(props.icon, 'size-5') }}</div>{% endif %}
+        {%- if props.title %}<twig:Card:Title class="cz-heading text-lg">{{ props.title }}</twig:Card:Title>{% endif %}
+        {%- if props.description %}<twig:Card:Description>{{ props.description|nl2br }}</twig:Card:Description>{% endif %}
+    </twig:Card:Header>
+    {%- endif %}
+    {%- if node.slots.children is not empty %}<twig:Card:Content class="flex flex-col gap-3">{{ cadenza_slot(node, 'children') }}</twig:Card:Content>{% endif %}
+</twig:Card>
+</{{ tag }}>

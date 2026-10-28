@@ -1,0 +1,4 @@
+{%- set sizes = {sm: 'text-sm', md: 'text-base', lg: 'text-lg md:text-xl'} -%}
+<div class="cz-prose {{ sizes[props.size] }} {{ props.align == 'center' ? 'text-center mx-auto' : '' }} max-w-3xl leading-relaxed">
+    {{ props.markdown|markdown_to_html }}
+</div>

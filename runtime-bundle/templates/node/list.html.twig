@@ -1,0 +1,5 @@
+{%- if props.style == 'numbered' %}<ol class="list-decimal space-y-2 pl-6">{% else %}<ul class="space-y-2 {{ props.style == 'bullet' ? 'list-disc pl-6' : '' }}">{% endif %}
+    {%- for item in props.items %}
+        <li class="{{ props.style == 'check' ? 'flex gap-3' : '' }}">{% if props.style == 'check' %}<span class="mt-0.5 text-primary">{{ cadenza_icon('check', 'size-5') }}</span>{% endif %}<span>{{ item }}</span></li>
+    {%- endfor %}
+{%- if props.style == 'numbered' %}</ol>{% else %}</ul>{% endif %}

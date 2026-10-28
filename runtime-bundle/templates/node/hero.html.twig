@@ -1,0 +1,21 @@
+{%- set heights = {sm: 'py-16', md: 'py-24 md:py-32', lg: 'py-32 md:py-44', screen: 'min-h-[85vh] flex items-center'} -%}
+{%- set bg = props.image and props.imagePosition == 'background' -%}
+<section class="relative overflow-hidden {{ heights[props.height] }} {{ bg ? 'text-white' : '' }}">
+    {%- if bg %}
+        <img src="{{ props.image }}" alt="" class="absolute inset-0 h-full w-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/70"></div>
+    {%- endif %}
+    <div class="relative mx-auto w-full max-w-6xl px-6 {{ props.image and props.imagePosition == 'right' ? 'grid items-center gap-12 md:grid-cols-2' : '' }}">
+        <div class="{{ props.align == 'center' and not (props.image and props.imagePosition == 'right') ? 'mx-auto max-w-3xl text-center' : 'max-w-2xl' }}">
+            {%- if props.eyebrow %}<p class="mb-4 text-sm font-semibold uppercase tracking-[0.2em] {{ bg ? 'text-white/80' : 'text-primary' }}">{{ props.eyebrow }}</p>{% endif %}
+            <h1 class="cz-heading text-4xl font-bold leading-tight tracking-tight md:text-6xl">{{ props.title }}</h1>
+            {%- if props.subtitle %}<p class="mt-6 text-lg md:text-xl {{ bg ? 'text-white/85' : 'text-muted-foreground' }}">{{ props.subtitle|nl2br }}</p>{% endif %}
+            {%- if node.slots.actions is not empty %}
+                <div class="mt-10 flex flex-wrap gap-3 {{ props.align == 'center' and not (props.image and props.imagePosition == 'right') ? 'justify-center' : '' }}">{{ cadenza_slot(node, 'actions') }}</div>
+            {%- endif %}
+        </div>
+        {%- if props.image and props.imagePosition == 'right' %}
+            <img src="{{ props.image }}" alt="" class="aspect-[4/3] w-full rounded-2xl object-cover shadow-xl">
+        {%- endif %}
+    </div>
+</section>

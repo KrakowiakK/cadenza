@@ -1,0 +1,5 @@
+{%- set aspects = {auto: '', square: 'aspect-square', '4/3': 'aspect-[4/3]', '16/9': 'aspect-video', '3/4': 'aspect-[3/4]', '21/9': 'aspect-[21/9]'} -%}
+<figure>
+    <img src="{{ props.src }}" alt="{{ props.alt }}" loading="lazy" class="w-full object-cover {{ aspects[props.aspect] }} {{ props.rounded ? 'rounded-xl' : '' }}">
+    {%- if props.caption %}<figcaption class="mt-2 text-sm text-muted-foreground">{{ props.caption }}</figcaption>{% endif %}
+</figure>

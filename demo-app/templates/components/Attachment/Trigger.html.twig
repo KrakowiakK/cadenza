@@ -1,0 +1,14 @@
+{%- props
+    ## 'button'|'a' The HTML tag to render; use `a` when the trigger is a link.
+    as = 'button'
+-%}
+<{{ as }}
+    data-slot="{{ attributes.render('data-slot')|default('attachment-trigger') }}"
+    {{ attributes.defaults({
+        class: 'absolute inset-0 z-10 outline-none'|tailwind_classes,
+        type: as == 'button' ? 'button' : false,
+    }) }}
+>
+    {##- The optional trigger label, usually left empty as the trigger covers the whole attachment. -#}
+    {%- block content %}{% endblock -%}
+</{{ as }}>

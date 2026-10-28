@@ -1,0 +1,9 @@
+ai:
+    agent:
+        studio:
+            platform: 'ai.platform.generic.default'
+            model: '%env(CADENZA_LLM_MODEL)%'
+            max_tool_calls: 24
+            tools:
+                - 'App\Agent\Tool\SiteTools'
+                - 'App\Agent\Tool\UiTools'

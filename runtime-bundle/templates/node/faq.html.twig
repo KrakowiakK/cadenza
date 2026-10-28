@@ -1,0 +1,8 @@
+<div class="mx-auto w-full max-w-3xl divide-y divide-border rounded-xl ring-1 ring-foreground/10">
+    {%- for item in props.items %}
+        <details class="group px-6 py-4">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">{{ item.question }}<span class="transition group-open:rotate-45">{{ cadenza_icon('plus', 'size-4') }}</span></summary>
+            <div class="cz-prose mt-3 text-muted-foreground">{{ item.answer|markdown_to_html }}</div>
+        </details>
+    {%- endfor %}
+</div>

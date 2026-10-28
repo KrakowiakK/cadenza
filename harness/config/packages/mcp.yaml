@@ -1,0 +1,19 @@
+mcp:
+    # The harness is an MCP client of the user's application: it reads the site and proposes drafts through the
+    # "agent" server, and publishes only after the owner approved, through the "control" server.
+    clients:
+        app:
+            client_info:
+                name: 'cadenza-harness'
+                version: '0.1.0'
+            servers:
+                site:
+                    transport: http
+                    url: '%env(CADENZA_APP_URL)%/_cadenza/mcp/agent'
+                    headers:
+                        X-Cadenza-Token: '%env(CADENZA_TOKEN)%'
+                control:
+                    transport: http
+                    url: '%env(CADENZA_APP_URL)%/_cadenza/mcp/control'
+                    headers:
+                        X-Cadenza-Token: '%env(CADENZA_TOKEN)%'

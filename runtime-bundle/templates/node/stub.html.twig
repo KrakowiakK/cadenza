@@ -1,0 +1,6 @@
+{%- set heights = {sm: 'min-h-24', md: 'min-h-44', lg: 'min-h-72'} -%}
+<div class="cz-stub relative flex {{ heights[props.height] }} flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-dashed border-border bg-muted/40 p-6 text-center">
+    <div class="cz-stub-shimmer absolute inset-0"></div>
+    <div class="relative flex items-center gap-2 font-semibold">{{ cadenza_icon('sparkles', 'size-4 text-primary') }}{{ props.label }}</div>
+    {%- if props.description %}<p class="relative max-w-md text-sm text-muted-foreground">{{ props.description }}</p>{% endif %}
+</div>

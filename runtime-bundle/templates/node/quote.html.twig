@@ -1,0 +1,9 @@
+<figure class="mx-auto max-w-3xl">
+    <blockquote class="cz-heading text-2xl leading-snug md:text-3xl">“{{ props.text }}”</blockquote>
+    {%- if props.author %}
+    <figcaption class="mt-6 flex items-center gap-3">
+        {%- if props.avatar %}<img src="{{ props.avatar }}" alt="" class="size-11 rounded-full object-cover">{% endif %}
+        <div><div class="font-semibold">{{ props.author }}</div>{% if props.role %}<div class="text-sm text-muted-foreground">{{ props.role }}</div>{% endif %}</div>
+    </figcaption>
+    {%- endif %}
+</figure>

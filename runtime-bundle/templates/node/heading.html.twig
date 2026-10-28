@@ -1,0 +1,5 @@
+{%- set sizes = {1: 'text-4xl md:text-5xl', 2: 'text-3xl md:text-4xl', 3: 'text-2xl', 4: 'text-xl'} -%}
+<div class="{{ props.align == 'center' ? 'text-center' : '' }}">
+    {%- if props.eyebrow %}<p class="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-primary">{{ props.eyebrow }}</p>{% endif %}
+    <h{{ props.level }} class="cz-heading {{ sizes[props.level] }} font-bold tracking-tight">{{ props.text }}</h{{ props.level }}>
+</div>

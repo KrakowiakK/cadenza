@@ -1,0 +1,5 @@
+{% extends '@CadenzaRuntime/layout.html.twig' %}
+{% block title %}{{ path }} · {{ cadenza_state().document.name }}{% endblock %}
+{% block main %}
+    {% include '@CadenzaRuntime/_blank.html.twig' with {headline: cadenza_state().document.pages is empty ? null : path, missing: cadenza_state().document.pages is not empty} %}
+{% endblock %}

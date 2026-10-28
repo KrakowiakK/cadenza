@@ -1,0 +1,10 @@
+{%- set cols = {2: 'sm:grid-cols-2', 3: 'sm:grid-cols-2 lg:grid-cols-3', 4: 'sm:grid-cols-2 lg:grid-cols-4'} -%}
+<div class="grid gap-6 {{ cols[props.columns] }}">
+    {%- for item in props.items %}
+        <div class="{{ props.style == 'cards' ? 'rounded-xl bg-card p-6 text-card-foreground ring-1 ring-foreground/10' : '' }}">
+            {%- if item.icon %}<div class="mb-4 inline-flex size-11 items-center justify-center rounded-lg bg-primary/10 text-primary">{{ cadenza_icon(item.icon, 'size-5') }}</div>{% endif %}
+            <h3 class="cz-heading text-lg font-semibold">{{ item.title }}</h3>
+            {%- if item.text %}<p class="mt-2 text-muted-foreground">{{ item.text|nl2br }}</p>{% endif %}
+        </div>
+    {%- endfor %}
+</div>

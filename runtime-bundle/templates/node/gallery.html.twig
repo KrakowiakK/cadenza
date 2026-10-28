@@ -1,0 +1,22 @@
+{%- set cols = {2: 'sm:grid-cols-2', 3: 'sm:grid-cols-2 lg:grid-cols-3', 4: 'sm:grid-cols-3 lg:grid-cols-4', 5: 'sm:grid-cols-3 lg:grid-cols-5'} -%}
+{%- set mcols = {2: 'sm:columns-2', 3: 'sm:columns-2 lg:columns-3', 4: 'sm:columns-3 lg:columns-4', 5: 'sm:columns-3 lg:columns-5'} -%}
+{%- set aspects = {auto: '', square: 'aspect-square', '4/3': 'aspect-[4/3]', '16/9': 'aspect-video', '3/4': 'aspect-[3/4]'} -%}
+{%- if props.images is empty %}
+    <div class="cz-empty-slot">No images yet</div>
+{%- elseif props.style == 'masonry' %}
+    <div class="columns-1 gap-4 {{ mcols[props.columns] }}">
+        {%- for image in props.images %}
+            <a href="{{ image.src }}" target="_blank" class="mb-4 block break-inside-avoid overflow-hidden rounded-xl"><img src="{{ image.src }}" alt="{{ image.alt|default('') }}" loading="lazy" class="w-full transition duration-500 hover:scale-105">
+            {%- if image.caption %}<span class="block px-1 pt-2 text-sm text-muted-foreground">{{ image.caption }}</span>{% endif %}</a>
+        {%- endfor %}
+    </div>
+{%- else %}
+    <div class="grid grid-cols-1 gap-4 {{ cols[props.columns] }}">
+        {%- for image in props.images %}
+            <a href="{{ image.src }}" target="_blank" class="group block overflow-hidden rounded-xl">
+                <img src="{{ image.src }}" alt="{{ image.alt|default('') }}" loading="lazy" class="w-full object-cover transition duration-500 group-hover:scale-105 {{ aspects[props.aspect] }}">
+                {%- if image.caption %}<span class="block px-1 pt-2 text-sm text-muted-foreground">{{ image.caption }}</span>{% endif %}
+            </a>
+        {%- endfor %}
+    </div>
+{%- endif %}

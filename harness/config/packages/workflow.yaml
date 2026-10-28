@@ -1,0 +1,29 @@
+framework:
+    workflows:
+        proposal:
+            type: state_machine
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: method
+                property: status
+            supports:
+                - App\Entity\Proposal
+            initial_marking: drafted
+            places: [drafted, sketched, applied, rejected, failed]
+            transitions:
+                sketch:
+                    from: drafted
+                    to: sketched
+                revise:
+                    from: sketched
+                    to: sketched
+                approve:
+                    from: sketched
+                    to: applied
+                reject:
+                    from: sketched
+                    to: rejected
+                fail:
+                    from: [drafted, sketched]
+                    to: failed

@@ -1,0 +1,12 @@
+<div class="grid gap-6 sm:grid-cols-2">
+    <div class="space-y-4">
+        {%- if props.address %}<div class="flex gap-3">{{ cadenza_icon('map-pin', 'size-5 text-primary shrink-0 mt-0.5') }}<span>{{ props.address|nl2br }}</span></div>{% endif %}
+        {%- if props.email %}<div class="flex gap-3">{{ cadenza_icon('mail', 'size-5 text-primary shrink-0') }}<a class="underline-offset-4 hover:underline" href="mailto:{{ props.email }}">{{ props.email }}</a></div>{% endif %}
+        {%- if props.phone %}<div class="flex gap-3">{{ cadenza_icon('phone', 'size-5 text-primary shrink-0') }}<a class="underline-offset-4 hover:underline" href="tel:{{ props.phone|replace({' ': ''}) }}">{{ props.phone }}</a></div>{% endif %}
+    </div>
+    {%- if props.hours is not empty %}
+    <dl class="space-y-2 rounded-xl bg-muted p-5">
+        {%- for row in props.hours %}<div class="flex justify-between gap-4"><dt class="text-muted-foreground">{{ row.days }}</dt><dd class="font-medium">{{ row.time }}</dd></div>{% endfor %}
+    </dl>
+    {%- endif %}
+</div>

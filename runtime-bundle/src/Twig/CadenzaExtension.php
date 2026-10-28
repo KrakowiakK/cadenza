@@ -1,0 +1,151 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Cadenza\Runtime\Twig;
+
+use Cadenza\Runtime\Catalog\Catalog;
+use Cadenza\Runtime\Site\Document;
+use Cadenza\Runtime\Theme\Theme;
+use Symfony\UX\Icons\IconRendererInterface;
+use Twig\Environment;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Twig\Extension\AbstractExtension;
+use Twig\Extension\GlobalsInterface;
+use Twig\Markup;
+use Twig\TwigFunction;
+
+final class CadenzaExtension extends AbstractExtension implements GlobalsInterface
+{
+    public function __construct(
+        private readonly Catalog $catalog,
+        private readonly RenderState $state,
+        #[Autowire('%cadenza.harness_url%')]
+        private readonly string $harnessUrl,
+        #[Autowire('%cadenza.token%')]
+        private readonly string $token,
+        private readonly ?IconRendererInterface $icons = null,
+    ) {
+    }
+
+    public function getGlobals(): array
+    {
+        return ['cadenza_harness_url' => $this->harnessUrl, 'cadenza_token' => $this->token];
+    }
+
+    public function getFunctions(): array
+    {
+        return [
+            new TwigFunction('cadenza_nodes', $this->renderNodes(...), ['needs_environment' => true, 'is_safe' => ['html']]),
+            new TwigFunction('cadenza_slot', $this->renderSlot(...), ['needs_environment' => true, 'is_safe' => ['html']]),
+            new TwigFunction('cadenza_theme_css', $this->themeCss(...), ['is_safe' => ['html']]),
+            new TwigFunction('cadenza_fonts_url', static fn (array $theme): string => Theme::googleFontsUrl($theme)),
+            new TwigFunction('cadenza_nav', static fn (array $doc): array => Document::navItems($doc)),
+            new TwigFunction('cadenza_state', fn (): RenderState => $this->state),
+            new TwigFunction('cadenza_icon', $this->icon(...), ['is_safe' => ['html']]),
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $page
+     */
+    public function renderNodes(Environment $twig, array $page): Markup
+    {
+        return $this->renderList($twig, $page['nodes'], $page['id']);
+    }
+
+    /**
+     * @param array<string, mixed> $node
+     */
+    public function renderSlot(Environment $twig, array $node, string $slot = 'children'): Markup
+    {
+        $page = $node['__page'] ?? '';
+
+        return $this->renderList($twig, $node['slots'][$slot] ?? [], $page.':'.$node['id'].'.'.$slot, $page, $node['__state'] ?? null);
+    }
+
+    /**
+     * Lucide icon by name; unknown names render nothing instead of failing the page.
+     */
+    public function icon(?string $name, string $class = 'size-4'): string
+    {
+        if (null === $this->icons || null === $name || !preg_match('/^[a-z0-9-]+(:[a-z0-9-]+)?$/', $name)) {
+            return '';
+        }
+        try {
+            return $this->icons->renderIcon(str_contains($name, ':') ? $name : 'lucide:'.$name, ['class' => $class, 'aria-hidden' => 'true']);
+        } catch (\Throwable) {
+            return '';
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $theme
+     */
+    public function themeCss(array $theme): string
+    {
+        $css = '';
+        foreach (Theme::cssVariables($theme) as $name => $value) {
+            $css .= $name.':'.$value.';';
+        }
+
+        return ':root:root{'.$css.'}';
+    }
+
+    /**
+     * @param list<array<string, mixed>> $nodes
+     */
+    private function renderList(Environment $twig, array $nodes, string $parentKey, ?string $page = null, ?string $inheritedState = null): Markup
+    {
+        $page ??= $parentKey;
+        $entries = array_map(static fn (array $n): array => ['node' => $n, 'removed' => false], $nodes);
+
+        // In a sketch, nodes the draft removes stay visible (faded) where they used to be.
+        if ($this->state->isSketch() && !$this->state->showBefore) {
+            foreach ($this->state->diff->removed as $removed) {
+                if ($removed['parent'] === $parentKey) {
+                    array_splice($entries, min($removed['index'], \count($entries)), 0, [['node' => $removed['node'], 'removed' => true]]);
+                }
+            }
+        }
+
+        $html = '';
+        foreach ($entries as $entry) {
+            $html .= $this->renderNode($twig, $entry['node'], $page, $entry['removed'], $inheritedState);
+        }
+
+        return new Markup($html, 'UTF-8');
+    }
+
+    /**
+     * @param array<string, mixed> $node
+     */
+    private function renderNode(Environment $twig, array $node, string $page, bool $removed, ?string $inheritedState = null): string
+    {
+        if (!$this->catalog->has($node['type'])) {
+            return \sprintf('<div class="cz-missing">Unknown node type “%s”</div>', htmlspecialchars($node['type']));
+        }
+        $type = $this->catalog->get($node['type']);
+        $node['__page'] = $page;
+        $props = array_merge($type->defaults(), $node['props'] ?? []);
+
+        $state = $removed ? 'removed' : $this->state->stateOf($node['id']);
+        // Inside an added or removed node, children carry the same state: mark only the outermost one.
+        $node['__state'] = $state ?? $inheritedState;
+        if (null !== $inheritedState && \in_array($inheritedState, ['added', 'removed', 'removing'], true)) {
+            $state = null;
+        }
+        $inner = $twig->render($type->template(), ['node' => $node, 'props' => $props, 'type' => $type]);
+
+        return \sprintf(
+            '<div class="cz-node%s" data-node-id="%s" data-node-type="%s" data-node-label="%s"%s style="view-transition-name:cz-%s">%s</div>',
+            null !== $state ? ' cz-'.$state : '',
+            htmlspecialchars($node['id']),
+            htmlspecialchars($node['type']),
+            htmlspecialchars($node['label'] ?? $type->label),
+            null !== $state ? ' data-cz-state="'.$state.'"' : '',
+            htmlspecialchars($node['id']).($removed ? '-gone' : ''),
+            $inner,
+        );
+    }
+}

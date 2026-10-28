@@ -1,0 +1,6 @@
+{%- set cols = {1: 'md:grid-cols-1', 2: 'md:grid-cols-2', 3: 'md:grid-cols-3', 4: 'md:grid-cols-4'} -%}
+<dl class="grid grid-cols-2 gap-8 {{ cols[min(max(props.items|length, 1), 4)] }}">
+    {%- for item in props.items %}
+        <div class="text-center"><dt class="cz-heading text-4xl font-bold text-primary">{{ item.value }}</dt><dd class="mt-1 text-muted-foreground">{{ item.label }}</dd></div>
+    {%- endfor %}
+</dl>
