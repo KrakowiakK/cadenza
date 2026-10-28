@@ -65,7 +65,8 @@ final class WidgetTools
             $this->turn->emit('status', ['text' => $withLabel ? $text.$label : $text]);
         };
         try {
-            $r = $this->workshop->build($name, $brief, $label, $shape, $this->turn->language, $status);
+            $sketch = $this->sketchShowing($name);
+            $r = $this->workshop->build($name, $brief, $label, $shape, $this->turn->language, $status, null, $sketch);
         } catch (\Throwable $e) {
             return 'Writing the code failed ('.$e->getMessage().'). Try again with a shorter brief.';
         }
@@ -73,7 +74,7 @@ final class WidgetTools
             return "The widget was not saved:\n- ".implode("\n- ", $r['errors'])."\nCall create_widget again with a brief that avoids this.";
         }
         $syntax = WidgetProgrammer::syntaxErrors($r['code']);
-        $sketch = ($r['existing'] ?? false) ? $this->sketchNewVersion($name, $label, $r['version']) : null;
+        $sketch = ($r['existing'] ?? false) ? $this->sketchNewVersion($name, $label, $r['version'], $sketch) : null;
 
         return \sprintf('Widget "%s" is ready (version %d, %d KB of code)%s%s.%s %s', $name, $r['version'], (int) ceil(\strlen($r['code']) / 1024),
             [] !== $syntax ? ' but its code may still have errors: '.implode('; ', $syntax) : '',
@@ -91,7 +92,32 @@ final class WidgetTools
      * A new version of a widget the site already shows waits in a sketch, like every other change: the live site keeps
      * the approved one. When a sketch of this conversation is placing the widget, that sketch gets the new version.
      */
-    private function sketchNewVersion(string $name, string $label, int $version): ?string
+    /**
+     * The newest open sketch of this conversation that shows this widget (it is being worked on there).
+     */
+    private function sketchShowing(string $name): ?int
+    {
+        if (null === $this->turn->conversation) {
+            return null;
+        }
+        $open = $this->openProposals->open($this->turn->conversation);
+        if ([] === $open) {
+            return null;
+        }
+        // Every sketch carries the live site's versions; one that works on this widget shows another version.
+        $shown = $this->site->widgetCode($name);
+        $live = 'live' === ($shown['source'] ?? null) ? (int) $shown['version'] : null;
+        foreach (array_reverse($open) as $proposal) {
+            $inSketch = $this->site->widgetCode($name, $proposal->getDraftId());
+            if ('draft' === ($inSketch['source'] ?? null) && (int) $inSketch['version'] !== $live) {
+                return $proposal->getDraftId();
+            }
+        }
+
+        return null;
+    }
+
+    private function sketchNewVersion(string $name, string $label, int $version, ?int $inSketch = null): ?string
     {
         $live = null;
         foreach ($this->site->widgets() as $widget) {
@@ -101,12 +127,13 @@ final class WidgetTools
         }
         $open = $this->openProposals->open($this->turn->conversation);
         $latest = [] !== $open ? end($open) : null;
-        if (null === $live && null === $latest) {
+        if (null === $live && null === $latest && null === $inSketch) {
             return null;
         }
         $pl = 'pl' === substr($this->turn->language, 0, 2);
-        $revise = null === $live ? $latest->getDraftId() : null;
-        $summary = null !== $revise ? $latest->getSummary() : ($pl ? 'Nowa wersja: ' : 'New version: ').$label;
+        // The sketch already working on this widget gets the new version; else one that places it; else a new one.
+        $revise = $inSketch ?? (null === $live ? $latest->getDraftId() : null);
+        $summary = null !== $revise ? ($this->openProposals->byDraft($revise)?->getSummary() ?? $label) : ($pl ? 'Nowa wersja: ' : 'New version: ').$label;
         $result = $this->proposals->propose($this->turn->conversation, [['op' => 'widget.use', 'widget' => $name, 'version' => $version]], $summary, $revise);
         if (null === $result['proposal']) {
             return 'The new version could not be put in a sketch: '.implode(' ', $result['errors']);

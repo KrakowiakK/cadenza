@@ -22,10 +22,12 @@ final class WidgetWorkshop
      *
      * @return array{ok: bool, errors: list<string>, version: int, shape: string, code: string, tested: bool, findings: ?string, notes: list<string>}
      */
-    public function build(string $name, string $brief, string $label, ?string $shape, string $language, \Closure $status, ?WidgetProgrammer $programmer = null): array
+    public function build(string $name, string $brief, string $label, ?string $shape, string $language, \Closure $status, ?WidgetProgrammer $programmer = null, ?int $draftId = null): array
     {
         $programmer ??= $this->programmer;
-        $current = $this->site->widgetCode($name);
+        // A change starts from what the owner sees: the version of the sketch being worked on, else the live one —
+        // never from a newer version waiting in another sketch.
+        $current = $this->site->widgetCode($name, $draftId);
         $existing = \is_string($current['code'] ?? null);
         // A change keeps the frame the widget was written for, unless a new one is asked for.
         $shape = isset(WidgetProgrammer::SHAPES[(string) $shape]) ? (string) $shape : (string) ($current['shape'] ?? 'wide');

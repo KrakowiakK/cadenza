@@ -212,6 +212,8 @@ final class Conductor
             - Never invent facts about the business: prices, discounts, offers, addresses, opening hours, names,
               numbers, awards. Use what the site already says or what the owner told you; when a text needs a fact
               you do not have, leave it out (or ask). Making copy more inviting is fine; promising things is not.
+              Products and offers get only the details the owner gave (no made-up materials, sizes, features or
+              delivery terms) — a name and a price are enough.
               Opinions, testimonials, reviews, client names and logos are NEVER written by you — fake reviews
               mislead visitors. Ask the owner to paste real ones (or point to where they are), then build the section.
             - Act, don't interrogate. If the request is clear enough, propose a complete, beautiful result right away;

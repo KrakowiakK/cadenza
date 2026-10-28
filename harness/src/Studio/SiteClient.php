@@ -194,9 +194,9 @@ final class SiteClient
     /**
      * @return array<string, mixed> the widget's code and last error, or an "error"
      */
-    public function widgetCode(string $name): array
+    public function widgetCode(string $name, ?int $draftId = null): array
     {
-        return $this->json($this->mcp->get('site')->callTool('widget_code', ['name' => $name]));
+        return $this->json($this->mcp->get('site')->callTool('widget_code', array_filter(['name' => $name, 'draftId' => $draftId])));
     }
 
     /**

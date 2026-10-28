@@ -19,6 +19,7 @@ final class WidgetTools
         private readonly Widgets $widgets,
         private readonly WidgetLibraries $libraries,
         private readonly \Cadenza\Runtime\Draft\SiteManager $site,
+        private readonly \Cadenza\Runtime\Repository\SiteVersionRepository $versions,
     ) {
     }
 
@@ -60,12 +61,23 @@ final class WidgetTools
     /**
      * @return array<string, mixed>
      */
-    #[McpTool(name: 'widget_code', description: 'The code of one widget, to change it.', annotations: new ToolAnnotations(readOnlyHint: true))]
-    public function code(string $name): array
+    #[McpTool(name: 'widget_code', description: 'The code of one widget, to change it: the version a sketch (draftId) shows, else the one the live site shows, else the latest. "source" says which.', annotations: new ToolAnnotations(readOnlyHint: true))]
+    public function code(string $name, ?int $draftId = null): array
     {
         $widget = $this->widgets->get($name);
+        if (null === $widget) {
+            return ['error' => 'No widget "'.$name.'".'];
+        }
+        $draft = null !== $draftId ? $this->versions->draft($draftId) : null;
+        $live = $this->site->document();
+        [$version, $source] = match (true) {
+            null !== $draft && isset($draft->getDocument()['widgets'][$name]) => [(int) $draft->getDocument()['widgets'][$name], 'draft'],
+            isset($live['widgets'][$name]) => [(int) $live['widgets'][$name], 'live'],
+            default => [$widget->getVersion(), 'latest'],
+        };
 
-        return null === $widget ? ['error' => 'No widget "'.$name.'".'] : ['name' => $name, 'description' => $widget->getDescription(), 'version' => $widget->getVersion(), 'shape' => $widget->getShape(), 'lastError' => $widget->getLastError(), 'code' => $widget->getCode()];
+        return ['name' => $name, 'description' => $widget->getDescription(), 'version' => $version, 'latest' => $widget->getVersion(), 'source' => $source, 'shape' => $widget->getShape(),
+            'lastError' => $widget->getLastError(), 'code' => $this->widgets->code($widget, $version)];
     }
 
     /**

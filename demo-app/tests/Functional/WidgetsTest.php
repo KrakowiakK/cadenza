@@ -135,5 +135,13 @@ final class WidgetsTest extends WebTestCase
         $client->request('GET', '/');
         self::assertSame('/_cadenza/widget/cube?v=1', $client->getCrawler()->filter('[data-node-type="widget"] iframe')->attr('data-src'));
         self::assertFalse($site->propose([['op' => 'site.restore', 'version' => 99]], 'Nope')->isValid());
+
+        // The agent changes what the owner sees: the live version, or the one of the sketch it works on.
+        $tools = $container->get(\Cadenza\Runtime\Mcp\Agent\WidgetTools::class);
+        $shown = $tools->code('cube');
+        self::assertSame([1, 'live', 2], [$shown['version'], $shown['source'], $shown['latest']]);
+        self::assertStringContainsString('THREE', $shown['code']);
+        $newer = $site->propose([['op' => 'widget.use', 'widget' => 'cube', 'version' => 2]], 'Newer');
+        self::assertSame([2, 'draft'], [$tools->code('cube', (int) $newer->draft->getId())['version'], $tools->code('cube', (int) $newer->draft->getId())['source']]);
     }
 }
