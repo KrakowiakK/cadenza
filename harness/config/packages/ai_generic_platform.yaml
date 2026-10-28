@@ -4,5 +4,10 @@ ai:
             # Any OpenAI-compatible endpoint: Hugging Face router, LM Studio, Ollama, vLLM, OpenRouter…
             default:
                 base_url: '%env(CADENZA_LLM_BASE_URL)%'
+                http_client: 'cadenza.llm_client'
                 api_key: '%env(default::CADENZA_LLM_API_KEY)%'
+                model_catalog: 'Symfony\AI\Platform\Bridge\Generic\FallbackModelCatalog'
+            fallback:
+                base_url: '%env(CADENZA_LLM_FALLBACK_BASE_URL)%'
+                api_key: '%env(default::CADENZA_LLM_FALLBACK_API_KEY)%'
                 model_catalog: 'Symfony\AI\Platform\Bridge\Generic\FallbackModelCatalog'

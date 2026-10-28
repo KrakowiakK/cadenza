@@ -1,6 +1,6 @@
 when@dev:
     web_profiler:
-        toolbar: true
+        toolbar: false  # the Cadenza agent reads the profiler and logs through Symfony AI Mate instead
 
     framework:
         profiler: true

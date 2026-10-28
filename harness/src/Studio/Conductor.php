@@ -27,6 +27,10 @@ final class Conductor
     public function __construct(
         #[Autowire(service: 'ai.agent.studio')]
         private readonly AgentInterface $agent,
+        #[Autowire(service: 'ai.agent.studio_fallback')]
+        private readonly AgentInterface $fallbackAgent,
+        #[Autowire('%env(CADENZA_LLM_FALLBACK_MODEL)%')]
+        private readonly string $fallbackModel,
         private readonly SiteClient $site,
         private readonly Turn $turn,
         private readonly ProposalRepository $proposals,
@@ -64,7 +68,17 @@ final class Conductor
         $conversation->addUserTurn($message, $this->turn->selection, $this->turn->path, array_map(fn (array $a): array => ['id' => $a['id'], 'kind' => $a['kind'] ?? 'photo', 'name' => $a['name'] ?? null, 'url' => $this->uploads->url($a['id'])], $attachments), \is_array($context['event'] ?? null));
         $this->em->flush();
 
-        $text = trim($this->agent->call($bag)->asText());
+        try {
+            $text = trim($this->agent->call($bag)->asText());
+        } catch (\Throwable $e) {
+            if (!$this->isUnreachable($e)) {
+                throw $e;
+            }
+            // The main model is busy or down: carry on with the fallback model instead of failing the owner's turn.
+            $this->turn->emit('model', ['label' => $this->fallbackModel.' (fallback)', 'reason' => $e->getMessage()]);
+            $this->turn->emit('status', ['text' => 'pl' === ($context['language'] ?? 'en') ? 'Główny model nie odpowiada — przełączam na zapasowy' : 'Main model is not answering — switching to the fallback']);
+            $text = trim($this->fallbackAgent->call($bag)->asText());
+        }
         $text = preg_replace('~<think>.*?</think>~s', '', $text) ?? $text;
 
         $conversation->addAssistantTurn(trim($text), array_map(static fn ($p) => $p->getId(), $this->turn->proposals));
@@ -103,6 +117,7 @@ final class Conductor
             - When the owner attaches a drawn sketch, follow its layout faithfully (order of blocks, columns, what is
               big or small, labels) and fill it with real content. Never put the sketch itself on the site.
             - Pass operations as a JSON array of objects (not a string).
+            - If something on the site fails or looks broken, check app_diagnostics (errors / requests) before guessing.
             - The owner's own photos (trips, Instagram, family…): first choice is photos_from_phone — a QR code, they
               pick photos on the phone, no accounts. Only if they want everything from Instagram at once, offer the
               export (connect_account "instagram").
@@ -181,6 +196,18 @@ final class Conductor
         }
 
         return $messages;
+    }
+
+    private function isUnreachable(\Throwable $e): bool
+    {
+        for ($cause = $e; null !== $cause; $cause = $cause->getPrevious()) {
+            if ($cause instanceof \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+                || preg_match('/timeout|timed out|Failed to connect|Connection refused|Could not resolve/i', $cause->getMessage())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function generationHint(): string

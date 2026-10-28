@@ -31,6 +31,7 @@ const I18N = {
         connectedOk: 'Connected', connectFailed: 'Connection failed',
         fromPhone: 'Photos from your phone', scanQr: 'Scan with your phone camera and pick photos from the gallery.', waitingPhone: 'Waiting for the phone…',
         phoneOpened: 'Phone connected — pick photos', receiving: 'Receiving', photos: 'photos', phoneDone: 'Photos received',
+        retry: 'Try again', modelBusy: 'The model did not answer in time.', fallbackUsed: 'Main model busy — answered by the fallback model',
         instagramPhone: 'Your Instagram photos are in your phone\'s gallery — the fastest way:', exportAll: 'Everything from Instagram at once (export)', openExport: 'Open Instagram export',
     },
     pl: {
@@ -60,6 +61,7 @@ const I18N = {
         connectedOk: 'Połączono', connectFailed: 'Nie udało się połączyć',
         fromPhone: 'Zdjęcia z telefonu', scanQr: 'Zeskanuj aparatem telefonu i wybierz zdjęcia z galerii.', waitingPhone: 'Czekam na telefon…',
         phoneOpened: 'Telefon połączony — wybierz zdjęcia', receiving: 'Odbieram', photos: 'zdjęć', phoneDone: 'Odebrano zdjęcia',
+        retry: 'Spróbuj ponownie', modelBusy: 'Model nie odpowiedział na czas.', fallbackUsed: 'Główny model zajęty — odpowiada model zapasowy',
         instagramPhone: 'Twoje zdjęcia z Instagrama są w galerii telefonu — najszybciej tak:', exportAll: 'Wszystko z Instagrama naraz (eksport)', openExport: 'Otwórz eksport Instagrama',
     },
 };
@@ -508,6 +510,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         if (!text) text = attachments.some((a) => a.kind === 'sketch') ? t('sketchPrompt') : '';
         if (event) this.addNote(text);
         else this.addUser(text, selection, attachments);
+        this.lastRequest = { text, event, attachments };
         this.clearSelection();
         this.attachments = [];
         this.renderAttachments();
@@ -611,10 +614,22 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
                 this.scrollDown();
                 break;
             }
+            case 'model':
+                this.showModel(data.label);
+                this.addNote(t('fallbackUsed'));
+                break;
             case 'error': {
                 const box = turn.part('text');
                 box.classList.remove('hidden');
-                box.insertAdjacentHTML('beforeend', `<p class="text-rose-600">${escapeHtml(data.message)}</p>`);
+                const busy = /timeout|timed out|Failed to connect|refused/i.test(data.message);
+                box.insertAdjacentHTML('beforeend', `<div class="rounded-xl border border-rose-200 bg-rose-50 p-3 text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200"><p>${escapeHtml(busy ? t('modelBusy') : t('error'))}</p>${busy ? '' : `<p class="mt-1 text-xs opacity-70">${escapeHtml(data.message.slice(0, 200))}</p>`}<button type="button" data-retry class="mt-2 rounded-lg bg-rose-600 px-3 py-1 text-xs font-semibold text-white">${t('retry')}</button></div>`);
+                const request = this.lastRequest;
+                box.querySelector('[data-retry]').addEventListener('click', (e) => {
+                    e.currentTarget.disabled = true;
+                    if (!request) return;
+                    this.attachments = (request.attachments ?? []).map((a) => ({ ...a, uploading: false }));
+                    this.send(request.text, request.event ? { event: request.event } : {});
+                });
                 break;
             }
         }
