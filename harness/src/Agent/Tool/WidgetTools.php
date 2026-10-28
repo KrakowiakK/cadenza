@@ -62,7 +62,7 @@ final class WidgetTools
             return "The widget was not saved:\n- ".implode("\n- ", $r['errors'])."\nCall create_widget again with a brief that avoids this.";
         }
         $syntax = WidgetProgrammer::syntaxErrors($r['code']);
-        $sketch = $r['version'] > 1 ? $this->sketchNewVersion($name, $label, $r['version']) : null;
+        $sketch = ($r['existing'] ?? false) ? $this->sketchNewVersion($name, $label, $r['version']) : null;
 
         return \sprintf('Widget "%s" is ready (version %d, %d KB of code)%s%s.%s %s', $name, $r['version'], (int) ceil(\strlen($r['code']) / 1024),
             [] !== $syntax ? ' but its code may still have errors: '.implode('; ', $syntax) : '',
@@ -70,7 +70,7 @@ final class WidgetTools
             [] !== $r['notes'] ? ' '.implode(' ', $r['notes']) : '',
             match (true) {
                 null !== $sketch => $sketch.' Do not call propose_changes for it; the owner approves the sketch like any other.',
-                $r['version'] > 1 && null === $shape => 'It is not on any page yet: place it with propose_changes.',
+                ($r['existing'] ?? false) && null === $shape => 'It is not on any page yet: place it with propose_changes.',
                 'background' === $r['shape'] => 'Now place it with propose_changes as the "widget" of a hero (variant "typographic").',
                 default => 'Now place it with propose_changes: {"type": "widget", "props": {"widget": "'.$name.'", …}} (its frame is '.$r['shape'].').',
             });

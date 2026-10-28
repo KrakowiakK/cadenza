@@ -100,7 +100,7 @@ final class Conductor
         $this->turn->selection = $context['selection'] ?? [];
         // The owner's language: what they write in beats the browser setting.
         $this->turn->language = match (true) {
-            (bool) preg_match('/[ąćęłńśźż]|\b(jest|się|mój|moja|strona|chcę|zrób|dodaj|zmień)\b/iu', $message) => 'pl',
+            (bool) preg_match('/[ąćęłńśźż]|\b(jest|się|sie|mój|moj|moja|strona|stron[eę]|chc[eę]|zr[oó]b|zrub|dodaj|zmie[nń]|gr[eę]|[zż]eby|dla|czy|prosz[eę]|nie)\b/iu', $message) => 'pl',
             (bool) preg_match('/\b(the|please|would|could|add|make|my|our|is|are)\b/i', $message) => 'en',
             default => $context['language'] ?? 'en',
         };

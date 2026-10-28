@@ -34,7 +34,7 @@ final class WidgetWorkshop
         $code = $programmer->write($brief, $language, $libraries, $shape, $existing ? $current['code'] : null, $current['lastError'] ?? null, $status);
         $result = $this->site->defineWidget($name, $existing ? '' : $label, $existing ? '' : mb_substr($brief, 0, 500), $code, $shape);
         if (!($result['ok'] ?? false)) {
-            return ['ok' => false, 'errors' => (array) ($result['errors'] ?? ['unknown error']), 'version' => 0, 'shape' => $shape, 'code' => $code, 'tested' => false, 'findings' => null, 'notes' => []];
+            return ['ok' => false, 'errors' => (array) ($result['errors'] ?? ['unknown error']), 'version' => 0, 'shape' => $shape, 'code' => $code, 'tested' => false, 'findings' => null, 'notes' => [], 'existing' => $existing];
         }
         $findings = null;
         $tested = $this->tester->available();
@@ -57,7 +57,7 @@ final class WidgetWorkshop
             }
         }
 
-        return ['ok' => true, 'errors' => [], 'version' => (int) $result['version'], 'shape' => $shape, 'code' => $code, 'tested' => $tested, 'findings' => $findings, 'notes' => (array) ($result['notes'] ?? [])];
+        return ['ok' => true, 'errors' => [], 'version' => (int) $result['version'], 'shape' => $shape, 'code' => $code, 'tested' => $tested, 'findings' => $findings, 'notes' => (array) ($result['notes'] ?? []), 'existing' => $existing];
     }
 
     /**
