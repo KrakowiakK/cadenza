@@ -25,8 +25,10 @@ has() { command -v "$1" >/dev/null 2>&1; }
 check() {
     has php || fail "PHP 8.4+ is required."
     php -r 'exit(PHP_VERSION_ID >= 80400 ? 0 : 1);' || fail "PHP 8.4+ is required (found $(php -r 'echo PHP_VERSION;'))."
+    local modules
+    modules="$(php -m)"
     for ext in pdo_sqlite gd intl zip sodium; do
-        php -m | grep -qi "^$ext$" || fail "PHP extension \"$ext\" is missing."
+        grep -qix "$ext" <<<"$modules" || fail "PHP extension \"$ext\" is missing."
     done
     has composer || fail "Composer is required (https://getcomposer.org)."
 }
