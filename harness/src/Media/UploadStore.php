@@ -51,11 +51,16 @@ final class UploadStore
     {
         $ext = strtolower(pathinfo($name, \PATHINFO_EXTENSION));
         $zip = str_starts_with((string) file_get_contents($sourcePath, false, null, 0, 4), "PK\x03\x04");
+        $pdf = str_starts_with((string) file_get_contents($sourcePath, false, null, 0, 5), '%PDF-');
         $ext = match (true) {
             \in_array($ext, ['xlsx', 'ods'], true) && $zip => $ext,
             \in_array($ext, ['xls', 'csv'], true) => $ext,
+            // Documents for visitors to download (a menu, rules, a price list).
+            'pdf' === $ext && $pdf => 'pdf',
+            \in_array($ext, ['docx', 'odt', 'pptx'], true) && $zip => $ext,
+            \in_array($ext, ['doc', 'txt'], true) => $ext,
             $zip => 'zip',
-            default => throw new \InvalidArgumentException('Supported files: images, ZIP archives and spreadsheets (XLSX, XLS, ODS, CSV).'),
+            default => throw new \InvalidArgumentException('Supported files: images, documents (PDF, DOCX, ODT, PPTX, DOC, TXT), ZIP archives and spreadsheets (XLSX, XLS, ODS, CSV).'),
         };
         if (!is_dir($this->directory)) {
             mkdir($this->directory, 0o775, true);
@@ -63,12 +68,12 @@ final class UploadStore
         $id = strtolower((string) new Ulid()).'.'.$ext;
         copy($sourcePath, $this->directory.'/'.$id);
 
-        return ['id' => $id, 'url' => $this->url($id), 'name' => $name, 'mime' => 'zip' === $ext ? 'application/zip' : 'spreadsheet', 'size' => (int) filesize($this->directory.'/'.$id)];
+        return ['id' => $id, 'url' => $this->url($id), 'name' => $name, 'mime' => match ($ext) { 'zip' => 'application/zip', 'xlsx', 'ods', 'xls', 'csv' => 'spreadsheet', default => 'document' }, 'size' => (int) filesize($this->directory.'/'.$id)];
     }
 
     public function path(string $id): ?string
     {
-        if (!preg_match('/^[a-z0-9]{26}\.(jpg|png|webp|gif|zip|xlsx|xls|ods|csv)$/', $id)) {
+        if (!preg_match('/^[a-z0-9]{26}\.(jpg|png|webp|gif|zip|xlsx|xls|ods|csv|pdf|docx|doc|odt|pptx|txt)$/', $id)) {
             return null;
         }
         $path = $this->directory.'/'.$id;

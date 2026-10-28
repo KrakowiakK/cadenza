@@ -176,6 +176,14 @@ final class SiteClient
     /**
      * @return array<string, mixed>
      */
+    public function importFile(string $url, string $name): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('file_import', ['url' => $url, 'name' => $name]));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function mediaStats(): array
     {
         return $this->json($this->mcp->get('site')->callTool('media_stats'));

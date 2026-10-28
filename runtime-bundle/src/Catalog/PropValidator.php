@@ -71,7 +71,13 @@ final class PropValidator
                 }
 
                 return [$value, null];
-            case 'url':
+            case 'file':
+                if (!\is_string($value) || !preg_match('~^/files/[A-Za-z0-9._-]+$~', $value)) {
+                    return [null, $path.' must be a document stored by the site ("/files/…"); store it first (add_document), or leave it empty.'];
+                }
+
+                return [$value, null];
+                        case 'url':
                 if (!\is_string($value)) {
                     return [null, $path.' must be a URL string.'];
                 }

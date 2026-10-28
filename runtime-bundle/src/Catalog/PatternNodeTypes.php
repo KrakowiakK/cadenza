@@ -198,6 +198,14 @@ final class PatternNodeTypes implements NodeTypeProviderInterface
             'height' => ['type' => 'enum', 'values' => ['medium', 'tall'], 'default' => 'medium'],
         ]);
 
+        yield new NodeType('downloads', 'Downloads', 'Pattern: documents to download — a menu, rules, a price list, a programme, forms to print. Each item shows its type, size and pages.', 'pattern', $head + [
+            'items' => ['type' => 'list', 'items' => [
+                'title' => ['type' => 'string', 'required' => true],
+                'file' => ['type' => 'file', 'required' => true],
+                'text' => ['type' => 'string', 'description' => 'one line about what is inside'],
+            ], 'default' => []],
+        ]);
+
         yield new NodeType('cta-band', 'Call to action band', 'Pattern: a strong closing invitation with one or two buttons, optionally with an image.', 'pattern', [
             'title' => ['type' => 'string', 'required' => true],
             'text' => ['type' => 'text', 'default' => null],

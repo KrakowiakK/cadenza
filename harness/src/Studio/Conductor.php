@@ -221,7 +221,11 @@ final class Conductor
                 $lines[] = \sprintf('[Attached spreadsheet, uploadId %s, name "%s" — read it with read_spreadsheet, import it with import_spreadsheet, then build a page with collection-grid/collection-table]', $attachment['id'], $attachment['name'] ?? '');
                 continue;
             }
-            if (str_ends_with($attachment['id'], '.zip')) {
+            if (preg_match('/\.(pdf|docx|doc|odt|pptx|txt)$/', $attachment['id'])) {
+                $lines[] = \sprintf('[Attached document, uploadId %s, name "%s" — to offer it for download put it on the site with add_document and show it in a "downloads" node (or link a button to it)]', $attachment['id'], $attachment['name'] ?? '');
+                continue;
+            }
+                        if (str_ends_with($attachment['id'], '.zip')) {
                 $lines[] = \sprintf('[Attached archive, uploadId %s, name "%s" — an export file; import it with import_content]', $attachment['id'], $attachment['name'] ?? '');
                 continue;
             }

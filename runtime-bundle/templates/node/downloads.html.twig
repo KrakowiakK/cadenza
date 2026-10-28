@@ -1,0 +1,22 @@
+{%- set pl = cadenza_state().language == 'pl' -%}
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+<ul class="mx-auto grid max-w-3xl gap-3">
+    {%- for item in props.items %}
+        {%- set f = cadenza_file(item.file) -%}
+        <li>
+            <a href="{{ item.file }}" download class="cz-card group flex items-center gap-4 p-4 md:p-5" data-turbo="false">
+                <span class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">{{ cadenza_icon(f and f.extension == 'pdf' ? 'file-text' : (f and f.extension in ['pptx'] ? 'presentation' : 'file'), 'size-6') }}</span>
+                <span class="min-w-0 flex-1">
+                    <span class="block font-semibold group-hover:text-primary">{{ item.title }}</span>
+                    <span class="block text-sm opacity-70">
+                        {%- if item.text %}{{ item.text }} · {% endif -%}
+                        {%- if f %}{{ f.extension|upper }} · {{ f.size > 1048576 ? (f.size / 1048576)|number_format(1, ',') ~ ' MB' : (f.size / 1024)|round ~ ' kB' }}{% if f.pages %} · {{ f.pages }} {{ pl ? (f.pages == 1 ? 'strona' : (f.pages % 10 in [2, 3, 4] and f.pages % 100 not in [12, 13, 14] ? 'strony' : 'stron')) : (f.pages == 1 ? 'page' : 'pages') }}{% endif %}{% endif -%}
+                    </span>
+                </span>
+                <span class="shrink-0 opacity-60 transition group-hover:translate-y-0.5 group-hover:opacity-100">{{ cadenza_icon('download', 'size-5') }}</span>
+            </a>
+        </li>
+    {%- endfor %}
+</ul>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

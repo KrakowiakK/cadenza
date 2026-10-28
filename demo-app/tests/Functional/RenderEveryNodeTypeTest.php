@@ -71,6 +71,7 @@ final class RenderEveryNodeTypeTest extends WebTestCase
             'bool' => true,
             'url' => '/',
             'image' => '/media/sample.jpg',
+            'file' => '/files/sample.pdf',
             'date' => '2030-06-14',
             'time' => '15:00',
             'list' => isset($schema['items'])

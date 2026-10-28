@@ -30,6 +30,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         private readonly Collections $collections,
         private readonly \Cadenza\Runtime\Form\Forms $forms,
         private readonly \Cadenza\Runtime\Media\MapPoints $mapPoints,
+        private readonly \Cadenza\Runtime\Media\FileLibrary $files,
         private readonly ?IconRendererInterface $icons = null,
         private readonly ?\Psr\Log\LoggerInterface $logger = null,
     ) {
@@ -60,6 +61,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
             new TwigFunction('cadenza_option_places', fn (array $node): array => $this->forms->optionPlaces($node)),
             new TwigFunction('cadenza_submissions', fn (string $formId, int $limit = 50): array => $this->forms->submissions($formId, $limit)),
             new TwigFunction('cadenza_map_points', fn (array $props): array => $this->mapPoints->points($props)),
+            new TwigFunction('cadenza_file', fn (?string $path): ?\Cadenza\Runtime\Entity\SiteFile => null !== $path ? $this->files->get($path) : null),
             new TwigFunction('cadenza_icon', $this->icon(...), ['is_safe' => ['html']]),
         ];
     }

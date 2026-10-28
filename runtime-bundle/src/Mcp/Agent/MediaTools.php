@@ -14,8 +14,27 @@ use Mcp\Schema\ToolAnnotations;
  */
 final class MediaTools
 {
-    public function __construct(private readonly MediaLibrary $media)
-    {
+    public function __construct(
+        private readonly MediaLibrary $media,
+        private readonly \Cadenza\Runtime\Media\FileLibrary $files,
+    ) {
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[McpTool(name: 'file_import', description: 'Store a document on the site for visitors to download (PDF, DOCX, DOC, ODT, PPTX, TXT). Returns its site path (/files/…) for "downloads" nodes or button links.')]
+    public function importFile(
+        #[Schema(description: 'http(s) URL of the uploaded document')]
+        string $url,
+        #[Schema(description: 'File name with extension, e.g. "Menu-zima.pdf"')]
+        string $name,
+    ): array {
+        try {
+            return ['ok' => true] + $this->files->importUrl($url, $name)->toArray();
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'error' => $e->getMessage()];
+        }
     }
 
     /**
