@@ -30,6 +30,7 @@ final class ToolTraceSubscriber
         'connect_account' => ['en' => 'Preparing the connection', 'pl' => 'Przygotowuję połączenie'],
         'import_content' => ['en' => 'Starting the import', 'pl' => 'Uruchamiam import'],
         'read_spreadsheet' => ['en' => 'Reading the spreadsheet', 'pl' => 'Czytam arkusz'],
+        'read_answers' => ['en' => 'Reading the answers', 'pl' => 'Czytam odpowiedzi'],
         'import_spreadsheet' => ['en' => 'Importing the data', 'pl' => 'Wczytuję dane'],
         'photos_from_phone' => ['en' => 'Preparing a QR code', 'pl' => 'Przygotowuję kod QR'],
         'media_overview' => ['en' => 'Looking at your photos', 'pl' => 'Przeglądam Twoje zdjęcia'],

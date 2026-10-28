@@ -419,7 +419,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         enabled?: bool|Param, // Default: true
  *     },
  *     lock?: Param|bool|string|array{ // Lock configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         resources?: Param|string|array<string, Param|string|list<scalar|Param|null>>,
  *     },
  *     semaphore?: Param|bool|string|array{ // Semaphore configuration
@@ -629,7 +629,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         }>,
  *     },
  *     rate_limiter?: bool|array{ // Rate limiter configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         limiters?: array<string, array{ // Default: []
  *             lock_factory?: scalar|Param|null, // The service ID of the lock factory used by this limiter (or null to disable locking). // Default: "auto"
  *             cache_pool?: scalar|Param|null, // The cache pool to use for storing the current limiter state. // Default: "cache.rate_limiter"
@@ -1635,6 +1635,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     owner_mode?: scalar|Param|null, // "always" for local development, "token" otherwise // Default: "token"
  *     token?: scalar|Param|null, // Shared secret with the Cadenza harness; also the owner login token
  *     harness_url?: scalar|Param|null, // Default: "http://127.0.0.1:8011"
+ *     notify_email?: scalar|Param|null, // Where to send a note when a visitor sends a form (needs MAILER_DSN) // Default: null
  * }
  * @psalm-type TalesFromADevTwigExtraTailwindConfig = array{
  *     tailwind_merge?: array{

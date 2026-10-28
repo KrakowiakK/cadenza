@@ -40,7 +40,7 @@ final class EditorGuide
             - {"op": "node.remove", "id": "<node id>"}                                  (or "ids": [...])
             - {"op": "theme.update", "direction": "editorial"}   (best first step for a new site: choose a design direction)
             - {"op": "theme.update", "preset": "warm", "mode": "light", "fontHeading": "Fraunces", "fontBody": "Inter", "radius": "lg", "tokens": {"primary": "#b45309"}}
-            - {"op": "site.update", "name": "Café Aroma", "tagline": "...", "footer": "...", "nav": [{"label": "Menu", "href": "/menu"}] or null for automatic}
+            - {"op": "site.update", "name": "Café Aroma", "tagline": "...", "language": "pl", "footer": "...", "nav": [{"label": "Menu", "href": "/menu"}] or null for automatic}
 
             How to compose beautiful pages:
             - First choose a design direction (theme.update {"direction": …}) that fits the business and mood.

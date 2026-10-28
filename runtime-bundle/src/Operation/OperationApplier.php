@@ -296,6 +296,12 @@ final class OperationApplier
                 $doc[$field] = $op[$field];
             }
         }
+        if (\array_key_exists('language', $op)) {
+            if (!\is_string($op['language']) || !preg_match('/^[a-z]{2}(-[A-Za-z]{2})?$/', $op['language'])) {
+                throw new OperationException('"language" is the site\'s language code, e.g. "pl" or "en".');
+            }
+            $doc['language'] = $op['language'];
+        }
         if (\array_key_exists('footer', $op)) {
             $doc['footer']['text'] = \is_array($op['footer']) ? ($op['footer']['text'] ?? null) : $op['footer'];
         }

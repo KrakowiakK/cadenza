@@ -173,6 +173,24 @@ final class SiteClient
         return $this->json($this->mcp->get('site')->callTool('media_stats'));
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function forms(): array
+    {
+        $forms = $this->json($this->mcp->get('site')->callTool('forms_list'));
+
+        return array_is_list($forms) ? $forms : ($forms['result'] ?? []);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function formAnswers(string $formId): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('form_answers', ['formId' => $formId, 'limit' => 60]));
+    }
+
     private function text(CallToolResult $result): string
     {
         $text = '';

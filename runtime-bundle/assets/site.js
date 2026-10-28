@@ -91,3 +91,55 @@ document.addEventListener('click', (e) => {
     });
     table.tBodies[0].append(...rows);
 });
+
+/*
+ * Forms: send without leaving the page, show what is missing next to the field, then the thank-you note.
+ */
+const formMessages = {
+    pl: { email: 'Podaj poprawny adres e-mail', phone: 'Podaj poprawny numer telefonu', number: 'Podaj liczbę', date: 'Podaj datę', option: 'Wybierz jedną z opcji', too_many: 'Za dużo prób, spróbuj za kilka minut.', closed: 'Zapisy są już zamknięte.', not_enough: 'Za mało wolnych miejsc — zostało: ', draft: 'Ten formularz nie jest jeszcze opublikowany.', failed: 'Nie udało się wysłać, spróbuj ponownie.' },
+    en: { email: 'Enter a valid e-mail address', phone: 'Enter a valid phone number', number: 'Enter a number', date: 'Enter a date', option: 'Choose one of the options', too_many: 'Too many tries, please wait a few minutes.', closed: 'This form is closed.', not_enough: 'Not enough places left: ', draft: 'This form is not published yet.', failed: 'Could not send, please try again.' },
+};
+document.addEventListener('submit', async (e) => {
+    const form = e.target.closest('[data-cz-form]');
+    if (!form) return;
+    e.preventDefault();
+    const t = formMessages[(document.documentElement.lang || 'en').slice(0, 2)] ?? formMessages.en;
+    const message = form.querySelector('[data-cz-form-message]');
+    const button = form.querySelector('[type=submit]');
+    form.querySelectorAll('[data-error]').forEach((p) => { p.hidden = true; });
+    form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+    message.hidden = true;
+    button.disabled = true;
+    try {
+        const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+        const result = await response.json();
+        if (result.ok) {
+            form.hidden = true;
+            form.parentElement.querySelector('[data-cz-form-done]').hidden = false;
+            const left = form.parentElement.querySelector('[data-cz-left]');
+            if (left && result.left !== null && result.left !== undefined) left.textContent = left.textContent.replace(/^\d+/, result.left);
+            return;
+        }
+        if (result.errors) {
+            let first = null;
+            for (const [index, code] of Object.entries(result.errors)) {
+                const field = form.querySelector(`[data-field="${index}"]`);
+                if (!field) continue;
+                const error = field.querySelector('[data-error]');
+                error.textContent = code === 'required' ? form.dataset.requiredText : (t[code] ?? code);
+                error.hidden = false;
+                field.querySelectorAll('input, textarea, select').forEach((el) => el.setAttribute('aria-invalid', 'true'));
+                first ??= field;
+            }
+            first?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            message.textContent = (t[result.error] ?? t.failed) + (result.error === 'not_enough' ? result.left : '');
+            message.hidden = false;
+        }
+    } catch {
+        message.textContent = t.failed;
+        message.hidden = false;
+    } finally {
+        button.disabled = false;
+    }
+});

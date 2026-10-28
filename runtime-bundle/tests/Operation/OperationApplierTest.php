@@ -57,6 +57,15 @@ final class OperationApplierTest extends TestCase
         self::assertStringContainsString('must be one of [1,2,3,4]', $result->errors[0]);
     }
 
+    public function testSiteLanguageIsALanguageCode(): void
+    {
+        $ok = $this->applier->apply(Document::empty(), [['op' => 'site.update', 'language' => 'pl']]);
+        self::assertTrue($ok->isValid());
+        self::assertSame('pl', $ok->document['language']);
+
+        self::assertFalse($this->applier->apply(Document::empty(), [['op' => 'site.update', 'language' => 'Polish']])->isValid());
+    }
+
     public function testUpdateMergesPropsAndReplaceKeepsTheId(): void
     {
         $doc = $this->page([['type' => 'heading', 'props' => ['text' => 'Old']]]);

@@ -23,7 +23,9 @@
         "symfony/scheduler": "^8.1",
         "symfony/messenger": "^8.1",
         "symfony/uid": "^8.1",
-        "symfony/http-client": "^8.1"
+        "symfony/http-client": "^8.1",
+        "symfony/rate-limiter": "^8.1",
+        "symfony/mailer": "^8.1"
     },
     "autoload": {
         "psr-4": {

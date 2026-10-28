@@ -28,6 +28,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         private readonly string $token,
         private readonly MediaLibrary $media,
         private readonly Collections $collections,
+        private readonly \Cadenza\Runtime\Form\Forms $forms,
         private readonly ?IconRendererInterface $icons = null,
         private readonly ?\Psr\Log\LoggerInterface $logger = null,
     ) {
@@ -52,6 +53,8 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
             new TwigFunction('cadenza_records', fn (\Cadenza\Runtime\Entity\Collection $c, int $limit = 500): array => $this->collections->records($c, $limit)),
             new TwigFunction('cadenza_categories', fn (\Cadenza\Runtime\Entity\Collection $c, string $field): array => $this->collections->categories($c, $field)),
             new TwigFunction('cadenza_format', static fn (string $type, mixed $value): string => Collections::format($type, $value)),
+            new TwigFunction('cadenza_form_stats', fn (array $node): ?array => null !== $this->forms->published($node['id']) ? $this->forms->stats($node) : null),
+            new TwigFunction('cadenza_submissions', fn (string $formId, int $limit = 50): array => $this->forms->submissions($formId, $limit)),
             new TwigFunction('cadenza_icon', $this->icon(...), ['is_safe' => ['html']]),
         ];
     }

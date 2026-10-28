@@ -1,0 +1,97 @@
+{%- set state = cadenza_state() -%}
+{%- set pl = state.document.language|default('en')|slice(0, 2) == 'pl' -%}
+{%- set t = pl ? {
+    send: 'Wyślij', sent: 'Dziękujemy! Twoja odpowiedź dotarła.', left: 'Wolne miejsca', full: 'Brak wolnych miejsc.', closedDate: 'Zapisy są już zamknięte.',
+    required: 'To pole jest wymagane', choose: 'Wybierz…', preview: 'Formularz zacznie zbierać odpowiedzi po zatwierdzeniu szkicu.',
+    answers: 'Odpowiedzi', people: 'osób', excel: 'Pobierz Excel', none: 'Jeszcze nikt nie odpowiedział.', newer: 'nowe', ownerOnly: 'Widzisz to tylko Ty',
+} : {
+    send: 'Send', sent: 'Thank you! Your answer has arrived.', left: 'Places left', full: 'No places left.', closedDate: 'This form is closed.',
+    required: 'This field is required', choose: 'Choose…', preview: 'The form starts collecting answers once the sketch is approved.',
+    answers: 'Answers', people: 'people', excel: 'Download Excel', none: 'No answers yet.', newer: 'new', ownerOnly: 'Only you can see this',
+} -%}
+{%- set stats = cadenza_form_stats(node) -%}
+{%- set sent = app.request.query.get('cz_sent') == node.id -%}
+{%- set input = 'w-full rounded-[calc(var(--radius)*0.8)] border border-current/15 bg-background px-4 py-3 text-base text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 aria-[invalid]:border-rose-500' -%}
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+<div class="grid items-start gap-10 {{ props.image ? 'md:grid-cols-2' : '' }}">
+    <div class="{{ props.image ? '' : 'mx-auto w-full max-w-2xl' }}">
+        {%- if props.image %}{% include '@CadenzaRuntime/node/_head.html.twig' with {props: props|merge({align: 'start'})} %}{% else %}{% include '@CadenzaRuntime/node/_head.html.twig' %}{% endif %}
+
+        {%- if state.owner and not state.embed and stats %}
+        <details class="cz-owner-only mb-6 rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 text-sm text-foreground" data-cz-form-inbox="{{ node.id }}">
+            <summary class="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 font-medium">
+                {{ cadenza_icon('inbox', 'size-4 text-primary') }}
+                <span>{{ t.answers }}: {{ stats.answers }}{% if props.peopleField or stats.capacity %} · {{ stats.people }} {{ t.people }}{% endif %}{% if stats.capacity %} / {{ stats.capacity }}{% endif %}</span>
+                {%- if stats.unseen > 0 %}<span class="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground" data-unseen>{{ stats.unseen }} {{ t.newer }}</span>{% endif %}
+                <a href="/_cadenza/form/{{ node.id }}/answers.xlsx" data-turbo="false" class="ml-auto inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline">{{ cadenza_icon('sheet', 'size-4') }}{{ t.excel }}</a>
+            </summary>
+            <p class="mt-1 text-xs opacity-60">{{ t.ownerOnly }}</p>
+            {%- set rows = cadenza_submissions(node.id, 30) -%}
+            {%- if rows is empty %}<p class="mt-3 opacity-70">{{ t.none }}</p>
+            {%- else %}
+            <div class="mt-3 max-h-80 overflow-auto rounded-lg border border-current/10 bg-background">
+                <table class="w-full text-left text-xs">
+                    <thead class="sticky top-0 bg-muted"><tr><th class="px-3 py-2 font-medium">#</th>{% for f in props.fields %}<th class="px-3 py-2 font-medium">{{ f.label }}</th>{% endfor %}</tr></thead>
+                    <tbody>
+                    {%- for s in rows %}
+                        <tr class="border-t border-current/10 {{ s.seen ? '' : 'font-medium' }}"><td class="px-3 py-2 whitespace-nowrap opacity-60">{{ s.createdAt|date('d.m H:i') }}</td>
+                        {%- for f in props.fields %}{% set v = s.answer(f.label) %}<td class="px-3 py-2">{{ v is iterable ? v|join(', ') : (v is same as(true) ? '✓' : (v is same as(false) ? '' : v)) }}</td>{% endfor %}</tr>
+                    {%- endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {%- endif %}
+        </details>
+        {%- endif %}
+
+        <div class="cz-card p-6 md:p-8">
+            {%- if stats and stats.capacity %}
+                <p class="mb-6 flex items-center justify-between gap-4 text-sm"><span class="opacity-70">{{ t.left }}</span><span class="cz-price text-lg font-semibold text-primary" data-cz-left>{{ stats.left }} / {{ stats.capacity }}</span></p>
+            {%- endif %}
+            {%- if stats and not stats.open %}
+                <p class="py-6 text-center text-lg">{{ props.closedMessage ?: (stats.closed == 'full' ? t.full : t.closedDate) }}</p>
+            {%- else %}
+            <div data-cz-form-done {{ sent ? '' : 'hidden' }} class="py-6 text-center">
+                <div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">{{ cadenza_icon('check', 'size-7') }}</div>
+                <p class="text-lg">{{ props.successMessage ?: t.sent }}</p>
+            </div>
+            <form method="post" action="/_cadenza/form/{{ node.id }}" data-turbo="false" data-cz-form data-required-text="{{ t.required }}" class="grid gap-5" {{ sent ? 'hidden' : '' }}>
+                <div aria-hidden="true" class="absolute -left-[9999px]"><input type="text" name="cz_website" tabindex="-1" autocomplete="off"></div>
+                {%- for f in props.fields %}
+                    {%- set name = 'f[' ~ loop.index0 ~ ']' -%}
+                    {%- set fid = node.id ~ '-' ~ loop.index0 -%}
+                    {%- set type = f.type|default('text') -%}
+                    <div data-field="{{ loop.index0 }}" class="grid gap-2">
+                        {%- if type == 'checkbox' %}
+                            <label class="flex items-start gap-3"><input type="checkbox" name="{{ name }}" value="1" {{ f.required ? 'required' : '' }} class="mt-1 size-5 accent-[var(--primary)]"><span>{{ f.label }}{% if f.required %} <span class="text-primary">*</span>{% endif %}</span></label>
+                        {%- else %}
+                            <label for="{{ fid }}" class="text-sm font-medium">{{ f.label }}{% if f.required %} <span class="text-primary">*</span>{% endif %}</label>
+                            {%- if type == 'textarea' %}
+                                <textarea id="{{ fid }}" name="{{ name }}" rows="4" placeholder="{{ f.placeholder }}" {{ f.required ? 'required' : '' }} class="{{ input }}"></textarea>
+                            {%- elseif type == 'select' %}
+                                <select id="{{ fid }}" name="{{ name }}" {{ f.required ? 'required' : '' }} class="{{ input }}"><option value="">{{ f.placeholder ?: t.choose }}</option>{% for o in f.options|default([]) %}<option>{{ o }}</option>{% endfor %}</select>
+                            {%- elseif type == 'radio' or type == 'choices' %}
+                                <div id="{{ fid }}" class="flex flex-wrap gap-2">
+                                {%- for o in f.options|default([]) %}
+                                    <label class="cursor-pointer"><input type="{{ type == 'radio' ? 'radio' : 'checkbox' }}" name="{{ name }}{{ type == 'choices' ? '[]' : '' }}" value="{{ o }}" {{ type == 'radio' and f.required ? 'required' : '' }} class="peer sr-only"><span class="inline-block rounded-full border border-current/15 px-4 py-2 text-sm transition peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-primary/30">{{ o }}</span></label>
+                                {%- endfor %}
+                                </div>
+                            {%- else %}
+                                {%- set html = {email: 'email', phone: 'tel', number: 'number', date: 'date'}[type]|default('text') -%}
+                                <input id="{{ fid }}" type="{{ html }}" name="{{ name }}" placeholder="{{ f.placeholder }}" {{ f.required ? 'required' : '' }}{% if type == 'number' %} min="0" inputmode="numeric"{% endif %}{% if type == 'email' %} autocomplete="email"{% elseif type == 'phone' %} autocomplete="tel"{% endif %} class="{{ input }}">
+                            {%- endif %}
+                        {%- endif %}
+                        {%- if f.help %}<p class="text-xs opacity-60">{{ f.help }}</p>{% endif %}
+                        <p data-error hidden class="text-xs text-rose-600"></p>
+                    </div>
+                {%- endfor %}
+                {%- if not stats %}<p class="rounded-lg bg-muted px-4 py-3 text-sm opacity-80">{{ t.preview }}</p>{% endif %}
+                <p data-cz-form-message hidden class="rounded-lg bg-rose-500/10 px-4 py-3 text-sm text-rose-700 dark:text-rose-300"></p>
+                <twig:Button type="submit" class="cz-btn h-12 w-full text-base sm:w-auto sm:justify-self-start sm:px-10" :disabled="not stats">{{ props.submitLabel ?: t.send }}</twig:Button>
+            </form>
+            {%- endif %}
+        </div>
+    </div>
+    {%- if props.image %}<img src="{{ props.image }}" alt="" loading="lazy" class="cz-img h-full min-h-80 w-full object-cover md:sticky md:top-24">{% endif %}
+</div>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

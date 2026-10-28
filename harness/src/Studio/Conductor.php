@@ -135,6 +135,11 @@ final class Conductor
             - The owner's data (products, menu, courses, events…) usually comes as a spreadsheet: read_spreadsheet,
               import_spreadsheet, then a page with collection-grid (cards with filter chips by a category field and
               search) or collection-table. Never copy rows into props by hand.
+            - When visitors should answer something — an RSVP to a wedding or party, a sign-up for a workshop or class
+              (with capacity and peopleField for limited places), an order, a booking request, a contact message, a
+              survey — use the "form" pattern with the right fields (choices as select/radio/choices with options).
+              Answers are stored on the site; when the owner asks who is coming, how many, what people chose, call
+              read_answers and answer with the numbers. Set the site's language once (site.update "language").
             - If something on the site fails or looks broken, check app_diagnostics (errors / requests) before guessing.
             - The owner's own photos (trips, Instagram, family…): first choice is photos_from_phone — a QR code, they
               pick photos on the phone, no accounts. Only if they want everything from Instagram at once, offer the

@@ -2,3 +2,4 @@ cadenza_runtime:
     owner_mode: '%env(CADENZA_OWNER_MODE)%'
     token: '%env(CADENZA_TOKEN)%'
     harness_url: '%env(CADENZA_HARNESS_URL)%'
+    notify_email: '%env(default::CADENZA_NOTIFY_EMAIL)%'

@@ -151,6 +151,24 @@ final class PatternNodeTypes implements NodeTypeProviderInterface
             ], 'default' => []],
         ]);
 
+        yield new NodeType('form', 'Form', 'Pattern: a form visitors fill in — RSVP to a wedding or party, sign-up for a workshop or class, an order, a booking request, a contact message, a survey. Answers are stored on the site; the owner sees them on the page, downloads them as Excel and can ask you about them. With capacity the form counts places (peopleField = label of a number field like "Number of guests") and closes when full.', 'pattern', $head + [
+            'fields' => ['type' => 'list', 'items' => [
+                'label' => ['type' => 'string', 'required' => true],
+                'type' => ['type' => 'enum', 'values' => ['text', 'email', 'phone', 'textarea', 'number', 'date', 'select', 'radio', 'checkbox', 'choices'], 'description' => 'select/radio = one of options, choices = several of options, checkbox = one yes/no (e.g. consent)'],
+                'required' => ['type' => 'bool'],
+                'options' => ['type' => 'list', 'of' => 'string', 'description' => 'for select, radio, choices'],
+                'placeholder' => ['type' => 'string'],
+                'help' => ['type' => 'string', 'description' => 'small hint under the field'],
+            ], 'default' => []],
+            'submitLabel' => ['type' => 'string', 'default' => null],
+            'successMessage' => ['type' => 'text', 'default' => null, 'description' => 'shown after sending'],
+            'capacity' => ['type' => 'int', 'default' => null, 'description' => 'places available; the form shows how many are left and closes when full'],
+            'peopleField' => ['type' => 'string', 'default' => null, 'description' => 'label of the number field that says how many places one answer takes'],
+            'closesAt' => ['type' => 'string', 'default' => null, 'description' => 'last day to answer, YYYY-MM-DD'],
+            'closedMessage' => ['type' => 'text', 'default' => null],
+            'image' => ['type' => 'image', 'default' => null, 'description' => 'optional image beside the form'],
+        ]);
+
         yield new NodeType('cta-band', 'Call to action band', 'Pattern: a strong closing invitation with one or two buttons, optionally with an image.', 'pattern', [
             'title' => ['type' => 'string', 'required' => true],
             'text' => ['type' => 'text', 'default' => null],
