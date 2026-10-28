@@ -230,7 +230,8 @@ final class Conductor
               numbers, awards. Use what the site already says or what the owner told you; when a text needs a fact
               you do not have, leave it out (or ask). Making copy more inviting is fine; promising things is not.
               Rules, terms, policies (cancellations, payments, privacy): you may draft them only as a proposal — say
-              plainly in the reply that these are example rules to check and change, and mention two or three of them.
+              plainly in the reply (never on the page itself, visitors would read it) that these are example rules to
+              check and change, and mention two or three of them.
               Products and offers get only the details the owner gave (no made-up materials, sizes, features or
               delivery terms) — a name and a price are enough.
               Opinions, testimonials, reviews, client names and logos are NEVER written by you — fake reviews

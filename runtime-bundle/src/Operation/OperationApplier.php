@@ -495,11 +495,12 @@ final class OperationApplier
         }
         $section = ['type' => 'section', 'props' => array_intersect_key($props, array_flip(['background', 'width', 'padding'])), 'children' => []];
         if (\is_string($props['title'] ?? null)) {
-            $section['children'][] = ['type' => 'heading', 'props' => array_filter(['text' => $props['title'], 'eyebrow' => $props['eyebrow'] ?? null, 'align' => $props['align'] ?? null])];
+            // Centred like the headings of the patterns around it, unless the model said otherwise.
+            $section['children'][] = ['type' => 'heading', 'props' => array_filter(['text' => $props['title'], 'eyebrow' => $props['eyebrow'] ?? null, 'align' => $props['align'] ?? 'center'])];
         }
         $intro = $props['intro'] ?? $props['subtitle'] ?? null;
         if (\is_string($intro) && '' !== $intro) {
-            $section['children'][] = ['type' => 'text', 'props' => array_filter(['markdown' => $intro, 'align' => $props['align'] ?? null])];
+            $section['children'][] = ['type' => 'text', 'props' => array_filter(['markdown' => $intro, 'align' => $props['align'] ?? 'center'])];
         }
         $section['children'][] = ['type' => $type->name, 'props' => array_diff_key($props, array_flip([...$sectionKeys, ...(isset($type->props['align']) ? [] : ['align'])]))] + array_diff_key($spec, ['type' => 1, 'props' => 1, 'id' => 1]);
         if (isset($spec['id'])) {
