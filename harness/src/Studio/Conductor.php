@@ -95,6 +95,18 @@ final class Conductor
             $text = preg_replace('~<think>.*?</think>~s', '', $text) ?? $text;
         }
 
+        // An empty reply with no work done (free models do this now and then): ask once more, then hand over to the
+        // fallback model; the owner should never be left looking at nothing.
+        for ($try = 0; '' === $text && 0 === $this->turn->toolCalls && $try < 2; ++$try) {
+            $this->turn->emit('status', ['text' => 'pl' === ($context['language'] ?? 'en') ? 'Próbuję jeszcze raz' : 'Trying again']);
+            $this->useFallback = $this->useFallback || 1 === $try;
+            $text = trim($this->callAgent($bag->with(Message::ofUser('Your previous reply was empty. Act on my last message now: call the tools you need, then answer me in 1–3 sentences.')), $context));
+            $text = preg_replace('~<think>.*?</think>~s', '', $text) ?? $text;
+        }
+        if ('' === $text && 0 === $this->turn->toolCalls) {
+            throw new \RuntimeException('The model returned an empty answer.');
+        }
+
         $conversation->addAssistantTurn(trim($text), array_map(static fn ($p) => $p->getId(), $this->turn->proposals));
         $this->em->flush();
 
