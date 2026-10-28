@@ -28,7 +28,7 @@ final class Proposals
      */
     public static function cleanSummary(string $summary): string
     {
-        $text = trim((string) preg_replace(['~</?[a-z!][^>]*>~i', '~\s+~u'], ['', ' '], $summary), " \t\n\r\0\x0B<>/");
+        $text = trim((string) preg_replace(['~</?[a-z!][^>]*>~i', '~\s+~u'], ['', ' '], $summary), " \t\n\r\0\x0B<>/[]{}\"'");
 
         return '' !== $text ? mb_substr($text, 0, 240) : 'Changes';
     }
