@@ -5,13 +5,13 @@
     week: 'w tym tygodniu', vsPrev: 'niż tydzień wcześniej', same: 'tyle samo co tydzień wcześniej', noVisits: 'Jeszcze nikt nie odwiedził strony. Liczymy wejścia gości — bez ciasteczek i bez danych osobowych; Twoje wejścia się nie liczą.',
     topPages: 'Najczęściej odwiedzane', answers: 'Odpowiedzi odwiedzających', noForms: 'Na stronie nie ma jeszcze formularza. Poproś np. „dodaj formularz zapisów”.', people: 'osób', places: 'miejsc zajętych', newer: 'nowe', excel: 'Excel', closed: 'zamknięty',
     changes: 'Ostatnie zmiany', version: 'Wersja', content: 'Zawartość', pages: 'strony', blocks: 'bloki', photos: 'zdjęcia', albums: 'albumy', records: 'rekordów',
-    health: 'Stan aplikacji', good: 'Wszystko działa', warning: 'Warto zerknąć', attention: 'Wymaga uwagi', errors: 'Błędy w logach (24 h)', worker: 'Praca w tle', running: 'działa', stopped: 'nie działa', workerHint: 'Importy i powiadomienia czekają, bo zadania w tle nie są przetwarzane. Uruchom ponownie: ./cadenza start', queued: 'Zadania w kolejce', failed: 'Zadania nieudane', imports: 'Ostatnie importy', connections: 'Połączone konta', ask: 'Zapytaj agenta, co się dzieje — przeczyta logi i profiler.', day: 'Dzień', views: 'Wejścia', open: 'Otwórz stronę',
+    health: 'Stan aplikacji', good: 'Wszystko działa', warning: 'Warto zerknąć', attention: 'Wymaga uwagi', errors: 'Błędy w logach (24 h)', worker: 'Praca w tle', running: 'działa', stopped: 'nie działa', workerHint: 'Importy i powiadomienia czekają, bo zadania w tle nie są przetwarzane. Uruchom ponownie: ./cadenza start', queued: 'Zadania w kolejce', failed: 'Zadania nieudane', imports: 'Ostatnie importy', connections: 'Połączone konta', ask: 'Zapytaj agenta, co się dzieje — przeczyta logi i profiler.', widgetsAsk: 'Napisz agentowi „napraw grę” — zna ten błąd.', day: 'Dzień', views: 'Wejścia', open: 'Otwórz stronę',
 } : {
     title: 'Dashboard', subtitle: 'Everything about your site in one place. Only you can see this.', visits: 'Visits', last30: 'last 30 days', today: 'today',
     week: 'this week', vsPrev: 'than the week before', same: 'same as the week before', noVisits: 'No visits yet. Visitors are counted without cookies or personal data; your own visits do not count.',
     topPages: 'Most visited', answers: 'Visitors\' answers', noForms: 'There is no form on the site yet. Ask e.g. “add a sign-up form”.', people: 'people', places: 'places taken', newer: 'new', excel: 'Excel', closed: 'closed',
     changes: 'Recent changes', version: 'Version', content: 'Content', pages: 'pages', blocks: 'blocks', photos: 'photos', albums: 'albums', records: 'records',
-    health: 'Application health', good: 'All good', warning: 'Worth a look', attention: 'Needs attention', errors: 'Errors in logs (24 h)', worker: 'Background jobs', running: 'running', stopped: 'not running', workerHint: 'Imports and notifications wait because background jobs are not processed. Start again: ./cadenza start', queued: 'Jobs waiting', failed: 'Failed jobs', imports: 'Recent imports', connections: 'Connected accounts', ask: 'Ask the agent what is going on — it reads the logs and the profiler.', day: 'Day', views: 'Views', open: 'Open the site',
+    health: 'Application health', good: 'All good', warning: 'Worth a look', attention: 'Needs attention', errors: 'Errors in logs (24 h)', worker: 'Background jobs', running: 'running', stopped: 'not running', workerHint: 'Imports and notifications wait because background jobs are not processed. Start again: ./cadenza start', queued: 'Jobs waiting', failed: 'Failed jobs', imports: 'Recent imports', connections: 'Connected accounts', ask: 'Ask the agent what is going on — it reads the logs and the profiler.', widgetsAsk: 'Tell the agent “fix the game” — it knows this error.', day: 'Day', views: 'Views', open: 'Open the site',
 } -%}
 {% block title %}{{ t.title }} · {{ cadenza_state().document.name }}{% endblock %}
 {% block main %}
@@ -171,6 +171,12 @@
                 {%- for j in health.imports|slice(0, 2) %}<div class="flex justify-between gap-3"><dt class="text-muted-foreground">{{ t.imports }} · {{ j.connector|default('') }}</dt><dd class="font-medium">{{ j.status|default('') }}</dd></div>{% endfor %}
             </dl>
             {%- if not health.worker %}<p class="mt-4 rounded-lg bg-muted/60 p-3 text-xs">{{ t.workerHint }}</p>{% endif %}
+            {%- if health.widgets|default([]) is not empty %}
+                <ul class="mt-4 space-y-2 rounded-lg bg-muted/60 p-3 text-xs">
+                    {%- for w in health.widgets %}<li>{{ cadenza_icon('puzzle', 'mr-1 inline size-3.5 align-[-2px]') }}<strong>{{ w.label }}</strong>: {{ w.error }}</li>{% endfor %}
+                </ul>
+                <p class="mt-2 text-xs text-muted-foreground">{{ t.widgetsAsk }}</p>
+            {%- endif %}
             {%- if health.lastErrors is not empty %}
                 <ul class="mt-4 space-y-2 rounded-lg bg-muted/60 p-3 text-xs">
                     {%- for e in health.lastErrors %}<li><span class="text-muted-foreground tabular-nums">{{ e.at|date('d.m H:i') }}</span> {{ e.message }}</li>{% endfor %}

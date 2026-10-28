@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Studio\SiteClient;
 use App\Studio\WidgetProgrammer;
+use App\Studio\WidgetWorkshop;
 use Symfony\AI\Platform\PlatformInterface;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -20,11 +20,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 final class WidgetCommand
 {
     public function __construct(
-        private readonly SiteClient $site,
+        private readonly WidgetWorkshop $workshop,
         #[Autowire(service: 'ai.platform.generic.default')]
         private readonly PlatformInterface $platform,
-        #[Autowire('%env(default:cadenza.llm_model:CADENZA_CODE_MODEL)%')]
-        private readonly string $model,
     ) {
     }
 
@@ -33,20 +31,19 @@ final class WidgetCommand
         #[Argument('lowercase name, e.g. "frogger"')] string $name,
         #[Argument('what it should be and do')] string $brief,
         #[Option('wide, square, tall, banner, auto or background')] string $shape = 'wide',
-        #[Option('another model of the same API, e.g. "kimi-k2.7-code"')] ?string $model = null,
+        #[Option('another model of the same API, e.g. "gpt-oss:120b"')] ?string $model = null,
         #[Option('language of its texts')] string $language = 'pl',
     ): int {
         $started = microtime(true);
-        $programmer = new WidgetProgrammer($this->platform, $model ?? $this->model);
-        $code = $programmer->write($brief, $language, $this->site->widgetLibraries(), $shape, null, null, static fn (string $step) => $io->comment($step));
-        $result = $this->site->defineWidget($name, ucfirst(str_replace('-', ' ', $name)), mb_substr($brief, 0, 500), $code, $shape);
-        if (!($result['ok'] ?? false)) {
-            $io->error((array) ($result['errors'] ?? ['not saved']));
+        $r = $this->workshop->build($name, $brief, ucfirst(str_replace('-', ' ', $name)), $shape, $language, static fn (string $step) => $io->comment($step),
+            null !== $model ? new WidgetProgrammer($this->platform, $model) : null);
+        if (!$r['ok']) {
+            $io->error($r['errors']);
 
             return 1;
         }
-        $errors = WidgetProgrammer::syntaxErrors($code);
-        $io->success(\sprintf('%s v%d: %d KB in %d s%s', $name, $result['version'], \strlen($code) >> 10, microtime(true) - $started, [] !== $errors ? ' — syntax: '.implode('; ', $errors) : ''));
+        $io->success(\sprintf('%s v%d: %d KB in %d s%s', $name, $r['version'], \strlen($r['code']) >> 10, microtime(true) - $started,
+            null !== $r['findings'] ? "\nstill:\n".$r['findings'] : ($r['tested'] ? ', tried in a browser: works' : '')));
 
         return 0;
     }

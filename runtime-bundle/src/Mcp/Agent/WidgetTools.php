@@ -55,7 +55,7 @@ final class WidgetTools
     {
         $widget = $this->widgets->get($name);
 
-        return null === $widget ? ['error' => 'No widget "'.$name.'".'] : ['name' => $name, 'version' => $widget->getVersion(), 'shape' => $widget->getShape(), 'lastError' => $widget->getLastError(), 'code' => $widget->getCode()];
+        return null === $widget ? ['error' => 'No widget "'.$name.'".'] : ['name' => $name, 'description' => $widget->getDescription(), 'version' => $widget->getVersion(), 'shape' => $widget->getShape(), 'lastError' => $widget->getLastError(), 'code' => $widget->getCode()];
     }
 
     /**

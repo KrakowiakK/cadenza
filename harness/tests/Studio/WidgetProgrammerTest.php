@@ -29,4 +29,26 @@ final class WidgetProgrammerTest extends TestCase
         self::assertStringContainsString('line 3', $errors[0]);
         self::assertStringContainsString('SyntaxError', $errors[0]);
     }
+
+    public function testCodeWithASyntaxErrorGoesBackToTheProgrammer(): void
+    {
+        if (null === (new \Symfony\Component\Process\ExecutableFinder())->find('node', null, ['/opt/homebrew/bin', '/usr/local/bin'])) {
+            self::markTestSkipped('Node is not installed');
+        }
+        $answers = ["```html\n<script type=\"module\">const a = (1;</script>\n```", "```html\n<script type=\"module\">const a = 1;</script>\n```"];
+        $calls = 0;
+        $platform = \Symfony\AI\Platform\Test\MockPlatformFactory::createPlatform(static function () use (&$calls, $answers): \Symfony\AI\Platform\Result\StreamResult {
+            $text = $answers[$calls++];
+
+            return new \Symfony\AI\Platform\Result\StreamResult((static function () use ($text): \Generator {
+                yield new \Symfony\AI\Platform\Result\Stream\Delta\TextDelta($text);
+            })());
+        });
+        $steps = [];
+        $code = (new WidgetProgrammer($platform, 'any-model'))->write('a counter', 'pl', ['three' => '0.186.1'], 'wide', progress: static function (string $s) use (&$steps): void { $steps[] = $s; });
+
+        self::assertSame('<script type="module">const a = 1;</script>', $code);
+        self::assertSame(2, $calls);
+        self::assertContains('fixing', $steps);
+    }
 }

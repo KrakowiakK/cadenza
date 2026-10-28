@@ -50,6 +50,10 @@ final class WidgetProgrammer
         and three.js. The frame's background is transparent (the page shows through) unless you paint one. Polished,
         modern and calm: rounded shapes, soft shadows, smooth easing, nothing garish.
 
+        From the page around it: window.cadenza.pointer ({x, y} from 0 to 1 over the frame, or null) and
+        window.cadenza.scroll (0 when the frame enters the screen from below, 1 when it leaves at the top), updated with
+        a "cadenza:view" event on window — they work even for backgrounds that ignore the mouse. Use them for parallax,
+        a scene that follows the mouse or turns as the page scrolls.
         Behaviour: requestAnimationFrame with delta time; pause when the tab is hidden; if window.cadenza.reducedMotion
         is true, keep decorative motion very slow or still. ALL visible text in the language "{language}", short labels
         too (score, best, level, player, computer, start, pause).
@@ -98,8 +102,9 @@ final class WidgetProgrammer
         $progress?->__invoke('checking');
         for ($round = 0; $round < 2 && [] !== ($errors = self::syntaxErrors($code)); ++$round) {
             $progress?->__invoke('fixing');
-            $messages->add(Message::ofAssistant("```html\n".$code."\n```"));
-            $messages->add(Message::ofUser("The code has errors:\n- ".implode("\n- ", $errors)."\n\nAnswer with the complete corrected code."));
+            $messages = $messages
+                ->with(Message::ofAssistant("```html\n".$code."\n```"))
+                ->with(Message::ofUser("The code has errors:\n- ".implode("\n- ", $errors)."\n\nAnswer with the complete corrected code."));
             $code = self::extract($this->complete($messages));
         }
 

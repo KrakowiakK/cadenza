@@ -61,6 +61,9 @@ final class WidgetsTest extends WebTestCase
         $client->request('GET', '/_cadenza/widget-lib/three');
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('Access-Control-Allow-Origin', '*');
+        $client->request('GET', '/_cadenza/widget-lib/three/addons/controls/OrbitControls.js');
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString('from"three"', str_replace(' ', '', (string) $client->getResponse()->getContent()));
         $client->request('GET', '/_cadenza/widget-lib/chart.js/auto');
         self::assertStringContainsString('registerables', (string) $client->getResponse()->getContent());
         $client->request('GET', '/_cadenza/widget-lib/@hotwired/turbo');

@@ -38,7 +38,7 @@ final class WidgetTestCommand
         $run = $this->tester->run($name, (int) $widget['version'], (string) ($widget['shape'] ?? 'wide'));
         $io->listing(array_merge($run['screenshots'], $run['errors'] ?: ['no browser errors']));
         $description = array_column($this->site->widgets(), 'description', 'name')[$name] ?? $name;
-        $io->writeln($this->tester->review((string) $description, $run['screenshots'], $run['played']) ?? 'Looks right.');
+        $io->writeln($this->tester->review((string) $description, $run['screenshots'], $run['played'], (string) ($widget['shape'] ?? 'wide')) ?? 'Looks right.');
 
         return 0;
     }

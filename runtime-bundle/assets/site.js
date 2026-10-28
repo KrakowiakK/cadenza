@@ -274,6 +274,26 @@ window.addEventListener('message', (e) => {
         }).catch(() => {});
     }
 });
+// What a frame cannot see by itself: where it is as the page scrolls (0 = just below the screen, 1 = just above it)
+// and where the pointer is over it (0–1) — so a background can follow the mouse and the scroll.
+let widgetTick = 0;
+const tellWidgets = (pointer) => {
+    if (widgetTick) return;
+    widgetTick = requestAnimationFrame(() => {
+        widgetTick = 0;
+        const vh = window.innerHeight;
+        document.querySelectorAll('iframe[data-cz-widget][src]').forEach((frame) => {
+            const r = frame.getBoundingClientRect();
+            if (r.bottom < -vh || r.top > 2 * vh) return;
+            const message = { cadenzaView: { scroll: Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height))), visible: r.bottom > 0 && r.top < vh } };
+            if (pointer) message.cadenzaView.pointer = { x: (pointer.clientX - r.left) / r.width, y: (pointer.clientY - r.top) / r.height };
+            frame.contentWindow?.postMessage(message, '*');
+        });
+    });
+};
+let lastPointer = null;
+window.addEventListener('scroll', () => tellWidgets(lastPointer), { passive: true });
+window.addEventListener('pointermove', (e) => { lastPointer = { clientX: e.clientX, clientY: e.clientY }; tellWidgets(lastPointer); }, { passive: true });
 document.addEventListener('turbo:load', widgets);
 document.addEventListener('turbo:frame-load', widgets);
 if (document.readyState !== 'loading') widgets(); else document.addEventListener('DOMContentLoaded', widgets);

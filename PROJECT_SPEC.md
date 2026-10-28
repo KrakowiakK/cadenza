@@ -581,14 +581,15 @@ Zrobione i działające end-to-end (sprawdzone w przeglądarce; testy: `./cadenz
 | Wersje językowe: `translate_page` (model tłumaczy tylko listę tekstów, drzewo odtwarzane), przełącznik języka, menu na język, teksty strony w języku podstrony; walidacja kotwic do sekcji | ✅ |
 | Dokumenty do pobrania (PDF/DOCX/ODT/PPTX): `add_document`, blok `downloads`, typ propsa `file`; menu na telefonie (`<details>`, bez JS) | ✅ |
 | Nowe bloki pisane przez agenta (§6.4 w wersji bezpiecznej): schemat propsów + szablon Twig w bazie, osobne środowisko Twig bez globali, Twig Sandbox, HtmlSanitizer, ikony po sanityzacji, test na przykładowych danych przed zapisem, Tailwind przebudowywany w tle (`BlockDefined`) | ✅ |
+| Widżety z kodem (gry, three.js, SVG, wykresy, kalkulatory): kod agenta w osobnym dokumencie z `sandbox` w nagłówku CSP (nieprzezroczyste źródło, bez sieci poza bibliotekami i zdjęciami strony), biblioteki z importmap strony z CORS; programista = osobne wywołanie modelu, `node --check`, próba w headless Chrome przez **Symfony Panther** (start, klawisze, zrzuty, błędy konsoli) i ocena zrzutów modelem wizyjnym → jedna runda poprawek; tło nagłówka z widżetu, rekordy gości w localStorage strony, przewijanie i kursor przekazywane do ramki; błędy z przeglądarki właściciela w pulpicie i w `widget_status` | ✅ |
 | Mapa: podróże z GPS zdjęć (trasa w czasie, legenda) i miejsca z adresów (Nominatim z uproszczeniami) | ✅ |
 | Diagnostyka przez Symfony AI Mate, izolacja błędów renderu, model zapasowy, tolerancja błędów modeli (JsonRepair, lenient resolver), polityka narzędzi w kodzie | ✅ |
 | Uruchomienie jednym poleceniem, README EN, licencja MIT, lista zgłoszeń do upstreamu, scenariusz filmu | ✅ |
 
 Nie zrobione (świadomie poza zakresem lub na później):
-- tworzenie nowych klocków z kodem przez agenta, bramki PHPStan/testy, worktree i tryb cienia (§6.4, §7.3–7.4);
+- klocki z kodem PHP (kod JS ma widżet w piaskownicy), bramki PHPStan/testy, worktree i tryb cienia (§6.4, §7.3–7.4);
 - samonaprawa z ponawianiem komunikatów z failure transport (§7.5) — jest diagnostyka przez Mate, brak pętli naprawy;
-- wizualna kontrola szkiców zrzutami Panther + model wizyjny;
+- wizualna kontrola całych szkiców stron zrzutami (jest dla widżetów);
 - MCP Apps (§7.7), interfejs EN/PL przez Translator (panel ma własny słownik EN/PL);
 - PHPStan na poziomie max (testy są, analiza statyczna nie).
 

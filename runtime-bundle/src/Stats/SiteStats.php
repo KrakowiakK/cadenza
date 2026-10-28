@@ -33,6 +33,7 @@ final class SiteStats
         private readonly MediaLibrary $media,
         private readonly Collections $collections,
         private readonly Connectors $connectors,
+        private readonly \Cadenza\Runtime\Widget\Widgets $widgets,
         #[Autowire(service: 'messenger.receiver_locator')]
         private readonly ContainerInterface $receivers,
         #[Autowire('%kernel.logs_dir%/%kernel.environment%.log')]
@@ -114,6 +115,13 @@ final class SiteStats
         // The worker checks in every 30 s; two minutes of silence means nobody processes background jobs.
         $worker = null !== $seen && time() - $seen < 120;
         $imports = array_map(static fn (ImportJob $j): array => $j->toArray(), $this->em->getRepository(ImportJob::class)->findBy([], ['id' => 'DESC'], 3));
+        // Widgets a browser reported as broken while the owner looked at them.
+        $brokenWidgets = [];
+        foreach ($this->widgets->all() as $widget) {
+            if (null !== $widget->getLastError()) {
+                $brokenWidgets[] = ['name' => $widget->getName(), 'label' => $widget->getLabel(), 'error' => $widget->getLastError()];
+            }
+        }
         $connections = [];
         foreach ($this->connectors->all() as $name => $_) {
             if (null !== $c = $this->connectors->connection($name)) {
@@ -124,7 +132,7 @@ final class SiteStats
         return [
             'status' => match (true) {
                 $failed > 0 || $errors >= 10 || (!$worker && $queued > 0) => 'attention',
-                $errors > 0 || $queued > 20 || !$worker => 'warning',
+                $errors > 0 || $queued > 20 || !$worker || [] !== $brokenWidgets => 'warning',
                 default => 'good',
             },
             'errors' => $errors,
@@ -135,6 +143,7 @@ final class SiteStats
             'failed' => $failed,
             'imports' => $imports,
             'connections' => $connections,
+            'widgets' => $brokenWidgets,
             'versions' => [
                 'PHP' => \PHP_VERSION,
                 'Symfony' => Kernel::VERSION,

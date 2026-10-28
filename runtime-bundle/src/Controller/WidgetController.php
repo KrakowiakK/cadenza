@@ -88,7 +88,7 @@ final class WidgetController
         ]);
     }
 
-    #[Route('/_cadenza/widget-lib/{library}', name: 'cadenza_widget_library', requirements: ['library' => '[@a-z0-9][a-z0-9@._/-]{0,120}'], methods: ['GET'])]
+    #[Route('/_cadenza/widget-lib/{library}', name: 'cadenza_widget_library', requirements: ['library' => '[@a-z0-9][A-Za-z0-9@._/-]{0,120}'], methods: ['GET'])]
     public function library(string $library): Response
     {
         $source = $this->libraries->source($library) ?? throw new NotFoundHttpException();
@@ -165,7 +165,16 @@ final class WidgetController
             const hex = (v) => { paint.clearRect(0, 0, 1, 1); paint.fillStyle = '#000'; paint.fillStyle = v || '#000'; paint.fillRect(0, 0, 1, 1); const [r, g, b] = paint.getImageData(0, 0, 1, 1).data; return '#' + [r, g, b].map((n) => n.toString(16).padStart(2, '0')).join(''); };
             const colors = {};
             for (const t of ['primary', 'primary-foreground', 'background', 'foreground', 'muted', 'muted-foreground', 'accent', 'accent-foreground', 'secondary', 'border', 'card']) colors[t.replace(/-(\w)/g, (m, c) => c.toUpperCase())] = hex(css.getPropertyValue('--' + t).trim());
-            window.cadenza = {colors, language: document.documentElement.lang, reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches};
+            window.cadenza = {colors, language: document.documentElement.lang, reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches, scroll: 0.5, pointer: null, visible: true};
+            // From the page around it: scroll position, pointer over the frame (also when it ignores pointer events).
+            addEventListener('message', (e) => {
+                const v = e.source === parent && e.data && e.data.cadenzaView;
+                if (!v || typeof v.scroll !== 'number') return;
+                window.cadenza.scroll = v.scroll;
+                window.cadenza.visible = !!v.visible;
+                if (v.pointer && typeof v.pointer.x === 'number' && typeof v.pointer.y === 'number') window.cadenza.pointer = {x: v.pointer.x, y: v.pointer.y};
+                dispatchEvent(new CustomEvent('cadenza:view', {detail: window.cadenza}));
+            });
             const report = (text) => send({error: String(text).slice(0, 500)});
             addEventListener('error', (e) => {
                 if (e.target && e.target.tagName === 'SCRIPT') { report('A script did not load: ' + (e.target.src || 'an import of an inline module')); return; }
