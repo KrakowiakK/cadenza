@@ -114,6 +114,30 @@ final class OperationApplierTest extends TestCase
         self::assertFalse($this->applier->apply($doc, [['op' => 'node.insert', 'page' => '/', 'node' => ['type' => 'button', 'props' => ['label' => 'Go', 'href' => '#nowhere']]]])->isValid());
     }
 
+    public function testLanguageNextToAMenuNamesTheMenusLanguage(): void
+    {
+        $result = $this->applier->apply(Document::empty(), [
+            ['op' => 'page.create', 'path' => '/', 'title' => 'Start', 'nodes' => [['id' => 'about', 'type' => 'heading', 'props' => ['text' => 'O mnie']]]],
+            ['op' => 'page.create', 'path' => '/en', 'title' => 'Home', 'lang' => 'en', 'translationOf' => '/', 'nodes' => [['id' => 'about-en', 'type' => 'heading', 'props' => ['text' => 'About']]]],
+            ['op' => 'site.update', 'language' => 'pl', 'nav' => [['label' => 'O mnie', 'href' => '/#about']]],
+            ['op' => 'site.update', 'language' => 'en', 'nav' => [['label' => 'About', 'href' => '/en#about-en']]],
+        ]);
+
+        self::assertTrue($result->isValid(), implode(' ', $result->errors));
+        self::assertSame('pl', $result->document['language']);
+        self::assertSame('O mnie', $result->document['nav']['items'][0]['label']);
+        self::assertSame('About', $result->document['nav']['byLanguage']['en'][0]['label']);
+    }
+
+    public function testSiteUpdateRefusesKeysItWouldIgnore(): void
+    {
+        $result = $this->applier->apply(Document::empty(), [['op' => 'site.update', 'enNav' => [], 'nav' => null]]);
+
+        self::assertFalse($result->isValid());
+        self::assertStringContainsString('"enNav"', $result->errors[0]);
+        self::assertStringContainsString('"lang": "en"', $result->errors[0]);
+    }
+
     public function testUpdateMergesPropsAndReplaceKeepsTheId(): void
     {
         $doc = $this->page([['type' => 'heading', 'props' => ['text' => 'Old']]]);

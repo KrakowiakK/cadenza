@@ -21,13 +21,16 @@ final class Outline
             \sprintf('Site "%s"%s', $doc['name'], $doc['tagline'] ? ' — '.$doc['tagline'] : ''),
             \sprintf('Theme: direction=%s preset=%s mode=%s fonts=%s/%s radius=%s%s', $theme['style'] ?? 'none', $theme['preset'], $theme['mode'], $theme['fontHeading'], $theme['fontBody'], $theme['radius'], $theme['tokens'] ? ' tokens='.json_encode($theme['tokens']) : ''),
             'Navigation: '.(\is_array($doc['nav']['items']) ? json_encode($doc['nav']['items'], \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES) : 'automatic (all pages)'),
+            ...array_map(static fn (string $lang, array $items): string => \sprintf('Navigation of "%s" pages (change with site.update "lang": "%s"): %s', $lang, $lang, json_encode($items, \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES)), array_keys($doc['nav']['byLanguage'] ?? []), $doc['nav']['byLanguage'] ?? []),
         ];
         if ([] === $doc['pages']) {
             $lines[] = 'Pages: none yet (the site is a blank canvas; create "/" first).';
         }
         foreach ($doc['pages'] as $page) {
             $lines[] = '';
-            $lines[] = \sprintf('Page %s "%s" [%s]%s', $page['path'], $page['title'], $page['id'], ($page['hidden'] ?? false) ? ' (hidden from nav)' : '');
+            $lines[] = \sprintf('Page %s "%s" [%s]%s%s%s', $page['path'], $page['title'], $page['id'], ($page['hidden'] ?? false) ? ' (hidden from nav)' : '',
+                isset($page['lang']) ? ' lang '.$page['lang'].(isset($page['translationOf']) ? ', translation of '.$page['translationOf'] : '') : '',
+                'members' === ($page['access'] ?? 'public') ? ' (members only)' : '');
             $lines = [...$lines, ...self::nodes($page['nodes'], 1)];
             if ([] === $page['nodes']) {
                 $lines[] = '  (empty)';

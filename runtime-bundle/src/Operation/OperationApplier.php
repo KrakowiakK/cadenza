@@ -379,9 +379,22 @@ final class OperationApplier
 
     private function siteUpdate(array $doc, array $op): array
     {
+        // An unknown key would be ignored silently and the agent would believe it changed something.
+        $unknown = array_diff(array_keys($op), ['op', 'name', 'tagline', 'language', 'announcement', 'footer', 'nav', 'lang']);
+        if ([] !== $unknown) {
+            throw new OperationException(\sprintf('unknown key(s) %s; site.update takes name, tagline, language, announcement, footer, nav. The menu of pages in another language: {"op": "site.update", "lang": "en", "nav": [{"label": "…", "href": "/en#id"}]}.', implode(', ', array_map(static fn (int|string $k): string => '"'.$k.'"', $unknown))));
+        }
         foreach (['name', 'tagline'] as $field) {
             if (\array_key_exists($field, $op)) {
                 $doc[$field] = $op[$field];
+            }
+        }
+        // With a menu, "language" names the menu's language (models mix up "language" and "lang"); the site's own
+        // language is then set only when it has none yet.
+        if (\array_key_exists('nav', $op) && isset($op['language']) && !isset($op['lang'])) {
+            $op['lang'] = $op['language'];
+            if (isset($doc['language'])) {
+                unset($op['language']);
             }
         }
         if (\array_key_exists('language', $op)) {
