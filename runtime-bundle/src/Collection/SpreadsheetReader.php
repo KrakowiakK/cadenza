@@ -83,7 +83,7 @@ final class SpreadsheetReader
             $all(static fn (string $v): bool => is_numeric(str_replace([' ', ','], ['', '.'], $v))) => 'number',
             $all(static fn (string $v): bool => (bool) preg_match('/^(tak|nie|yes|no|true|false|0|1|x)$/iu', $v)) => 'bool',
             $all(static fn (string $v): bool => false !== strtotime($v) && (bool) preg_match('/\d{4}|\d{1,2}[.\/-]\d{1,2}/', $v)) => 'date',
-            \count(array_unique($strings)) <= max(2, (int) ceil(\count($strings) / 4)) && \count(array_unique($strings)) <= 12 && max(array_map('mb_strlen', $strings)) <= 40 => 'category',
+            \count(array_unique($strings)) <= max(2, (int) ceil(\count($strings) / 2)) && \count(array_unique($strings)) <= 12 && max(array_map('mb_strlen', $strings)) <= 40 => 'category',
             max(array_map('mb_strlen', $strings)) > 120 => 'longtext',
             default => 'text',
         };
