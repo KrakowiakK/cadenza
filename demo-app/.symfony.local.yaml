@@ -1,5 +1,5 @@
 workers:
     # Background jobs (imports) and the daily sync of connected accounts
     messenger_consume:
-        cmd: ['symfony', 'console', 'messenger:consume', 'async', 'scheduler_cadenza', '--time-limit=3600']
+        cmd: ['symfony', 'console', 'messenger:consume', 'async', 'scheduler_cadenza']
         watch: ['config', 'src', 'templates', 'vendor/cadenza']

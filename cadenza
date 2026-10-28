@@ -88,7 +88,7 @@ start() {
         step "Starting with PHP's built-in server (Symfony CLI not found)"
         (cd "$APP" && PHP_CLI_SERVER_WORKERS=4 nohup php -c "$APP/php.ini" -S "0.0.0.0:$APP_PORT" -t public "$ROOT/bin/router.php" </dev/null >"$RUN/app.log" 2>&1 & echo $! >"$RUN/app.pid")
         (cd "$STUDIO" && PHP_CLI_SERVER_WORKERS=4 nohup php -c "$STUDIO/php.ini" -S "127.0.0.1:$STUDIO_PORT" -t public "$ROOT/bin/router.php" </dev/null >"$RUN/studio.log" 2>&1 & echo $! >"$RUN/studio.pid")
-        (cd "$APP" && nohup php bin/console messenger:consume async scheduler_cadenza --time-limit=3600 </dev/null >"$RUN/worker.log" 2>&1 & echo $! >"$RUN/worker.pid")
+        (cd "$APP" && nohup php "$APP/bin/console" messenger:consume async scheduler_cadenza </dev/null >"$RUN/worker.log" 2>&1 & echo $! >"$RUN/worker.pid")
     fi
     echo
     bold "Cadenza is running"
@@ -103,6 +103,8 @@ stop() {
     fi
     # PHP's built-in server forks workers (PHP_CLI_SERVER_WORKERS); match all of them by this checkout's router.
     pkill -f "$ROOT/bin/router.php" 2>/dev/null || true
+    # The worker too, also one left behind by an earlier start whose pid file was overwritten.
+    pkill -f "$APP/bin/console messenger:consume" 2>/dev/null || true
     for pid in "$RUN"/*.pid; do
         [ -f "$pid" ] || continue
         kill "$(cat "$pid")" 2>/dev/null || true

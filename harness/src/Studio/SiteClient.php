@@ -191,6 +191,14 @@ final class SiteClient
         return $this->json($this->mcp->get('site')->callTool('form_answers', ['formId' => $formId, 'limit' => 60]));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    public function stats(): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('site_stats'));
+    }
+
     private function text(CallToolResult $result): string
     {
         $text = '';

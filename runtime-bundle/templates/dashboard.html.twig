@@ -1,0 +1,202 @@
+{% extends '@CadenzaRuntime/layout.html.twig' %}
+{%- set pl = cadenza_state().document.language|default('en')|slice(0, 2) == 'pl' -%}
+{%- set t = pl ? {
+    title: 'Pulpit', subtitle: 'Wszystko o Twojej stronie w jednym miejscu. Widzisz to tylko Ty.', visits: 'Odwiedziny', last30: 'ostatnie 30 dni', today: 'dziś',
+    week: 'w tym tygodniu', vsPrev: 'niż tydzień wcześniej', same: 'tyle samo co tydzień wcześniej', noVisits: 'Jeszcze nikt nie odwiedził strony. Liczymy wejścia gości — bez ciasteczek i bez danych osobowych; Twoje wejścia się nie liczą.',
+    topPages: 'Najczęściej odwiedzane', answers: 'Odpowiedzi odwiedzających', noForms: 'Na stronie nie ma jeszcze formularza. Poproś np. „dodaj formularz zapisów”.', people: 'osób', places: 'miejsc zajętych', newer: 'nowe', excel: 'Excel', closed: 'zamknięty',
+    changes: 'Ostatnie zmiany', version: 'Wersja', content: 'Zawartość', pages: 'strony', blocks: 'bloki', photos: 'zdjęcia', albums: 'albumy', records: 'rekordów',
+    health: 'Stan aplikacji', good: 'Wszystko działa', warning: 'Warto zerknąć', attention: 'Wymaga uwagi', errors: 'Błędy w logach (24 h)', worker: 'Praca w tle', running: 'działa', stopped: 'nie działa', workerHint: 'Importy i powiadomienia czekają, bo zadania w tle nie są przetwarzane. Uruchom ponownie: ./cadenza start', queued: 'Zadania w kolejce', failed: 'Zadania nieudane', imports: 'Ostatnie importy', connections: 'Połączone konta', ask: 'Zapytaj agenta, co się dzieje — przeczyta logi i profiler.', day: 'Dzień', views: 'Wejścia', open: 'Otwórz stronę',
+} : {
+    title: 'Dashboard', subtitle: 'Everything about your site in one place. Only you can see this.', visits: 'Visits', last30: 'last 30 days', today: 'today',
+    week: 'this week', vsPrev: 'than the week before', same: 'same as the week before', noVisits: 'No visits yet. Visitors are counted without cookies or personal data; your own visits do not count.',
+    topPages: 'Most visited', answers: 'Visitors\' answers', noForms: 'There is no form on the site yet. Ask e.g. “add a sign-up form”.', people: 'people', places: 'places taken', newer: 'new', excel: 'Excel', closed: 'closed',
+    changes: 'Recent changes', version: 'Version', content: 'Content', pages: 'pages', blocks: 'blocks', photos: 'photos', albums: 'albums', records: 'records',
+    health: 'Application health', good: 'All good', warning: 'Worth a look', attention: 'Needs attention', errors: 'Errors in logs (24 h)', worker: 'Background jobs', running: 'running', stopped: 'not running', workerHint: 'Imports and notifications wait because background jobs are not processed. Start again: ./cadenza start', queued: 'Jobs waiting', failed: 'Failed jobs', imports: 'Recent imports', connections: 'Connected accounts', ask: 'Ask the agent what is going on — it reads the logs and the profiler.', day: 'Day', views: 'Views', open: 'Open the site',
+} -%}
+{% block title %}{{ t.title }} · {{ cadenza_state().document.name }}{% endblock %}
+{% block main %}
+{%- set card = 'rounded-[calc(var(--radius)*1.2)] border border-border bg-card p-5 text-card-foreground md:p-6' -%}
+{%- set label = 'text-xs font-medium tracking-wide uppercase text-muted-foreground' -%}
+<div class="mx-auto w-full max-w-6xl px-6 py-10 md:py-14" data-cz-dashboard>
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-semibold tracking-tight">{{ t.title }}</h1>
+            <p class="mt-1 text-muted-foreground">{{ t.subtitle }}</p>
+        </div>
+        <a href="/" class="inline-flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-2 text-sm font-medium transition hover:bg-muted">{{ cadenza_icon('arrow-left', 'size-4') }}{{ t.open }}</a>
+    </div>
+
+    {#- Headline numbers -#}
+    {%- set answers = forms|reduce((sum, f) => sum + f.answers, 0) -%}
+    {%- set unseen = forms|reduce((sum, f) => sum + f.unseen, 0) -%}
+    {%- set delta = visits.previousWeek > 0 ? ((visits.week - visits.previousWeek) / visits.previousWeek * 100)|round : null -%}
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div class="{{ card }}">
+            <p class="{{ label }}">{{ t.visits }} · {{ t.week }}</p>
+            <p class="mt-2 text-4xl font-semibold tabular-nums">{{ visits.week }}</p>
+            <p class="mt-1 text-sm text-muted-foreground">
+                {%- if delta is not null %}{{ delta == 0 ? t.same : ((delta > 0 ? '↑ ' : '↓ ') ~ (delta|abs) ~ '% ' ~ t.vsPrev) }}{% else %}{{ visits.today }} {{ t.today }}{% endif -%}
+            </p>
+        </div>
+        <div class="{{ card }}">
+            <p class="{{ label }}">{{ t.answers }}</p>
+            <p class="mt-2 text-4xl font-semibold tabular-nums">{{ answers }}</p>
+            <p class="mt-1 text-sm text-muted-foreground">{% if unseen > 0 %}{{ unseen }} {{ t.newer }}{% else %}{{ forms|length }} {{ pl ? 'formularze' : 'forms' }}{% endif %}</p>
+        </div>
+        <div class="{{ card }}">
+            <p class="{{ label }}">{{ t.content }}</p>
+            <p class="mt-2 text-4xl font-semibold tabular-nums">{{ content.pages }}</p>
+            <p class="mt-1 text-sm text-muted-foreground">{{ t.pages }} · {{ content.blocks }} {{ t.blocks }} · {{ content.media }} {{ t.photos }}</p>
+        </div>
+        <div class="{{ card }}">
+            <p class="{{ label }}">{{ t.health }}</p>
+            {%- set status = {good: ['circle-check', 'text-emerald-600 dark:text-emerald-400'], warning: ['triangle-alert', 'text-amber-600 dark:text-amber-400'], attention: ['octagon-alert', 'text-rose-600 dark:text-rose-400']}[health.status] -%}
+            <p class="mt-3 flex items-center gap-2 text-lg font-semibold">{{ cadenza_icon(status[0], 'size-6 ' ~ status[1]) }}{{ attribute(t, health.status) }}</p>
+            <p class="mt-1 text-sm text-muted-foreground">{{ t.version }} {{ content.version }}{% if content.publishedAt %} · {{ content.publishedAt|date('d.m H:i') }}{% endif %}</p>
+        </div>
+    </div>
+
+    {#- Visits over time: one series, so no legend; the title names it. -#}
+    <div class="mt-4 grid gap-4 lg:grid-cols-3">
+        <div class="{{ card }} lg:col-span-2">
+            <div class="flex items-baseline justify-between gap-4">
+                <h2 class="font-semibold">{{ t.visits }} <span class="font-normal text-muted-foreground">· {{ t.last30 }}</span></h2>
+                <p class="text-sm text-muted-foreground tabular-nums">{{ visits.total }}</p>
+            </div>
+            {%- if visits.total == 0 %}
+                <p class="mt-6 rounded-lg bg-muted px-4 py-6 text-center text-sm text-muted-foreground">{{ t.noVisits }}</p>
+            {%- else %}
+                {%- set max = max(visits.days|map(d => d.views)) -%}
+                {%- set top = max <= 4 ? 4 : (max / 4)|round(0, 'ceil') * 4 -%}
+                {%- set w = 720 -%}{%- set h = 180 -%}{%- set slot = w / visits.days|length -%}
+                <div class="relative mt-5" data-cz-chart>
+                    <svg viewBox="0 0 {{ w + 28 }} {{ h + 24 }}" class="w-full overflow-visible" role="img" aria-label="{{ t.visits }}, {{ t.last30 }}">
+                        {%- for i in 0..2 %}
+                            {%- set y = h - h * i / 2 -%}
+                            <line x1="28" x2="{{ w + 28 }}" y1="{{ y }}" y2="{{ y }}" stroke="currentColor" stroke-opacity="{{ i == 0 ? '.25' : '.08' }}" stroke-width="1"/>
+                            <text x="20" y="{{ y + 4 }}" text-anchor="end" font-size="11" fill="currentColor" fill-opacity=".55">{{ top * i / 2 }}</text>
+                        {%- endfor %}
+                        {%- for d in visits.days %}
+                            {%- set bh = d.views > 0 ? max(3, h * d.views / top) : 0 -%}
+                            {%- set x = 28 + slot * loop.index0 + 1 -%}{%- set bw = slot - 2 -%}{%- set r = min(4, bw / 2, bh) -%}
+                            <g data-tip="{{ d.day|format_date('medium', locale: pl ? 'pl' : 'en') }}" data-value="{{ d.views }}">
+                                <rect x="{{ x - 1 }}" y="0" width="{{ slot }}" height="{{ h }}" fill="transparent"/>
+                                {%- if bh > 0 %}<path d="M{{ x }},{{ h }} V{{ h - bh + r }} Q{{ x }},{{ h - bh }} {{ x + r }},{{ h - bh }} H{{ x + bw - r }} Q{{ x + bw }},{{ h - bh }} {{ x + bw }},{{ h - bh + r }} V{{ h }} Z" fill="var(--primary)"/>{% endif %}
+                            </g>
+                        {%- endfor %}
+                        {%- for i in [0, (visits.days|length / 2)|round(0, 'floor'), visits.days|length - 1] %}
+                            <text x="{{ 28 + slot * i + slot / 2 }}" y="{{ h + 18 }}" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity=".55">{{ visits.days[i].day|date('d.m') }}</text>
+                        {%- endfor %}
+                    </svg>
+                    <div data-tooltip hidden class="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs whitespace-nowrap text-popover-foreground shadow-md"></div>
+                </div>
+                <details class="mt-3 text-sm"><summary class="cursor-pointer text-muted-foreground">{{ pl ? 'Tabela' : 'Table' }}</summary>
+                    <table class="mt-2 w-full text-left text-xs"><thead><tr class="text-muted-foreground"><th class="py-1">{{ t.day }}</th><th class="py-1 text-right">{{ t.views }}</th></tr></thead>
+                    <tbody>{% for d in visits.days|reverse %}<tr class="border-t border-border"><td class="py-1">{{ d.day|date('d.m.Y') }}</td><td class="py-1 text-right tabular-nums">{{ d.views }}</td></tr>{% endfor %}</tbody></table>
+                </details>
+            {%- endif %}
+        </div>
+        <div class="{{ card }}">
+            <h2 class="font-semibold">{{ t.topPages }}</h2>
+            {%- if visits.pages is empty %}<p class="mt-4 text-sm text-muted-foreground">—</p>
+            {%- else %}
+                {%- set first = visits.pages[0].views -%}
+                <ul class="mt-4 space-y-3 text-sm">
+                {%- for p in visits.pages %}
+                    <li>
+                        <div class="flex justify-between gap-3"><a href="{{ p.path }}" class="truncate hover:underline">{{ p.path }}</a><span class="tabular-nums text-muted-foreground">{{ p.views }}</span></div>
+                        <div class="mt-1 h-1.5 rounded-full bg-muted"><div class="h-full rounded-full bg-primary" style="width: {{ (p.views / first * 100)|round }}%"></div></div>
+                    </li>
+                {%- endfor %}
+                </ul>
+            {%- endif %}
+        </div>
+    </div>
+
+    {#- Forms -#}
+    <div class="mt-4 {{ card }}">
+        <h2 class="font-semibold">{{ t.answers }}</h2>
+        {%- if forms is empty %}<p class="mt-4 text-sm text-muted-foreground">{{ t.noForms }}</p>
+        {%- else %}
+        <div class="mt-4 grid gap-4 md:grid-cols-2">
+            {%- for f in forms %}
+                <div class="rounded-xl bg-muted/60 p-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <a href="{{ f.page }}#{{ f.id }}" class="font-medium hover:underline">{{ f.title }}</a>
+                            <p class="text-sm text-muted-foreground">{{ f.answers }} {{ pl ? 'odpowiedzi' : 'answers' }}{% if f.capacity or f.people != f.answers %} · {{ f.people }} {{ t.people }}{% endif %}{% if f.unseen %} · <span class="font-medium text-foreground">{{ f.unseen }} {{ t.newer }}</span>{% endif %}{% if not f.open %} · {{ t.closed }}{% endif %}</p>
+                        </div>
+                        <a href="/_cadenza/form/{{ f.id }}/answers.xlsx" data-turbo="false" class="inline-flex shrink-0 items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium hover:bg-muted">{{ cadenza_icon('sheet', 'size-3.5') }}{{ t.excel }}</a>
+                    </div>
+                    {%- if f.capacity %}
+                        <div class="mt-3 h-2 rounded-full bg-background" role="meter" aria-valuemin="0" aria-valuemax="{{ f.capacity }}" aria-valuenow="{{ f.people }}"><div class="h-full rounded-full bg-primary" style="width: {{ min(100, f.people / f.capacity * 100)|round }}%"></div></div>
+                        <p class="mt-1.5 text-xs text-muted-foreground tabular-nums">{{ f.people }} / {{ f.capacity }} {{ t.places }}</p>
+                    {%- endif %}
+                </div>
+            {%- endfor %}
+        </div>
+        {%- endif %}
+    </div>
+
+    <div class="mt-4 grid gap-4 lg:grid-cols-3">
+        {#- Changes -#}
+        <div class="{{ card }}">
+            <h2 class="font-semibold">{{ t.changes }}</h2>
+            <ol class="mt-4 space-y-3 text-sm">
+                {%- for v in content.history %}
+                    <li class="flex gap-3"><span class="mt-0.5 shrink-0 rounded bg-muted px-1.5 text-xs font-medium tabular-nums">{{ v.number }}</span><span class="min-w-0"><span class="line-clamp-2">{{ v.summary }}</span><span class="text-xs text-muted-foreground">{{ v.at ? v.at|date('d.m H:i') : '' }}</span></span></li>
+                {%- endfor %}
+            </ol>
+        </div>
+        {#- Content -#}
+        <div class="{{ card }}">
+            <h2 class="font-semibold">{{ t.content }}</h2>
+            <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div class="rounded-lg bg-muted/60 p-3"><dt class="text-muted-foreground">{{ t.pages }}</dt><dd class="text-xl font-semibold tabular-nums">{{ content.pages }}</dd></div>
+                <div class="rounded-lg bg-muted/60 p-3"><dt class="text-muted-foreground">{{ t.blocks }}</dt><dd class="text-xl font-semibold tabular-nums">{{ content.blocks }}</dd></div>
+                <div class="rounded-lg bg-muted/60 p-3"><dt class="text-muted-foreground">{{ t.photos }}</dt><dd class="text-xl font-semibold tabular-nums">{{ content.media }}</dd></div>
+                <div class="rounded-lg bg-muted/60 p-3"><dt class="text-muted-foreground">{{ t.albums }}</dt><dd class="text-xl font-semibold tabular-nums">{{ content.albums }}</dd></div>
+            </dl>
+            {%- for c in content.collections %}<p class="mt-3 flex justify-between text-sm"><a href="/{{ c.slug }}" class="hover:underline">{{ c.name }}</a><span class="text-muted-foreground tabular-nums">{{ c.records }} {{ t.records }}</span></p>{% endfor %}
+        </div>
+        {#- Health -#}
+        <div class="{{ card }}">
+            <h2 class="font-semibold">{{ t.health }}</h2>
+            <dl class="mt-4 space-y-2 text-sm">
+                <div class="flex justify-between gap-3"><dt class="text-muted-foreground">{{ t.errors }}</dt><dd class="font-medium tabular-nums">{{ health.errors }}</dd></div>
+                <div class="flex justify-between gap-3"><dt class="text-muted-foreground">{{ t.worker }}</dt><dd class="flex items-center gap-1.5 font-medium">{{ health.worker ? cadenza_icon('circle-check', 'size-4 text-emerald-600 dark:text-emerald-400') : cadenza_icon('circle-pause', 'size-4 text-amber-600 dark:text-amber-400') }}{{ health.worker ? t.running : t.stopped }}</dd></div>
+                <div class="flex justify-between gap-3"><dt class="text-muted-foreground">{{ t.queued }}</dt><dd class="font-medium tabular-nums">{{ health.queued ?? '—' }}</dd></div>
+                <div class="flex justify-between gap-3"><dt class="text-muted-foreground">{{ t.failed }}</dt><dd class="font-medium tabular-nums">{{ health.failed ?? '—' }}</dd></div>
+                {%- for c in health.connections %}<div class="flex justify-between gap-3"><dt class="text-muted-foreground">{{ c.connector|capitalize }}</dt><dd class="truncate font-medium">{{ c.account|default('✓') }}</dd></div>{% endfor %}
+                {%- for j in health.imports|slice(0, 2) %}<div class="flex justify-between gap-3"><dt class="text-muted-foreground">{{ t.imports }} · {{ j.connector|default('') }}</dt><dd class="font-medium">{{ j.status|default('') }}</dd></div>{% endfor %}
+            </dl>
+            {%- if not health.worker %}<p class="mt-4 rounded-lg bg-muted/60 p-3 text-xs">{{ t.workerHint }}</p>{% endif %}
+            {%- if health.lastErrors is not empty %}
+                <ul class="mt-4 space-y-2 rounded-lg bg-muted/60 p-3 text-xs">
+                    {%- for e in health.lastErrors %}<li><span class="text-muted-foreground tabular-nums">{{ e.at|date('d.m H:i') }}</span> {{ e.message }}</li>{% endfor %}
+                </ul>
+                <p class="mt-2 text-xs text-muted-foreground">{{ t.ask }}</p>
+            {%- endif %}
+            <p class="mt-4 flex flex-wrap gap-x-3 gap-y-1 border-t border-border pt-3 text-xs text-muted-foreground">{% for name, v in health.versions %}<span>{{ name }} {{ v }}</span>{% endfor %}</p>
+        </div>
+    </div>
+</div>
+<script type="module">
+    // Hover on a day of the visits chart: date and number in a tooltip.
+    const chart = document.querySelector('[data-cz-chart]');
+    if (chart) {
+        const tip = chart.querySelector('[data-tooltip]');
+        chart.querySelectorAll('[data-tip]').forEach((bar) => {
+            bar.addEventListener('pointerenter', () => {
+                const mark = (bar.querySelector('path') ?? bar).getBoundingClientRect(), outer = chart.getBoundingClientRect();
+                tip.innerHTML = `${bar.dataset.tip} · <strong>${bar.dataset.value}</strong>`;
+                tip.style.left = `${mark.left - outer.left + mark.width / 2}px`;
+                tip.style.top = `${mark.top - outer.top - 6}px`;
+                tip.hidden = false;
+                bar.querySelector('path')?.setAttribute('fill-opacity', '.8');
+            });
+            bar.addEventListener('pointerleave', () => { tip.hidden = true; bar.querySelector('path')?.removeAttribute('fill-opacity'); });
+        });
+    }
+</script>
+{% endblock %}

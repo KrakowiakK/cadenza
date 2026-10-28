@@ -19,7 +19,7 @@ const I18N = {
         error: 'Something went wrong', harnessDown: 'Cannot reach the Cadenza studio (harness). Is it running?',
         steps: 'steps', selection: 'Selected', showChanges: 'Show changes',
         attach: 'Attach photos', draw: 'Draw a sketch', sketchPrompt: 'Build the page following my sketch',
-        uploading: 'Uploading…', chat: 'Conversation', history: 'History', version: 'Version', current: 'current',
+        uploading: 'Uploading…', chat: 'Conversation', history: 'History', dashboard: 'Dashboard', version: 'Version', current: 'current',
         preview: 'Preview', restore: 'Restore', restoreThis: 'Restore this version', close: 'Close', undo: 'Undo',
         startOver: 'Start over', startOverConfirm: 'Sure? Click again — history is kept.', restored: 'Restored — a new version was published.',
         pickPhoto: 'Pick a photo', picked: 'In the sketch', noHistory: 'Nothing published yet.',
@@ -50,7 +50,7 @@ const I18N = {
         error: 'Coś poszło nie tak', harnessDown: 'Nie mogę połączyć się ze studiem Cadenzy (harness). Czy działa?',
         steps: 'kroki', selection: 'Zaznaczone', showChanges: 'Pokaż zmiany',
         attach: 'Dołącz zdjęcia', draw: 'Narysuj szkic', sketchPrompt: 'Zbuduj stronę według mojego szkicu',
-        uploading: 'Wysyłam…', chat: 'Rozmowa', history: 'Historia', version: 'Wersja', current: 'bieżąca',
+        uploading: 'Wysyłam…', chat: 'Rozmowa', history: 'Historia', dashboard: 'Pulpit', version: 'Wersja', current: 'bieżąca',
         preview: 'Podgląd', restore: 'Przywróć', restoreThis: 'Przywróć tę wersję', close: 'Zamknij', undo: 'Cofnij',
         startOver: 'Zacznij od nowa', startOverConfirm: 'Na pewno? Kliknij jeszcze raz — historia zostaje.', restored: 'Przywrócono — opublikowano nową wersję.',
         pickPhoto: 'Wybierz zdjęcie', picked: 'W szkicu', noHistory: 'Nic jeszcze nie opublikowano.',
@@ -117,6 +117,7 @@ const ICONS = {
     clip: '<path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',
     pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
     clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    dashboard: '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
     chat: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
     square: '<rect x="4" y="4" width="16" height="16" rx="1"/>',
     type: '<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>',
@@ -165,6 +166,7 @@ class Studio {
       <div class="text-sm font-semibold leading-tight">Cadenza</div>
       <div class="flex items-center gap-2 text-xs text-muted-foreground"><span data-cz="status" class="flex items-center gap-1.5"></span><span data-cz="model" class="truncate opacity-70"></span></div>
     </div>
+    <a href="/_cadenza/dashboard" data-cz="dashboard" title="${t('dashboard')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('dashboard')}</a>
     <button type="button" data-cz="tab-history" title="${t('history')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('clock')}</button>
     <button type="button" data-cz="new" title="${t('newChat')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('plus')}</button>
     <button type="button" data-cz="collapse" title="${t('collapse')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('minimize')}</button>
