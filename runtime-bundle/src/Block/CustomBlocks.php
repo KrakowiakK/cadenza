@@ -27,7 +27,7 @@ final class CustomBlocks implements NodeTypeProviderInterface
         private readonly Catalog $catalog,
         #[\Symfony\Component\DependencyInjection\Attribute\Target('cadenza.event_bus')]
         private readonly \Symfony\Component\Messenger\MessageBusInterface $events,
-        #[\Symfony\Component\DependencyInjection\Attribute\Autowire('%kernel.project_dir%/var/cadenza/blocks')]
+        #[\Symfony\Component\DependencyInjection\Attribute\Autowire('%cadenza.blocks_dir%')]
         private readonly string $sourceDir,
     ) {
     }

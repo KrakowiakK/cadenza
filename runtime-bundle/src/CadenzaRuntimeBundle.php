@@ -34,7 +34,9 @@ final class CadenzaRuntimeBundle extends AbstractBundle
         $container->parameters()
             ->set('cadenza.token', $config['token'])
             ->set('cadenza.harness_url', rtrim($config['harness_url'], '/'))
-            ->set('cadenza.notify_email', $config['notify_email'] ?: null);
+            ->set('cadenza.notify_email', $config['notify_email'] ?: null)
+            // Copies of the agent's block templates for Tailwind to read (tests keep theirs in the cache).
+            ->set('cadenza.blocks_dir', 'test' === $builder->getParameter('kernel.environment') ? '%kernel.cache_dir%/cadenza_block_sources' : '%kernel.project_dir%/var/cadenza/blocks');
 
         $container->services()
             ->defaults()->autowire()->autoconfigure()
