@@ -49,9 +49,10 @@ final class MediaLibrary
     }
 
     /**
-     * @param array<string, ?string> $meta
+     * @param array<string, ?string>         $meta
+     * @param (callable(Media): void)|null $describe sets connector details before saving
      */
-    public function store(string $bytes, array $meta = []): Media
+    public function store(string $bytes, array $meta = [], ?callable $describe = null): Media
     {
         $info = @getimagesizefromstring($bytes);
         if (false === $info || !isset(self::TYPES[$info['mime']])) {
@@ -97,10 +98,18 @@ final class MediaLibrary
             $meta['license'] ?? null,
             $meta['licenseUrl'] ?? null,
         );
+        if (null !== $describe) {
+            $describe($media);
+        }
         $this->em->persist($media);
         $this->em->flush();
 
         return $media;
+    }
+
+    public function findExternal(string $source, string $externalId): ?Media
+    {
+        return $this->em->getRepository(Media::class)->findOneBy(['source' => $source, 'externalId' => $externalId]);
     }
 
     /**
@@ -109,5 +118,54 @@ final class MediaLibrary
     public function recent(int $limit = 30): array
     {
         return $this->em->getRepository(Media::class)->findBy([], ['id' => 'DESC'], $limit);
+    }
+
+    /**
+     * Images for data-bound views (media-gallery), filtered by source, hashtag/tag and year.
+     *
+     * @return list<Media>
+     */
+    public function query(?string $source = null, ?string $tag = null, ?int $year = null, string $sort = 'newest', int $limit = 60): array
+    {
+        $qb = $this->em->getRepository(Media::class)->createQueryBuilder('m')->setMaxResults(max(1, min(500, $limit)));
+        if (null !== $source && '' !== $source && 'all' !== $source) {
+            $qb->andWhere('m.source = :source')->setParameter('source', $source);
+        }
+        if (null !== $year) {
+            $qb->andWhere('m.takenAt >= :from AND m.takenAt < :to')
+                ->setParameter('from', new \DateTimeImmutable($year.'-01-01'))
+                ->setParameter('to', new \DateTimeImmutable(($year + 1).'-01-01'));
+        }
+        $qb->addSelect('COALESCE(m.takenAt, m.createdAt) AS HIDDEN sortDate')->orderBy('sortDate', 'oldest' === $sort ? 'ASC' : 'DESC');
+        $items = $qb->getQuery()->getResult();
+        if (null !== $tag && '' !== $tag) {
+            $tag = mb_strtolower(ltrim($tag, '#'));
+            $items = array_values(array_filter($items, static fn (Media $m): bool => \in_array($tag, $m->getTags(), true)));
+        }
+
+        return $items;
+    }
+
+    /**
+     * @return array{total: int, sources: array<string, int>, tags: array<string, int>, years: array<int, int>}
+     */
+    public function stats(): array
+    {
+        $all = $this->em->getRepository(Media::class)->findAll();
+        $sources = $tags = $years = [];
+        foreach ($all as $m) {
+            $sources[$m->getSource()] = ($sources[$m->getSource()] ?? 0) + 1;
+            foreach ($m->getTags() as $tag) {
+                $tags[$tag] = ($tags[$tag] ?? 0) + 1;
+            }
+            if (null !== $m->getTakenAt()) {
+                $y = (int) $m->getTakenAt()->format('Y');
+                $years[$y] = ($years[$y] ?? 0) + 1;
+            }
+        }
+        arsort($tags);
+        krsort($years);
+
+        return ['total' => \count($all), 'sources' => $sources, 'tags' => \array_slice($tags, 0, 30, true), 'years' => $years];
     }
 }

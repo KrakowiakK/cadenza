@@ -25,6 +25,10 @@ final class ToolTraceSubscriber
         'offer_images' => ['en' => 'Picking photos for you', 'pl' => 'Wybieram zdjęcia dla Ciebie'],
         'use_image' => ['en' => 'Adding an image', 'pl' => 'Dodaję obraz'],
         'generate_image' => ['en' => 'Generating an image', 'pl' => 'Generuję obraz'],
+        'list_connectors' => ['en' => 'Checking connections', 'pl' => 'Sprawdzam połączenia'],
+        'connect_account' => ['en' => 'Preparing the connection', 'pl' => 'Przygotowuję połączenie'],
+        'import_content' => ['en' => 'Starting the import', 'pl' => 'Uruchamiam import'],
+        'media_overview' => ['en' => 'Looking at your photos', 'pl' => 'Przeglądam Twoje zdjęcia'],
     ];
 
     /** @var array<string, list<string>> */

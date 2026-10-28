@@ -1,0 +1,20 @@
+{
+    "$schema": "../../schema-block-v1.json",
+    "type": "source",
+    "name": "Instagram",
+    "version": "0.1.0",
+    "description": "Imports the owner's Instagram posts (photos, captions, dates, hashtags) into the media library.",
+    "dependencies": { "composer": ["symfony/http-client:^8.1"] },
+    "connector": {
+        "name": "instagram",
+        "methods": ["oauth", "file"],
+        "oauth": { "scopes": ["instagram_business_basic"], "env": ["INSTAGRAM_CLIENT_ID", "INSTAGRAM_CLIENT_SECRET"] },
+        "file": { "accept": "Instagram data export (ZIP, JSON format)" }
+    },
+    "messages": {
+        "consumes": ["Cadenza\\Runtime\\Message\\RunImport", "Cadenza\\Runtime\\Message\\SyncConnections"],
+        "emits": ["Cadenza\\Runtime\\Message\\MediaImported"]
+    },
+    "permissions": { "http": ["api.instagram.com", "graph.instagram.com", "www.instagram.com", "*.cdninstagram.com", "*.fbcdn.net"] },
+    "status": "candidate"
+}

@@ -42,9 +42,28 @@ final class UploadStore
         return ['id' => $id, 'url' => $this->url($id), 'name' => $name, 'mime' => $info['mime'], 'width' => $info[0], 'height' => $info[1]];
     }
 
+    /**
+     * Any other file the owner gives (export archives…), kept as is.
+     *
+     * @return array{id: string, url: string, name: string, mime: string, size: int}
+     */
+    public function saveFile(string $sourcePath, string $name): array
+    {
+        if (!str_starts_with((string) file_get_contents($sourcePath, false, null, 0, 4), "PK\x03\x04")) {
+            throw new \InvalidArgumentException('Only images and ZIP archives are supported.');
+        }
+        if (!is_dir($this->directory)) {
+            mkdir($this->directory, 0o775, true);
+        }
+        $id = strtolower((string) new Ulid()).'.zip';
+        copy($sourcePath, $this->directory.'/'.$id);
+
+        return ['id' => $id, 'url' => $this->url($id), 'name' => $name, 'mime' => 'application/zip', 'size' => (int) filesize($this->directory.'/'.$id)];
+    }
+
     public function path(string $id): ?string
     {
-        if (!preg_match('/^[a-z0-9]{26}\.(jpg|png|webp|gif)$/', $id)) {
+        if (!preg_match('/^[a-z0-9]{26}\.(jpg|png|webp|gif|zip)$/', $id)) {
             return null;
         }
         $path = $this->directory.'/'.$id;
@@ -63,7 +82,7 @@ final class UploadStore
     public function forModel(string $id): ?string
     {
         $path = $this->path($id);
-        if (null === $path) {
+        if (null === $path || str_ends_with($id, '.zip')) {
             return null;
         }
         $bytes = (string) file_get_contents($path);

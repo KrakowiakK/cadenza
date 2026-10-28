@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cadenza\Runtime\Twig;
 
 use Cadenza\Runtime\Catalog\Catalog;
+use Cadenza\Runtime\Media\MediaLibrary;
 use Cadenza\Runtime\Site\Document;
 use Cadenza\Runtime\Theme\Theme;
 use Symfony\UX\Icons\IconRendererInterface;
@@ -24,7 +25,9 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         private readonly string $harnessUrl,
         #[Autowire('%cadenza.token%')]
         private readonly string $token,
+        private readonly MediaLibrary $media,
         private readonly ?IconRendererInterface $icons = null,
+        private readonly ?\Psr\Log\LoggerInterface $logger = null,
     ) {
     }
 
@@ -42,6 +45,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
             new TwigFunction('cadenza_fonts_url', static fn (array $theme): string => Theme::googleFontsUrl($theme)),
             new TwigFunction('cadenza_nav', static fn (array $doc): array => Document::navItems($doc)),
             new TwigFunction('cadenza_state', fn (): RenderState => $this->state),
+            new TwigFunction('cadenza_media', fn (array $p): array => $this->media->query($p['source'] ?? null, $p['tag'] ?? null, $p['year'] ?? null, $p['sort'] ?? 'newest', (int) ($p['limit'] ?? 60))),
             new TwigFunction('cadenza_icon', $this->icon(...), ['is_safe' => ['html']]),
         ];
     }
@@ -135,7 +139,15 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         if (null !== $inheritedState && \in_array($inheritedState, ['added', 'removed', 'removing'], true)) {
             $state = null;
         }
-        $inner = $twig->render($type->template(), ['node' => $node, 'props' => $props, 'type' => $type]);
+        try {
+            $inner = $twig->render($type->template(), ['node' => $node, 'props' => $props, 'type' => $type]);
+        } catch (\Throwable $e) {
+            // One broken block must not take the page down; the owner sees what failed, visitors see nothing.
+            $this->logger?->error('Cadenza node {id} ({type}) failed to render: {message}', ['id' => $node['id'], 'type' => $node['type'], 'message' => $e->getMessage(), 'exception' => $e]);
+            $inner = $this->state->owner
+                ? \sprintf('<div class="cz-node-error rounded-xl border-2 border-dashed border-rose-300 bg-rose-50 p-4 text-sm text-rose-800"><strong>%s</strong> could not be shown: %s</div>', htmlspecialchars($type->label), htmlspecialchars(mb_substr(($e->getPrevious() ?? $e)->getMessage(), 0, 300)))
+                : '';
+        }
 
         return \sprintf(
             '<div class="cz-node%s" data-node-id="%s" data-node-type="%s" data-node-label="%s"%s style="view-transition-name:cz-%s">%s</div>',

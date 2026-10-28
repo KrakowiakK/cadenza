@@ -35,10 +35,13 @@ final class MediaController
         try {
             $file = $request->files->get('file');
             if (null !== $file) {
-                if ($file->getSize() > 25 * 1024 * 1024) {
-                    return new JsonResponse(['error' => 'The file is larger than 25 MB.'], 413);
+                $isZip = str_ends_with(strtolower($file->getClientOriginalName()), '.zip') || 'application/zip' === $file->getMimeType();
+                if ($file->getSize() > ($isZip ? 500 : 25) * 1024 * 1024) {
+                    return new JsonResponse(['error' => 'The file is too large.'], 413);
                 }
-                $saved = $this->uploads->save((string) file_get_contents($file->getPathname()), $file->getClientOriginalName());
+                $saved = $isZip
+                    ? $this->uploads->saveFile($file->getPathname(), $file->getClientOriginalName())
+                    : $this->uploads->save((string) file_get_contents($file->getPathname()), $file->getClientOriginalName());
             } else {
                 $payload = $request->toArray();
                 if (!preg_match('~^data:image/(png|jpeg|webp);base64,(.+)$~', (string) ($payload['dataUrl'] ?? ''), $m)) {

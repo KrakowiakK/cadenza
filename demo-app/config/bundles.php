@@ -20,4 +20,5 @@ return [
     Symfony\UX\Icons\UXIconsBundle::class => ['all' => true],
     Cadenza\Runtime\CadenzaRuntimeBundle::class => ['all' => true],
     TalesFromADev\Twig\Extra\Tailwind\Bridge\Symfony\Bundle\TalesFromADevTwigExtraTailwindBundle::class => ['all' => true],
+    Cadenza\Source\Instagram\CadenzaSourceInstagramBundle::class => ['all' => true],
 ];

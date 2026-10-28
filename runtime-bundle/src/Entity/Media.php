@@ -12,6 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'cadenza_media')]
+#[ORM\UniqueConstraint(columns: ['source', 'external_id'])]
+#[ORM\Index(columns: ['taken_at'])]
 class Media
 {
     #[ORM\Id]
@@ -21,6 +23,20 @@ class Media
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
+
+    /** Id of the item in the service it came from (Instagram post id…), to import each item once. */
+    #[ORM\Column(length: 191, nullable: true)]
+    private ?string $externalId = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $caption = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $takenAt = null;
+
+    /** @var list<string> */
+    #[ORM\Column(type: Types::JSON)]
+    private array $tags = [];
 
     public function __construct(
         #[ORM\Column(length: 255, unique: true)]
@@ -68,6 +84,35 @@ class Media
         return $this->source;
     }
 
+    public function getCaption(): ?string
+    {
+        return $this->caption;
+    }
+
+    public function getTakenAt(): ?\DateTimeImmutable
+    {
+        return $this->takenAt;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getTags(): array
+    {
+        return $this->tags;
+    }
+
+    /**
+     * @param list<string> $tags
+     */
+    public function describe(?string $externalId, ?string $caption, ?\DateTimeImmutable $takenAt, array $tags): void
+    {
+        $this->externalId = $externalId;
+        $this->caption = null !== $caption ? mb_substr($caption, 0, 5000) : null;
+        $this->takenAt = $takenAt;
+        $this->tags = array_values(array_unique(array_map(static fn (string $t): string => mb_strtolower($t), $tags)));
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -81,6 +126,9 @@ class Media
             'height' => $this->height,
             'orientation' => $this->width > $this->height * 1.15 ? 'landscape' : ($this->height > $this->width * 1.15 ? 'portrait' : 'square'),
             'source' => $this->source,
+            'caption' => null !== $this->caption ? mb_substr($this->caption, 0, 200) : null,
+            'takenAt' => $this->takenAt?->format('Y-m-d'),
+            'tags' => $this->tags ?: null,
             'author' => $this->author,
             'license' => $this->license,
             'licenseUrl' => $this->licenseUrl,

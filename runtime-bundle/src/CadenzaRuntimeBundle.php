@@ -39,7 +39,7 @@ final class CadenzaRuntimeBundle extends AbstractBundle
         $container->services()
             ->defaults()->autowire()->autoconfigure()
             ->load('Cadenza\\Runtime\\', '../src/')
-            ->exclude(['../src/Entity/', '../src/CadenzaRuntimeBundle.php', '../src/Operation/ApplyResult.php', '../src/Operation/OperationException.php', '../src/Draft/DraftResult.php', '../src/Site/Diff.php', '../src/Site/Document.php', '../src/Site/Outline.php', '../src/Catalog/NodeType.php', '../src/Theme/']);
+            ->exclude(['../src/Entity/', '../src/CadenzaRuntimeBundle.php', '../src/Operation/ApplyResult.php', '../src/Operation/OperationException.php', '../src/Draft/DraftResult.php', '../src/Site/Diff.php', '../src/Site/Document.php', '../src/Site/Outline.php', '../src/Catalog/NodeType.php', '../src/Theme/', '../src/Message/', '../src/Connector/ImportContext.php']);
     }
 
     public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
@@ -55,6 +55,17 @@ final class CadenzaRuntimeBundle extends AbstractBundle
         ]);
         $builder->prependExtensionConfig('framework', [
             'asset_mapper' => ['paths' => [$this->getPath().'/assets' => '@cadenza/runtime']],
+            'messenger' => [
+                'buses' => [
+                    'messenger.bus.default' => [],
+                    // Events (MediaImported…): blocks may or may not listen, so no handler is fine.
+                    'cadenza.event_bus' => ['default_middleware' => ['enabled' => true, 'allow_no_handlers' => true]],
+                ],
+                'routing' => [
+                    'Cadenza\\Runtime\\Message\\RunImport' => 'async',
+                    'Cadenza\\Runtime\\Message\\SyncConnections' => 'async',
+                ],
+            ],
         ]);
     }
 }

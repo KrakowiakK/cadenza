@@ -50,9 +50,9 @@ class Conversation
     /**
      * @param list<array<string, string>> $selection
      */
-    public function addUserTurn(string $text, array $selection, string $path, array $attachments = []): void
+    public function addUserTurn(string $text, array $selection, string $path, array $attachments = [], bool $event = false): void
     {
-        $this->turns[] = ['role' => 'user', 'text' => $text, 'selection' => $selection, 'attachments' => $attachments, 'path' => $path, 'at' => date(\DATE_ATOM)];
+        $this->turns[] = array_filter(['role' => 'user', 'text' => $text, 'selection' => $selection, 'attachments' => $attachments, 'path' => $path, 'event' => $event ?: null, 'at' => date(\DATE_ATOM)], static fn (mixed $v): bool => null !== $v);
     }
 
     /**

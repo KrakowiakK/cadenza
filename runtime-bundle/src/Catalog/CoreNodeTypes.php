@@ -65,6 +65,17 @@ final class CoreNodeTypes implements NodeTypeProviderInterface
             'style' => ['type' => 'enum', 'values' => ['grid', 'masonry'], 'default' => 'grid'],
         ]);
 
+        yield new NodeType('media-gallery', 'Live gallery', 'Gallery that shows images straight from the media library, filtered by source (e.g. "instagram"), hashtag/tag and year. It updates by itself when new images arrive (imports, syncs). Use it instead of listing images by hand.', 'media', [
+            'source' => ['type' => 'string', 'default' => 'all', 'description' => '"all", "instagram", "upload", "wikimedia"…'],
+            'tag' => ['type' => 'string', 'default' => null, 'description' => 'only images with this hashtag/tag, without #'],
+            'year' => ['type' => 'int', 'default' => null],
+            'sort' => ['type' => 'enum', 'values' => ['newest', 'oldest'], 'default' => 'newest'],
+            'limit' => ['type' => 'int', 'default' => 60],
+            'columns' => ['type' => 'enum', 'values' => [2, 3, 4, 5], 'default' => 3],
+            'style' => ['type' => 'enum', 'values' => ['grid', 'masonry'], 'default' => 'grid'],
+            'captions' => ['type' => 'enum', 'values' => ['none', 'hover', 'below'], 'default' => 'hover'],
+        ]);
+
         yield new NodeType('button', 'Button', 'A link styled as a button.', 'content', [
             'label' => ['type' => 'string', 'required' => true],
             'href' => ['type' => 'url', 'default' => '#'],

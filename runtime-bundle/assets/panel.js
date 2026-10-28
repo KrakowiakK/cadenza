@@ -25,6 +25,10 @@ const I18N = {
         pickPhoto: 'Pick a photo', picked: 'In the sketch', noHistory: 'Nothing published yet.',
         pen: 'Pen', box: 'Box', text: 'Text', eraser: 'Eraser', clear: 'Clear', cancel: 'Cancel', useSketch: 'Add to message',
         sketchHint: 'Draw the layout: boxes for sections, words for what goes where. Cadenza will read it.', typeLabel: 'Type a label, Enter',
+        signIn: 'Sign in with', uploadExport: 'Upload the export (ZIP)', connectedAs: 'Connected as', or: 'or',
+        exportHelp: 'Instagram → Settings → Accounts Center → Your information and permissions → Download your information → choose JSON format.',
+        exportUploaded: 'Here is my export file.', importing: 'Importing', importDone: 'Import finished', imported: 'imported', skipped: 'already there',
+        connectedOk: 'Connected', connectFailed: 'Connection failed',
     },
     pl: {
         placeholder: 'Powiedz, co zmienić…',
@@ -47,6 +51,10 @@ const I18N = {
         pickPhoto: 'Wybierz zdjęcie', picked: 'W szkicu', noHistory: 'Nic jeszcze nie opublikowano.',
         pen: 'Ołówek', box: 'Ramka', text: 'Tekst', eraser: 'Gumka', clear: 'Wyczyść', cancel: 'Anuluj', useSketch: 'Dodaj do wiadomości',
         sketchHint: 'Narysuj układ: ramki to sekcje, słowa mówią, co gdzie ma być. Cadenza to odczyta.', typeLabel: 'Wpisz etykietę, Enter',
+        signIn: 'Zaloguj przez', uploadExport: 'Wgraj plik eksportu (ZIP)', connectedAs: 'Połączono jako', or: 'albo',
+        exportHelp: 'Instagram → Ustawienia → Centrum kont → Twoje informacje i uprawnienia → Pobierz swoje informacje → wybierz format JSON.',
+        exportUploaded: 'Oto mój plik eksportu.', importing: 'Importuję', importDone: 'Import zakończony', imported: 'zaimportowano', skipped: 'już było',
+        connectedOk: 'Połączono', connectFailed: 'Nie udało się połączyć',
     },
 };
 const LANG = (navigator.language || 'en').toLowerCase().startsWith('pl') ? 'pl' : 'en';
@@ -156,7 +164,7 @@ class Studio {
   <form data-cz="form" class="border-t border-border p-3">
     <div data-cz="chips" class="mb-2 hidden flex-wrap gap-1.5"></div>
     <div data-cz="attachments" class="mb-2 hidden flex-wrap gap-2"></div>
-    <input type="file" data-cz="file" accept="image/*" multiple class="hidden">
+    <input type="file" data-cz="file" accept="image/*,.zip,application/zip" multiple class="hidden">
     <div class="flex items-end gap-2 rounded-xl border border-border bg-muted/40 p-1.5 focus-within:border-foreground/30">
       <div class="flex shrink-0 flex-col">
         <button type="button" data-cz="pick" title="${t('pick')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-background hover:text-foreground">${icon('target')}</button>
@@ -258,6 +266,15 @@ class Studio {
             this.bannerAction(action.dataset.czAction);
         });
         document.addEventListener('turbo:before-visit', (e) => this.keepSketchOnVisit(e));
+        window.addEventListener('message', (e) => {
+            if (e.origin !== location.origin || e.data?.type !== 'cadenza:connected') return;
+            if (e.data.ok) {
+                this.toast(`${t('connectedOk')}: ${e.data.detail}`);
+                this.send(`${t('connectedOk')}: ${e.data.connector} ${e.data.detail}`, { event: { type: 'account_connected', connector: e.data.connector, account: e.data.detail } });
+            } else {
+                this.toast(`${t('connectFailed')}: ${e.data.detail}`, 'error');
+            }
+        });
         document.addEventListener('turbo:load', () => this.afterLoad());
         this.afterLoad();
     }
@@ -308,7 +325,7 @@ class Studio {
     addUser(text, selection = [], attachments = []) {
         const el = document.createElement('div');
         el.className = 'cz-msg ml-10 self-end rounded-2xl rounded-br-md bg-foreground px-3.5 py-2 text-background';
-        el.innerHTML = (attachments.length ? `<div class="mb-1.5 flex flex-wrap gap-1.5">${attachments.map((a) => `<img src="${escapeHtml(a.url)}" alt="" class="h-16 max-w-28 rounded-lg bg-white object-cover">`).join('')}</div>` : '') + (selection.length ? `<div class="mb-1 flex flex-wrap gap-1">${selection.map((s) => `<span class="rounded-md bg-background/15 px-1.5 py-0.5 text-[11px]">◎ ${escapeHtml(s.label)}</span>`).join('')}</div>` : '') + `<div class="whitespace-pre-wrap">${escapeHtml(text)}</div>`;
+        el.innerHTML = (attachments.length ? `<div class="mb-1.5 flex flex-wrap gap-1.5">${attachments.map((a) => a.url && !/\.zip$/.test(a.id ?? '') ? `<img src="${escapeHtml(a.url)}" alt="" class="h-16 max-w-28 rounded-lg bg-white object-cover">` : `<span class="flex items-center gap-1 rounded-lg bg-background/15 px-2 py-1 text-xs">${icon('clip', 'size-3.5')}${escapeHtml(a.name ?? a.id)}</span>`).join('')}</div>` : '') + (selection.length ? `<div class="mb-1 flex flex-wrap gap-1">${selection.map((s) => `<span class="rounded-md bg-background/15 px-1.5 py-0.5 text-[11px]">◎ ${escapeHtml(s.label)}</span>`).join('')}</div>` : '') + `<div class="whitespace-pre-wrap">${escapeHtml(text)}</div>`;
         this.messages.append(el);
         this.scrollDown();
     }
@@ -445,7 +462,8 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
             const data = await this.api(`/api/conversations/${encodeURIComponent(this.conversationId)}`);
             if (!data.turns?.length) { this.welcome(); }
             for (const turn of data.turns ?? []) {
-                if (turn.role === 'user') this.addUser(turn.text, turn.selection ?? [], turn.attachments ?? []);
+                if (turn.role === 'user' && turn.event) this.addNote(turn.text);
+                else if (turn.role === 'user') this.addUser(turn.text, turn.selection ?? [], turn.attachments ?? []);
                 else {
                     const tt = this.addAssistantText(turn.text || '');
                     if (!turn.text) tt.part('text').classList.add('hidden');
@@ -468,13 +486,14 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         this.setStatus('idle');
     }
 
-    async send(text) {
-        if (this.busy) return;
+    async send(text, { event = null } = {}) {
+        if (this.busy) { if (event) setTimeout(() => this.send(text, { event }), 1500); return; }
         if (this.attachments.some((a) => a.uploading)) { this.toast(t('uploading')); return; }
         const selection = this.selection.map(({ id, label, type }) => ({ id, label, type }));
         const attachments = this.attachments.map(({ id, kind, name, url }) => ({ id, kind, name, url }));
         if (!text) text = attachments.some((a) => a.kind === 'sketch') ? t('sketchPrompt') : '';
-        this.addUser(text, selection, attachments);
+        if (event) this.addNote(text);
+        else this.addUser(text, selection, attachments);
         this.clearSelection();
         this.attachments = [];
         this.renderAttachments();
@@ -492,7 +511,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
                     conversationId: this.conversationId,
                     message: text,
                     attachments: attachments.map(({ id, kind, name }) => ({ id, kind, name })),
-                    context: { path: url.pathname, draftId: meta('cz-draft') ? Number(meta('cz-draft')) : null, selection, language: LANG, viewport: innerWidth < 768 ? 'mobile' : 'desktop' },
+                    context: { event, path: url.pathname, draftId: meta('cz-draft') ? Number(meta('cz-draft')) : null, selection, language: LANG, viewport: innerWidth < 768 ? 'mobile' : 'desktop' },
                 }),
             });
             if (!res.ok || !res.body) throw new Error(`${res.status}`);
@@ -557,6 +576,12 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
                 break;
             case 'choice':
                 this.choiceGrid(turn.part('cards'), data);
+                break;
+            case 'connect':
+                this.connectCard(turn.part('cards'), data);
+                break;
+            case 'import':
+                this.importCard(turn.part('cards'), data);
                 break;
             case 'generated':
                 turn.part('cards').insertAdjacentHTML('beforeend', `<img src="${escapeHtml(data.url)}" alt="" title="${escapeHtml(data.prompt)}" class="cz-msg w-full rounded-xl">`);
@@ -753,11 +778,74 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         for (const s of this.selection) document.querySelector(`.cz-node[data-node-id="${CSS.escape(s.id)}"]`)?.classList.add('cz-picked');
     }
 
+    addNote(text) {
+        const el = document.createElement('div');
+        el.className = 'cz-msg flex items-center gap-2 self-center rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground';
+        el.innerHTML = icon('check', 'size-3.5') + escapeHtml(text);
+        this.messages.append(el);
+        this.scrollDown();
+    }
+
+    // ---------------------------------------------------------------------------------------------- connectors
+
+    connectCard(container, c) {
+        const card = document.createElement('div');
+        card.className = 'cz-msg rounded-xl border border-border p-3';
+        const brand = c.connector === 'instagram' ? 'bg-gradient-to-br from-amber-400 via-pink-500 to-violet-600' : 'bg-foreground';
+        card.innerHTML = `
+<div class="flex items-center gap-2"><span class="flex size-8 items-center justify-center rounded-lg ${brand} text-white">${icon('sparkle')}</span><div class="font-semibold">${escapeHtml(c.label)}</div></div>
+${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-300">${t('connectedAs')} ${escapeHtml(c.connection.account)}</div>` : ''}
+<div class="mt-3 flex flex-col gap-2">
+  ${c.signInUrl ? `<button type="button" data-do="signin" class="rounded-lg ${brand} px-3 py-2 text-sm font-semibold text-white">${t('signIn')} ${escapeHtml(c.label)}</button>` : ''}
+  ${c.methods.includes('file') ? `${c.signInUrl ? `<div class="text-center text-[11px] text-muted-foreground">${t('or')}</div>` : ''}<button type="button" data-do="upload" class="rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted">${icon('clip', 'size-4 inline -mt-0.5 mr-1')}${t('uploadExport')}</button>
+  <p class="text-[11px] leading-snug text-muted-foreground">${t('exportHelp')}</p>` : ''}
+</div>
+<input type="file" accept=".zip,application/zip" class="hidden">`;
+        card.querySelector('[data-do="signin"]')?.addEventListener('click', () => {
+            const w = 520, h = 720;
+            window.open(c.signInUrl, 'cadenza-connect', `width=${w},height=${h},left=${screenX + (outerWidth - w) / 2},top=${screenY + 60}`);
+        });
+        const input = card.querySelector('input[type=file]');
+        card.querySelector('[data-do="upload"]')?.addEventListener('click', () => input.click());
+        input.addEventListener('change', async () => {
+            if (!input.files.length) return;
+            await this.addFiles([...input.files]);
+            this.send(t('exportUploaded'));
+        });
+        container.append(card);
+        this.scrollDown();
+    }
+
+    importCard(container, data) {
+        const card = document.createElement('div');
+        card.className = 'cz-msg rounded-xl border border-border p-3';
+        card.innerHTML = `<div class="flex items-center justify-between text-xs"><span class="font-semibold" data-part="title">${t('importing')}…</span><span data-part="count" class="text-muted-foreground"></span></div>
+<div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div data-part="bar" class="h-full w-0 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-500"></div></div>`;
+        container.append(card);
+        this.scrollDown();
+        const poll = async () => {
+            let job;
+            try { job = await this.api(`/api/imports/${data.jobId}`); } catch { setTimeout(poll, 3000); return; }
+            const pct = job.total ? Math.round((job.done / job.total) * 100) : (job.status === 'done' ? 100 : 15);
+            card.querySelector('[data-part="bar"]').style.width = pct + '%';
+            card.querySelector('[data-part="count"]').textContent = job.total ? `${job.done}/${job.total}` : `${job.done}`;
+            if (job.status === 'done' || job.status === 'failed') {
+                const summary = `${t('importDone')}: ${job.imported} ${t('imported')}${job.skipped ? `, ${job.skipped} ${t('skipped')}` : ''}`;
+                card.querySelector('[data-part="title"]').textContent = job.status === 'failed' ? `${t('error')}: ${job.errors?.[0] ?? ''}` : summary;
+                this.send(summary, { event: { type: 'import_finished', ...job } });
+                return;
+            }
+            setTimeout(poll, 1500);
+        };
+        poll();
+    }
+
     // ---------------------------------------------------------------------------------------------- attachments
 
     async addFiles(files) {
         for (const file of files.slice(0, 6)) {
-            const item = { id: null, kind: 'photo', name: file.name, url: URL.createObjectURL(file), uploading: true };
+            const isZip = /\.zip$/i.test(file.name) || file.type === 'application/zip';
+            const item = { id: null, kind: isZip ? 'file' : 'photo', name: file.name, url: isZip ? null : URL.createObjectURL(file), uploading: true };
             this.attachments.push(item);
             this.renderAttachments();
             try {
@@ -766,7 +854,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
                 const res = await fetch(HARNESS + '/api/uploads', { method: 'POST', headers: { 'X-Cadenza-Token': TOKEN }, body: form });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error ?? res.status);
-                Object.assign(item, { id: data.id, url: data.url, uploading: false });
+                Object.assign(item, { id: data.id, url: item.kind === 'file' ? null : data.url, uploading: false });
             } catch (e) {
                 this.attachments = this.attachments.filter((a) => a !== item);
                 this.toast(t('error') + ': ' + e.message, 'error');
@@ -793,7 +881,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         const box = this.el('attachments');
         box.classList.toggle('hidden', !this.attachments.length);
         box.classList.toggle('flex', !!this.attachments.length);
-        box.innerHTML = this.attachments.map((a, i) => `<div class="relative"><img src="${escapeHtml(a.url)}" alt="" class="size-16 rounded-lg border border-border bg-white object-cover ${a.uploading ? 'opacity-50' : ''}">${a.kind === 'sketch' ? `<span class="absolute bottom-1 left-1 rounded bg-violet-600 px-1 text-[10px] font-semibold text-white">✎</span>` : ''}${a.uploading ? '<span class="absolute inset-0 m-auto size-4 animate-spin rounded-full border-2 border-violet-500 border-t-transparent"></span>' : ''}<button type="button" data-remove="${i}" class="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-foreground text-[11px] text-background">×</button></div>`).join('');
+        box.innerHTML = this.attachments.map((a, i) => `<div class="relative">${a.kind === 'file' ? `<div class="flex size-16 flex-col items-center justify-center gap-0.5 rounded-lg border border-border bg-muted text-[10px] text-muted-foreground ${a.uploading ? 'opacity-50' : ''}">${icon('clip')}<span class="max-w-14 truncate">${escapeHtml(a.name)}</span></div>` : `<img src="${escapeHtml(a.url)}" alt="" class="size-16 rounded-lg border border-border bg-white object-cover ${a.uploading ? 'opacity-50' : ''}">`}${a.kind === 'sketch' ? `<span class="absolute bottom-1 left-1 rounded bg-violet-600 px-1 text-[10px] font-semibold text-white">✎</span>` : ''}${a.uploading ? '<span class="absolute inset-0 m-auto size-4 animate-spin rounded-full border-2 border-violet-500 border-t-transparent"></span>' : ''}<button type="button" data-remove="${i}" class="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-foreground text-[11px] text-background">×</button></div>`).join('');
         box.querySelectorAll('[data-remove]').forEach((b) => b.addEventListener('click', () => { this.attachments.splice(Number(b.dataset.remove), 1); this.renderAttachments(); }));
     }
 

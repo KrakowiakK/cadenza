@@ -61,7 +61,7 @@ final class Conductor
         }
         $bag = $bag->with(Message::ofUser(...$parts));
 
-        $conversation->addUserTurn($message, $this->turn->selection, $this->turn->path, array_map(fn (array $a): array => ['id' => $a['id'], 'kind' => $a['kind'] ?? 'photo', 'url' => $this->uploads->url($a['id'])], $attachments));
+        $conversation->addUserTurn($message, $this->turn->selection, $this->turn->path, array_map(fn (array $a): array => ['id' => $a['id'], 'kind' => $a['kind'] ?? 'photo', 'name' => $a['name'] ?? null, 'url' => $this->uploads->url($a['id'])], $attachments), \is_array($context['event'] ?? null));
         $this->em->flush();
 
         $text = trim($this->agent->call($bag)->asText());
@@ -103,6 +103,12 @@ final class Conductor
             - When the owner attaches a drawn sketch, follow its layout faithfully (order of blocks, columns, what is
               big or small, labels) and fill it with real content. Never put the sketch itself on the site.
             - Pass operations as a JSON array of objects (not a string).
+            - Content from other services (Instagram…): list_connectors, then connect_account to show the owner how to
+              connect (sign in, or upload the service's export). When an export archive is attached, import_content
+              with method "file". Imports run in the background; you get a message when done. Then build the pages
+              with "media-gallery" nodes (they show the library live, filtered by source, hashtag, year) — use
+              media_overview to plan albums (e.g. one gallery per top hashtag or year). Never list imported images
+              one by one in props.
             - When the owner points at elements (selection with node ids), change exactly those.
             - Small follow-up tweaks to a sketch the owner is reviewing: extend it with reviseDraftId.
               A new, unrelated change: a new proposal.
@@ -130,7 +136,14 @@ final class Conductor
         if (!empty($context['selection'])) {
             $lines[] = '[Selected elements: '.implode(', ', array_map(static fn (array $s): string => \sprintf('%s (%s "%s")', $s['id'], $s['type'] ?? '?', $s['label'] ?? ''), $context['selection'])).']';
         }
+        if (\is_array($context['event'] ?? null)) {
+            $lines[] = '[Event from the studio: '.json_encode($context['event'], \JSON_UNESCAPED_UNICODE).']';
+        }
         foreach ($attachments as $i => $attachment) {
+            if (str_ends_with($attachment['id'], '.zip')) {
+                $lines[] = \sprintf('[Attached archive, uploadId %s, name "%s" — an export file; import it with import_content]', $attachment['id'], $attachment['name'] ?? '');
+                continue;
+            }
             $lines[] = \sprintf('[Attached image %d, id %s: %s]', $i + 1, $attachment['id'], 'sketch' === ($attachment['kind'] ?? '')
                 ? 'a layout SKETCH the owner drew — read it as a wireframe: boxes are sections/blocks, their position is the layout, handwritten words are labels or content'
                 : 'a photo/image from the owner'.(isset($attachment['name']) ? ' ("'.$attachment['name'].'")' : '').' — if it belongs on the site, import it with use_image');

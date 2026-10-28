@@ -120,6 +120,41 @@ final class SiteClient
         return $this->json($this->mcp->get('control')->callTool('version_restore', ['version' => $version]));
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function connectors(): array
+    {
+        $result = $this->mcp->get('site')->callTool('connectors_list');
+        $data = \is_array($result->structuredContent) ? $result->structuredContent : json_decode($this->text($result), true);
+
+        return array_values(\is_array($data) ? ($data['result'] ?? $data) : []);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function importStart(string $connector, string $method, ?string $fileUrl = null): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('import_start', array_filter(['connector' => $connector, 'method' => $method, 'fileUrl' => $fileUrl])));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function importStatus(int $jobId): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('import_status', ['jobId' => $jobId]));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function mediaStats(): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('media_stats'));
+    }
+
     private function text(CallToolResult $result): string
     {
         $text = '';

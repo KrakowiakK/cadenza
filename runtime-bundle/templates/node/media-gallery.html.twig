@@ -1,0 +1,19 @@
+{%- set cols = {2: 'sm:grid-cols-2', 3: 'sm:grid-cols-2 lg:grid-cols-3', 4: 'sm:grid-cols-3 lg:grid-cols-4', 5: 'sm:grid-cols-3 lg:grid-cols-5'} -%}
+{%- set mcols = {2: 'sm:columns-2', 3: 'sm:columns-2 lg:columns-3', 4: 'sm:columns-3 lg:columns-4', 5: 'sm:columns-3 lg:columns-5'} -%}
+{%- set items = cadenza_media(props) -%}
+{%- if items is empty %}
+    <div class="cz-empty-slot">No images yet{{ props.source != 'all' ? ' from ' ~ props.source : '' }}{{ props.tag ? ' tagged #' ~ props.tag : '' }}.</div>
+{%- else %}
+    <div class="{{ props.style == 'masonry' ? 'columns-1 gap-4 ' ~ mcols[props.columns] : 'grid grid-cols-1 gap-4 ' ~ cols[props.columns] }}">
+        {%- for m in items %}
+            <figure class="group relative overflow-hidden rounded-xl {{ props.style == 'masonry' ? 'mb-4 break-inside-avoid' : '' }}">
+                <a href="{{ m.path }}" target="_blank"><img src="{{ m.path }}" alt="{{ m.alt }}" loading="lazy" class="w-full object-cover transition duration-500 group-hover:scale-105 {{ props.style == 'grid' ? 'aspect-square' : '' }}"></a>
+                {%- if m.caption and props.captions == 'hover' %}
+                    <figcaption class="pointer-events-none absolute inset-x-0 bottom-0 translate-y-2 bg-gradient-to-t from-black/75 to-transparent p-4 pt-10 text-sm text-white opacity-0 transition group-hover:translate-y-0 group-hover:opacity-100">{{ m.caption|length > 140 ? m.caption|slice(0, 140) ~ '…' : m.caption }}{% if m.takenAt %}<span class="mt-1 block text-xs opacity-75">{{ m.takenAt|date('j.m.Y') }}</span>{% endif %}</figcaption>
+                {%- elseif m.caption and props.captions == 'below' %}
+                    <figcaption class="px-1 pt-2 text-sm text-muted-foreground">{{ m.caption|length > 140 ? m.caption|slice(0, 140) ~ '…' : m.caption }}</figcaption>
+                {%- endif %}
+            </figure>
+        {%- endfor %}
+    </div>
+{%- endif %}

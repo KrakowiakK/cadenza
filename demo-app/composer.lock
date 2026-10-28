@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1c0ae0df0b625208a6051cb0832c996e",
+    "content-hash": "091df7ccdfe3e596f08794993ddf2aae",
     "packages": [
         {
             "name": "cadenza/runtime-bundle",
@@ -44,6 +44,34 @@
                 "MIT"
             ],
             "description": "Cadenza runtime: page tree, renderer, sketches and the owner's chat panel for a living Symfony app.",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "cadenza/source-instagram",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../library/sources/instagram",
+                "reference": "9fb53c48bea8e9d8dfd36f8cd4ee4bd5d1c00060"
+            },
+            "require": {
+                "cadenza/runtime-bundle": "*",
+                "ext-zip": "*",
+                "php": ">=8.4",
+                "symfony/http-client": "^8.1"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Cadenza\\Source\\Instagram\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Cadenza source: the owner's Instagram photos, from an account sign-in (Business/Creator) or a data export ZIP.",
             "transport-options": {
                 "relative": true
             }
@@ -7326,6 +7354,91 @@
             "time": "2026-10-06T20:05:50+00:00"
         },
         {
+            "name": "symfony/scheduler",
+            "version": "v8.1.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/scheduler.git",
+                "reference": "0d76364a972a672ce3c33535791c91eaf8df7412"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/scheduler/zipball/0d76364a972a672ce3c33535791c91eaf8df7412",
+                "reference": "0d76364a972a672ce3c33535791c91eaf8df7412",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4.1",
+                "symfony/clock": "^7.4|^8.0"
+            },
+            "require-dev": {
+                "dragonmantank/cron-expression": "^3.1",
+                "symfony/cache": "^7.4.8|^8.0.8",
+                "symfony/console": "^7.4|^8.0",
+                "symfony/dependency-injection": "^7.4|^8.0",
+                "symfony/event-dispatcher": "^7.4|^8.0",
+                "symfony/lock": "^7.4|^8.0",
+                "symfony/messenger": "^7.4|^8.0",
+                "symfony/serializer": "^7.4|^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Scheduler\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sergey Rabochiy",
+                    "email": "upyx.00@gmail.com"
+                },
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Provides scheduling through Symfony Messenger",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "cron",
+                "schedule",
+                "scheduler"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/scheduler/tree/v8.1.9"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-10-11T13:01:54+00:00"
+        },
+        {
             "name": "symfony/security-bundle",
             "version": "v8.1.9",
             "source": {
@@ -12441,6 +12554,7 @@
     "minimum-stability": "beta",
     "stability-flags": {
         "cadenza/runtime-bundle": 20,
+        "cadenza/source-instagram": 20,
         "symfony/mcp-bundle": 10
     },
     "prefer-stable": true,

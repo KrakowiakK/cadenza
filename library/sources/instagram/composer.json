@@ -1,0 +1,17 @@
+{
+    "name": "cadenza/source-instagram",
+    "description": "Cadenza source: the owner's Instagram photos, from an account sign-in (Business/Creator) or a data export ZIP.",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.4",
+        "ext-zip": "*",
+        "cadenza/runtime-bundle": "*",
+        "symfony/http-client": "^8.1"
+    },
+    "autoload": {
+        "psr-4": { "Cadenza\\Source\\Instagram\\": "src/" }
+    },
+    "minimum-stability": "beta",
+    "prefer-stable": true
+}
