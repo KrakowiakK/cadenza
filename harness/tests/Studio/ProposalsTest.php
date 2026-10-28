@@ -34,6 +34,7 @@ final class ProposalsTest extends TestCase
         self::assertSame('Wersja "EN"', Proposals::cleanSummary('Wersja "EN"'));
         self::assertSame('Formularz zapisów, do 12 osób', Proposals::cleanSummary('Formularz zapisów, do 12 osób">'));
         self::assertSame('Cały cytat', Proposals::cleanSummary('"Cały cytat"'));
+        self::assertSame('"DE" version: /, /gry', Proposals::cleanSummary('"DE" version: /, /gry'));
         self::assertSame('Zapisy na trzy warsztaty listopadowe', Proposals::cleanSummary('Zapisy na trzy warsztaty listopadowe]]'));
     }
 }

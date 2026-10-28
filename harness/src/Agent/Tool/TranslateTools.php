@@ -14,6 +14,7 @@ use Symfony\AI\Agent\Toolbox\Attribute\AsTool;
 final class TranslateTools
 {
     public function __construct(
+        private readonly \App\Repository\ProposalRepository $openProposals,
         private readonly SiteClient $site,
         private readonly PageTranslator $translator,
         private readonly Proposals $proposals,
@@ -46,7 +47,13 @@ final class TranslateTools
         // An explicit menu needs its own version in the new language (an automatic one follows the pages by itself).
         $settings = $this->site->settings();
         $byId = array_column($settings['pages'] ?? [], 'path', 'id');
-        $translated = [$tree['path']];
+        // One sketch per language: pages translated in this conversation go into the same one, so that they link to
+        // each other and the menu knows all of them before anything is approved.
+        [$sketch, $inSketch] = $this->languageSketch($language);
+        if (\in_array($tree['path'], $inSketch, true)) {
+            return \sprintf('%s is already translated in sketch %d; change it there (propose_changes with reviseDraftId %d).', $tree['path'], $sketch->getDraftId(), $sketch->getDraftId());
+        }
+        $translated = [...$inSketch, $tree['path']];
         foreach ($settings['pages'] ?? [] as $p) {
             if ($p['lang'] === $language && null !== $p['translationOf'] && isset($byId[$p['translationOf']])) {
                 $translated[] = $byId[$p['translationOf']];
@@ -55,8 +62,9 @@ final class TranslateTools
         if (null !== $nav = $this->translator->translateNav($settings['nav'] ?? null, $language, $translated)) {
             $operations[] = $nav;
         }
-        $summary = ('pl' === substr($this->turn->language, 0, 2) ? 'Wersja „%s” strony %s' : '"%s" version of %s');
-        $result = $this->proposals->propose($this->turn->conversation, $operations, \sprintf($summary, strtoupper($language), $tree['path']));
+        $paths = implode(', ', array_values(array_unique($translated)));
+        $summary = \sprintf('pl' === substr($this->turn->language, 0, 2) ? 'Wersja „%s”: %s' : '"%s" version: %s', strtoupper($language), $paths);
+        $result = $this->proposals->propose($this->turn->conversation, $operations, $summary, $sketch?->getDraftId());
         if (null === $result['proposal']) {
             return 'The translated page was rejected: '.implode(' ', $result['errors']);
         }
@@ -66,6 +74,25 @@ final class TranslateTools
         $this->turn->emit('ui', ['command' => 'showSketch', 'draftId' => $proposal->getDraftId(), 'path' => $operation['path']]);
 
         return \sprintf('Sketch ready: %s is the %s version of %s (draft %d), with a language switcher in the header. Translate other pages the same way if the owner wants the whole site.', $operation['path'], $language, $tree['path'], $proposal->getDraftId());
+    }
+
+    /**
+     * The open sketch of this conversation with pages in this language, and the pages it translates.
+     *
+     * @return array{0: ?\App\Entity\Proposal, 1: list<string>}
+     */
+    private function languageSketch(string $language): array
+    {
+        if (null === $this->turn->conversation) {
+            return [null, []];
+        }
+        foreach (array_reverse($this->openProposals->open($this->turn->conversation)) as $proposal) {
+            if (preg_match('/^(?:Wersja „|")'.strtoupper($language).'(?:”|") ?(?:version)?: (.+)$/u', $proposal->getSummary(), $m)) {
+                return [$proposal, array_map('trim', explode(',', $m[1]))];
+            }
+        }
+
+        return [null, []];
     }
 
     /**

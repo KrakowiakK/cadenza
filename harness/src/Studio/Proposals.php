@@ -28,7 +28,7 @@ final class Proposals
      */
     public static function cleanSummary(string $summary): string
     {
-        $text = trim((string) preg_replace(['~</?[a-z!][^>]*>~i', '~\s+~u'], ['', ' '], $summary), " \t\n\r\0\x0B<>/[]{}");
+        $text = trim((string) preg_replace(['~</?[a-z!][^>]*>~i', '~\s+~u', '~</?$~'], ['', ' ', ''], trim($summary)), " \t\n\r\0\x0B<>[]{}");
         // Quotes only when they wrap the whole summary or hang alone at its end ("…osób\">").
         $text = (string) preg_replace('~^(["\'])(.*)\1$~su', '$2', $text);
         foreach (['"', "'"] as $quote) {
