@@ -3,7 +3,7 @@
     <div class="{{ props.image ? '' : 'mx-auto max-w-3xl w-full' }}">
         {%- if props.eyebrow %}<p class="cz-eyebrow mb-4">{{ props.eyebrow }}</p>{% endif %}
         {%- if props.title %}<h2 class="cz-display text-3xl md:text-5xl">{{ props.title }}</h2>{% endif %}
-        {%- if props.intro %}<p class="cz-lead mt-4 text-lg opacity-75">{{ props.intro|nl2br }}</p>{% endif %}
+        {%- if props.intro %}<p class="cz-lead mt-4 text-lg opacity-75">{{ props.intro|cadenza_inline }}</p>{% endif %}
         <div class="mt-10 grid gap-8 sm:grid-cols-2">
             <div class="space-y-4">
                 {%- if props.address %}<div class="flex gap-3">{{ cadenza_icon('map-pin', 'size-5 text-primary shrink-0 mt-0.5') }}<span>{{ props.address|nl2br }}</span></div>

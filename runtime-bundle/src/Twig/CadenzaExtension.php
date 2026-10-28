@@ -43,6 +43,18 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         return ['cadenza_harness_url' => $this->harnessUrl, 'cadenza_token' => $this->token];
     }
 
+    public function getFilters(): array
+    {
+        return [
+            // Short texts (intros, subtitles) are plain text, but models write **bold** in them anyway.
+            new \Twig\TwigFilter('cadenza_inline', static fn (?string $text): string => nl2br((string) preg_replace(
+                ['~\*\*(\S(?:.*?\S)?)\*\*~u', '~(?<![\w*])\*(\S(?:.*?\S)?)\*(?![\w*])~u'],
+                ['<strong>$1</strong>', '<em>$1</em>'],
+                htmlspecialchars((string) $text, \ENT_QUOTES),
+            )), ['is_safe' => ['html']]),
+        ];
+    }
+
     public function getFunctions(): array
     {
         return [

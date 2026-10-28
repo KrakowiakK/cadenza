@@ -72,7 +72,7 @@ final class WidgetsTest extends WebTestCase
         $site->initialise(Document::empty('Arcade'), 'Blank');
         $result = $site->propose([['op' => 'page.create', 'path' => '/', 'title' => 'Arcade', 'nodes' => [
             ['type' => 'hero', 'props' => ['title' => 'Play', 'variant' => 'typographic', 'widget' => 'cube']],
-            ['type' => 'widget', 'props' => ['widget' => 'cube', 'title' => 'The cube', 'aspect' => 'square', 'caption' => 'Drag to turn it']],
+            ['type' => 'widget', 'props' => ['widget' => 'cube', 'title' => 'The cube', 'intro' => '**Drag** it, *gently* <script>alert(1)</script>', 'aspect' => 'square', 'caption' => 'Drag to turn it']],
         ]]], 'Arcade');
         self::assertTrue($result->isValid(), implode("\n", $result->errors));
         $site->publish((int) $result->draft->getId());
@@ -84,6 +84,9 @@ final class WidgetsTest extends WebTestCase
         self::assertSame('/_cadenza/widget/cube?v=1', $frame->attr('data-src'));
         self::assertSame('true', $crawler->filter('[data-node-type="hero"] iframe')->attr('aria-hidden'), 'a background is decoration');
         self::assertSelectorTextContains('[data-node-type="widget"] figcaption', 'Drag to turn it');
+        self::assertSelectorTextContains('[data-node-type="widget"] .cz-lead strong', 'Drag', 'models write **bold** in short texts');
+        self::assertSelectorTextContains('[data-node-type="widget"] .cz-lead em', 'gently');
+        self::assertSelectorNotExists('[data-node-type="widget"] .cz-lead script');
 
         // Errors from a visitor's browser are not kept; only what the owner sees.
         $client->request('POST', '/_cadenza/widget/cube/error', [], [], ['CONTENT_TYPE' => 'application/json'], '{"version":1,"error":"x is not defined"}');

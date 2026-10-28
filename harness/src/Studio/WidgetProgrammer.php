@@ -51,11 +51,20 @@ final class WidgetProgrammer
         modern and calm: rounded shapes, soft shadows, smooth easing, nothing garish.
 
         Behaviour: requestAnimationFrame with delta time; pause when the tab is hidden; if window.cadenza.reducedMotion
-        is true, keep decorative motion very slow or still. All visible text in the language "{language}".
+        is true, keep decorative motion very slow or still. ALL visible text in the language "{language}", short labels
+        too (score, best, level, player, computer, start, pause).
         Games: a start screen (title, how to play, "press Space / tap to start"), score and best score (localStorage,
         it works here), game over with restart, levels getting faster; keyboard AND touch (swipe or on-screen buttons
         big enough for a thumb); click/tap focuses the game. Make it genuinely fun and complete, not a stub.
-        Decorative backgrounds (behind a heading): subtle and slow, low contrast, no text, ignores pointer events.
+        Decorative backgrounds (behind a heading): subtle and slow, low contrast (shapes at 15–35% opacity), covering at
+        most a third of the area and calmer in the middle where the title is; visible though, not washed out; no text.
+        3D (three.js): recognisable objects built from several primitives with bevels or rounded geometry, physically
+        based materials, hemisphere + directional light with soft shadows, the object filling ~70% of the frame,
+        OrbitControls with damping and a gentle auto-rotate, renderer with alpha and antialias.
+        Physics (Matter.js): static ground and side walls inside the visible area, rebuilt on resize; render with your
+        own canvas drawing in the site's colours.
+        Charts (Chart.js): responsive with maintainAspectRatio false, the site's colours, tooltips, numbers in the
+        site's language format.
         No alert(), confirm() or prompt() (they are blocked): use your own overlays. Robust code: no undefined variables, every function you call exists, no placeholders or TODOs. Aim for a
         complete result in at most ~500 lines.
         TXT;

@@ -46,6 +46,14 @@ appears first as a **sketch on the live page**; nothing goes live until you appr
   services, the **Twig sandbox** (allow-listed tags, filters and functions), and Symfony's **HtmlSanitizer** on the
   output (no scripts, event handlers, styles, forms or foreign images). Tailwind picks up the new classes in the
   background.
+- **Things that move: games, 3D, animation.** *“A Tetris for the guests”*, *“make the opening come alive with soft
+  3D shapes”*, *“a breathing exercise: a circle that grows as you breathe in”*. The agent writes a **widget** — real
+  HTML, CSS and JavaScript, with three.js, Chart.js, Matter.js or confetti from the site's own importmap — and the
+  studio treats it like a programmer would: syntax checked, then **played in a headless Chrome with Symfony Panther**
+  (start, a few keys, screenshots, the browser's errors); a model that can see looks at the screenshots and what is
+  wrong goes back for a fix, before the owner sees the sketch. Widgets run as documents of their own with the sandbox
+  in the response itself (an opaque origin: no cookies, no storage, no network but the site's libraries and photos);
+  the page keeps a game's best score for each visitor.
 - **Content that grows, by chat.** *“Add a post: the bus for guests leaves at 11:00”*, *“change the price of the vase
   to 140 zł”* — news, events, menus and products are collections the agent writes entry by entry. Every entry is a
   draft the owner sees marked on the page and publishes from a card in the panel; visitors keep the live version.
@@ -156,10 +164,11 @@ script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in th
 | **Messenger, Scheduler, Workflow** | imports and events (`MediaImported`, `FormSubmitted`); daily sync of connected accounts; the proposal state machine |
 | **Security, Translation** | the owner's sign-in (form login, login throttling, remember-me, stateless CSRF), first-run setup; members' passwordless login links; texts in the site's language |
 | **Twig Sandbox, HtmlSanitizer** | blocks the agent writes itself: allow-listed Twig in an isolated environment, sanitised output |
+| **Panther, Process** | the agent tries the games and animations it wrote in a headless Chrome before the owner sees them |
 | **RateLimiter, Mailer** | visitors' forms: a sliding window per address against bots, an optional note to the owner |
 | **UX Toolkit (shadcn), Twig/Live Components, Turbo, Icons** | patterns, the panel, View Transitions between versions |
 | **Doctrine, Uid, HttpClient, PhpSpreadsheet** | drafts and versions, media, collections; spreadsheets in (collections) and out (form answers) |
-| **AssetMapper (importmap)** | Leaflet for maps, loaded only on pages that have one — no Node, no build step for JS |
+| **AssetMapper (importmap)** | Leaflet for maps, loaded only on pages that have one; three.js, Chart.js, Matter.js for widgets, served to their sandbox by the site — no Node, no build step for JS |
 
 ## Models
 
@@ -174,7 +183,9 @@ The studio talks to any OpenAI-compatible chat API with tool calling. Configure 
 
 Also `CADENZA_LLM_API_KEY`, and optionally a fallback (`CADENZA_LLM_FALLBACK_*`, used when the main model is silent for
 75 s) and a vision model (`CADENZA_LLM_VISION_*`, used for messages with images). Model options travel in the model
-name's query string. Optional: `HUGGINGFACE_API_KEY` (image generation with FLUX), `PEXELS_API_KEY`,
+name's query string. Widgets: `CADENZA_CODE_MODEL` (the model that writes their code; default the main one) and
+`CADENZA_REVIEW_MODEL` (a model of the main API that looks at the screenshots of a widget under test, e.g.
+`gemma4:31b` on Ollama Cloud's free plan; default the vision model). Optional: `HUGGINGFACE_API_KEY` (image generation with FLUX), `PEXELS_API_KEY`,
 `UNSPLASH_ACCESS_KEY`, `INSTAGRAM_CLIENT_ID`/`INSTAGRAM_CLIENT_SECRET`.
 
 Smaller and free models make mistakes in tool arguments (numbers as strings, JSON as strings, extra brackets). The
@@ -194,8 +205,10 @@ examples/                sample files to try
 ## Known limitations
 
 - A full page from a free cloud model takes 1–4 minutes; local or paid models are much faster.
-- Blocks the agent writes are templates, not PHP: they cannot run code or scripts (by design). Panther-based visual
-  review is designed but not built.
+- Blocks the agent writes are templates, not PHP: they cannot run code or scripts (by design); code that runs is
+  a widget, sandboxed in a frame of its own. Free models write simple games well and ambitious ones (Frogger) with
+  rough edges: the browser test catches crashes and blank screens, not every rule of a game. Trying widgets needs
+  Chrome on the studio's computer (`./cadenza setup` fetches its driver); without it they are only syntax-checked.
 - One owner account per site (Symfony Security: form login with CSRF, throttling, remember-me); run behind HTTPS
   before exposing it. The studio talks to the site with a shared token kept in `.env.local`.
 - Instagram Login needs a Meta app and a Business/Creator account; the export ZIP works for everyone.
