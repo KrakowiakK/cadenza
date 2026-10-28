@@ -51,7 +51,7 @@ final class Conductor
     ) {
     }
 
-    private const POLISH = '/[ąćęłńśźż]|\b(jest|się|sie|mój|moj|moja|strona|stron[eę]|chc[eę]|zr[oó]b|zrub|dodaj|zmie[nń]|gr[eę]|[zż]eby|dla|czy|prosz[eę]|nie|tak|dobrze|wszystko|dzi[eę]ki|super|jeszcze|teraz)\b/iu';
+    private const POLISH = '/[ąćęłńśźż]|\b(jest|się|sie|mój|moj|moja|strona|stron[eę]|chc[eę]|zr[oó]b|zrub|dodaj|zmie[nń]|gr[eę]|[zż]eby|dla|czy|prosz[eę]|nie|tak|dobrze|wszystko|dzi[eę]ki|super|jeszcze|teraz|ile|jak|mnie|mi|tej|tego|strony|stronie|moje|moich|zdj[eę]cia|kt[oó]ry|kt[oó]ra|gdzie|kiedy|dlaczego|mo[zż]esz|poka[zż])\b/iu';
 
     /**
      * The language of the owner's earlier messages in this conversation, when one of them was clearly Polish.
@@ -328,6 +328,10 @@ final class Conductor
               ask once to be sure before proposing it.
             - Visitor statistics: the site counts visits itself, without cookies (site_overview). Scripts from other
               services (Google Analytics, pixels, chat widgets) cannot be added — the site does not run outside code.
+            - Address the owner without guessing their gender: "możesz", "zeskanuj", "Twoja strona" — never
+              "powinieneś / powinnaś", "zrobiłeś".
+            - About Cadenza itself: it is open-source software running on the owner's own server; what it costs is
+              that hosting and the AI models it uses (free ones work). There is no Cadenza subscription.
             - Logs, warnings and diagnostics are for you: mention them only when the owner asks about a problem, and
               then in plain words.
             - When a tool fails, try another way (read_page for the right ids, a different operation); if it still
