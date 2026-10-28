@@ -21,6 +21,10 @@ final class ToolTraceSubscriber
         'read_outline' => ['en' => 'Looking through the site', 'pl' => 'Przeglądam stronę'],
         'show_page' => ['en' => 'Opening a page', 'pl' => 'Przechodzę na stronę'],
         'point_at' => ['en' => 'Pointing at elements', 'pl' => 'Wskazuję elementy'],
+        'find_images' => ['en' => 'Searching photos', 'pl' => 'Szukam zdjęć'],
+        'offer_images' => ['en' => 'Picking photos for you', 'pl' => 'Wybieram zdjęcia dla Ciebie'],
+        'use_image' => ['en' => 'Adding an image', 'pl' => 'Dodaję obraz'],
+        'generate_image' => ['en' => 'Generating an image', 'pl' => 'Generuję obraz'],
     ];
 
     /** @var array<string, list<string>> */
@@ -31,7 +35,7 @@ final class ToolTraceSubscriber
     {
     }
 
-    #[AsEventListener]
+    #[AsEventListener(priority: 20)]
     public function onRequested(ToolCallRequested $event): void
     {
         $name = $event->getToolCall()->getName();
@@ -46,17 +50,25 @@ final class ToolTraceSubscriber
         $name = $event->getDefinition()->getName();
         $result = $event->getResult()->getResult();
         $failed = \is_string($result) && str_starts_with($result, 'The site rejected');
-        $this->turn->emit('tool', ['id' => $this->finish($name), 'name' => $name, 'label' => $this->label($name), 'state' => $failed ? 'error' : 'done', 'detail' => $failed ? $this->firstError($result) : $this->detail($name, $event->getArguments())]);
+        $this->turn->emit('tool', ['id' => $this->take($name), 'name' => $name, 'label' => $this->label($name), 'state' => $failed ? 'error' : 'done', 'detail' => $failed ? $this->firstError($result) : $this->detail($name, $event->getArguments())]);
     }
 
     #[AsEventListener]
     public function onFailed(ToolCallFailed $event): void
     {
         $name = $event->getDefinition()->getName();
-        $this->turn->emit('tool', ['id' => $this->finish($name), 'name' => $name, 'label' => $this->label($name), 'state' => 'error', 'detail' => mb_substr($event->getException()->getMessage(), 0, 160)]);
+        $this->turn->emit('tool', ['id' => $this->take($name), 'name' => $name, 'label' => $this->label($name), 'state' => 'error', 'detail' => mb_substr($event->getException()->getMessage(), 0, 160)]);
     }
 
-    private function finish(string $name): string
+    /**
+     * Closes a step whose result was produced by a listener (no ToolCallSucceeded is dispatched then).
+     */
+    public function finish(string $name, bool $ok): void
+    {
+        $this->turn->emit('tool', ['id' => $this->take($name), 'name' => $name, 'label' => $this->label($name), 'state' => $ok ? 'done' : 'error']);
+    }
+
+    private function take(string $name): string
     {
         return array_shift($this->running[$name]) ?? $name.'-'.++$this->counter;
     }
@@ -76,6 +88,8 @@ final class ToolTraceSubscriber
         return match ($name) {
             'propose_changes' => isset($arguments['summary']) ? \sprintf('%s · %d op.', $arguments['summary'], \count((array) ($arguments['operations'] ?? []))) : null,
             'read_page', 'show_page' => (string) ($arguments['page'] ?? $arguments['path'] ?? ''),
+            'find_images', 'offer_images' => (string) ($arguments['query'] ?? ''),
+            'generate_image' => mb_substr((string) ($arguments['prompt'] ?? ''), 0, 120),
             default => null,
         };
     }

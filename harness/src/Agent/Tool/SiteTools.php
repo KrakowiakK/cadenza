@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace App\Agent\Tool;
 
-use App\Entity\Proposal;
-use App\Repository\ProposalRepository;
+use App\Studio\Proposals;
 use App\Studio\SiteClient;
 use App\Studio\Turn;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\AI\Agent\Toolbox\Attribute\AsTool;
-use Symfony\Component\Workflow\WorkflowInterface;
 
 #[AsTool('propose_changes', 'Propose a change to the site as a batch of operations. It becomes a sketch the owner sees on the page immediately and approves or rejects. Returns the result, or errors to fix and retry.', method: 'propose')]
 #[AsTool('read_page', 'Full JSON of one page with every prop value (the outline in your instructions shows only key props).', method: 'readPage')]
@@ -20,9 +17,7 @@ final class SiteTools
     public function __construct(
         private readonly SiteClient $site,
         private readonly Turn $turn,
-        private readonly ProposalRepository $proposals,
-        private readonly EntityManagerInterface $em,
-        private readonly WorkflowInterface $proposalStateMachine,
+        private readonly Proposals $proposals,
     ) {
     }
 
@@ -33,41 +28,22 @@ final class SiteTools
      */
     public function propose(array $operations, string $summary, ?int $reviseDraftId = null): string
     {
-        $proposal = null;
-        if (null !== $reviseDraftId) {
-            $proposal = $this->proposals->byDraft($reviseDraftId);
-            if (null === $proposal || !$proposal->isOpen()) {
-                return \sprintf('Draft %d is not open any more; omit reviseDraftId to start a new proposal.', $reviseDraftId);
-            }
+        $result = $this->proposals->propose($this->turn->conversation, $operations, $summary, $reviseDraftId);
+        if (null === $result['proposal']) {
+            return "The site rejected the batch, nothing was saved. Fix these errors and call propose_changes again with the whole corrected batch:\n- ".implode("\n- ", $result['errors']);
         }
-
-        $result = $this->site->propose(array_values($operations), $summary, $reviseDraftId);
-        if (!($result['ok'] ?? false)) {
-            return "The site rejected the batch, nothing was saved. Fix these errors and call propose_changes again with the whole corrected batch:\n- ".implode("\n- ", (array) ($result['errors'] ?? ['unknown error']));
-        }
-
-        $draftId = (int) $result['draftId'];
-        $focus = (string) ($result['focusPath'] ?? '/');
-        if (null === $proposal) {
-            $proposal = new Proposal($this->turn->conversation, $draftId, $summary, $result['changes'] ?? [], $focus);
-            $this->em->persist($proposal);
-            $this->proposalStateMachine->apply($proposal, 'sketch');
-        } else {
-            $proposal->revise($summary, $result['changes'] ?? [], $focus);
-            $this->proposalStateMachine->apply($proposal, 'revise');
-        }
-        $this->em->flush();
+        $proposal = $result['proposal'];
 
         $this->turn->proposals[] = $proposal;
         $this->turn->emit('proposal', $proposal->toArray());
-        $this->turn->emit('ui', ['command' => 'showSketch', 'draftId' => $draftId, 'path' => $focus]);
+        $this->turn->emit('ui', ['command' => 'showSketch', 'draftId' => $proposal->getDraftId(), 'path' => $proposal->getFocusPath()]);
 
         return \sprintf(
-            "Sketch ready: draft %d, shown to the owner on %s. Changes: %s. New ids: %s.\nThe owner now reviews it and approves or rejects it in the panel; do not claim it is live.",
-            $draftId,
-            $focus,
-            json_encode($result['changes'] ?? []),
-            implode(', ', \array_slice((array) ($result['createdIds'] ?? []), 0, 30)) ?: 'none',
+            "Sketch ready: draft %d, shown to the owner on %s. Changes: %s.\nCreated: %s\nThe owner now reviews it and approves or rejects it in the panel; do not claim it is live.",
+            $proposal->getDraftId(),
+            $proposal->getFocusPath(),
+            json_encode($proposal->toArray()['changes']),
+            implode('; ', \array_slice($result['created'], 0, 40)) ?: 'nothing new',
         );
     }
 

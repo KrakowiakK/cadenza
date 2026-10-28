@@ -129,6 +129,16 @@ final class SiteManager
     }
 
     /**
+     * Removes every version and draft and starts again from a blank canvas. Only for development and explicit resets.
+     */
+    public function wipe(string $name = 'My site'): SiteVersion
+    {
+        $this->em->createQuery('DELETE FROM '.SiteVersion::class.' v')->execute();
+
+        return $this->initialise(Document::empty($name), 'Blank canvas');
+    }
+
+    /**
      * @param array<string, mixed> $document
      */
     public function initialise(array $document, string $summary): SiteVersion

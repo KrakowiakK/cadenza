@@ -10,7 +10,7 @@
             {%- if props.eyebrow %}<p class="mb-4 text-sm font-semibold uppercase tracking-[0.2em] {{ bg ? 'text-white/80' : 'text-primary' }}">{{ props.eyebrow }}</p>{% endif %}
             <h1 class="cz-heading text-4xl font-bold leading-tight tracking-tight md:text-6xl">{{ props.title }}</h1>
             {%- if props.subtitle %}<p class="mt-6 text-lg md:text-xl {{ bg ? 'text-white/85' : 'text-muted-foreground' }}">{{ props.subtitle|nl2br }}</p>{% endif %}
-            {%- if node.slots.actions is not empty %}
+            {%- if node.slots.actions|default([]) is not empty %}
                 <div class="mt-10 flex flex-wrap gap-3 {{ props.align == 'center' and not (props.image and props.imagePosition == 'right') ? 'justify-center' : '' }}">{{ cadenza_slot(node, 'actions') }}</div>
             {%- endif %}
         </div>

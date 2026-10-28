@@ -60,8 +60,9 @@ final class ChatController
         }
         $message = mb_substr(trim((string) ($payload['message'] ?? '')), 0, 8000);
         $context = \is_array($payload['context'] ?? null) ? $payload['context'] : [];
+        $attachments = array_values(array_filter(\is_array($payload['attachments'] ?? null) ? $payload['attachments'] : [], static fn (mixed $a): bool => \is_array($a) && \is_string($a['id'] ?? null)));
 
-        $response = new StreamedResponse(function () use ($conversation, $message, $context): void {
+        $response = new StreamedResponse(function () use ($conversation, $message, $context, $attachments): void {
             set_time_limit(0);
             ignore_user_abort(false);
             @ini_set('zlib.output_compression', '0');
@@ -75,7 +76,7 @@ final class ChatController
             $this->turn->start($conversation, \Closure::fromCallable($send));
             $send('conversation', ['id' => $conversation->getId(), 'model' => $this->modelLabel]);
             try {
-                $text = $this->conductor->answer($conversation, $message, $context);
+                $text = $this->conductor->answer($conversation, $message, $context, $attachments);
                 $send('message', ['text' => $text]);
             } catch (\Throwable $e) {
                 $this->logger->error('Cadenza turn failed: {message}', ['message' => $e->getMessage(), 'exception' => $e]);

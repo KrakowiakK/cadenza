@@ -8,6 +8,6 @@
     {%- if props.background == 'image' %}<div class="absolute inset-0 bg-black/50"></div>{% endif %}
     <div class="relative mx-auto px-6 {{ widths[props.width] }} {{ layouts[props.layout] }} {{ gaps[props.gap] }} {{ props.align == 'center' ? 'text-center justify-items-center items-center' : '' }}">
         {{ cadenza_slot(node, 'children') }}
-        {%- if node.slots.children is empty %}<div class="cz-empty-slot">Empty section</div>{% endif -%}
+        {%- if node.slots.children|default([]) is empty %}<div class="cz-empty-slot">Empty section</div>{% endif -%}
     </div>
 </section>

@@ -48,6 +48,12 @@ final class PageController
                 $document = $sketch;
             }
         }
+        $versionNumber = $request->query->getInt('cz_version');
+        if ($this->state->owner && null === $this->state->diff && $versionNumber > 0 && null !== $version = $this->versions->byNumber($versionNumber)) {
+            $this->state->previewVersion = $version;
+            $this->state->currentNumber = $this->site->currentNumber();
+            $document = $version->getDocument();
+        }
         $this->state->document = $document;
 
         $page = Document::findPage($document, '/'.$path);

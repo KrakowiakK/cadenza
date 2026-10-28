@@ -9,6 +9,6 @@
         {%- if props.description %}<twig:Card:Description>{{ props.description|nl2br }}</twig:Card:Description>{% endif %}
     </twig:Card:Header>
     {%- endif %}
-    {%- if node.slots.children is not empty %}<twig:Card:Content class="flex flex-col gap-3">{{ cadenza_slot(node, 'children') }}</twig:Card:Content>{% endif %}
+    {%- if node.slots.children|default([]) is not empty %}<twig:Card:Content class="flex flex-col gap-3">{{ cadenza_slot(node, 'children') }}</twig:Card:Content>{% endif %}
 </twig:Card>
 </{{ tag }}>

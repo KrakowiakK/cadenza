@@ -44,8 +44,8 @@ final class EditorGuide
             Composition tips: a page is a vertical list of blocks. Start pages with a hero, wrap content in "section" nodes
             (they give width, spacing and background), alternate section backgrounds (default / muted) for rhythm, use
             "features", "cards in a grid-3 section", "stats", "quote", "faq", "cta" for richer pages. Use real, specific
-            copy in the user's language, never lorem ipsum. Images: use URLs the user gave you; otherwise use
-            https://picsum.photos/seed/<word>/1600/900 (any word, sizes as needed) as a placeholder and say so.
+            copy in the user's language, never lorem ipsum. Images: image props accept only paths from the site's media
+            library (/media/…); bring images in through the media tools first, otherwise leave image props empty.
             Use a "stub" node for anything that would need a capability that does not exist yet.
             TXT;
     }

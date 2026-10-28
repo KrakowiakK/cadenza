@@ -18,11 +18,13 @@
         <meta name="cz-harness" content="{{ cadenza_harness_url }}">
         <meta name="cz-token" content="{{ cadenza_token }}">
         {%- if state.isSketch %}<meta name="cz-draft" content="{{ state.draftId }}">{% endif %}
+        {%- if state.previewVersion %}<meta name="cz-version" content="{{ state.previewVersion.number }}">{% endif %}
         <script type="module" src="{{ asset('@cadenza/runtime/panel.js') }}"></script>
     {%- endif %}
 </head>
 <body class="flex min-h-screen flex-col bg-background text-foreground antialiased{{ state.isSketch ? ' cz-sketch' : '' }}{{ state.showBefore ? ' cz-before' : '' }}">
     {%- if state.isSketch %}{% include '@CadenzaRuntime/_sketch_banner.html.twig' %}{% endif %}
+    {%- if state.previewVersion %}{% include '@CadenzaRuntime/_version_banner.html.twig' %}{% endif %}
     <header class="sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur" style="view-transition-name:cz-header">
         <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-6">
             <a href="/" class="cz-heading text-lg font-bold tracking-tight">{{ doc.name }}</a>

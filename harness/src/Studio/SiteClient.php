@@ -81,6 +81,45 @@ final class SiteClient
         return $this->json($this->mcp->get('control')->callTool('draft_discard', ['draftId' => $draftId]));
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function node(string $id, ?int $draftId): ?array
+    {
+        $node = $this->json($this->mcp->get('site')->callTool('node_get', array_filter(['id' => $id, 'draftId' => $draftId])));
+
+        return isset($node['error']) || !isset($node['type']) ? null : $node;
+    }
+
+    /**
+     * @param array<string, ?string> $meta alt, source, author, license, licenseUrl, sourceUrl
+     *
+     * @return array<string, mixed>
+     */
+    public function importMedia(string $url, array $meta): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('media_import', array_filter(['url' => $url] + $meta, static fn (mixed $v): bool => null !== $v && '' !== $v)));
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function history(int $limit = 50): array
+    {
+        $result = $this->mcp->get('control')->callTool('history', ['limit' => $limit]);
+        $data = \is_array($result->structuredContent) ? $result->structuredContent : json_decode($this->text($result), true);
+
+        return array_values(\is_array($data) ? ($data['result'] ?? $data) : []);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function restore(int $version): array
+    {
+        return $this->json($this->mcp->get('control')->callTool('version_restore', ['version' => $version]));
+    }
+
     private function text(CallToolResult $result): string
     {
         $text = '';

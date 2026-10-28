@@ -7,3 +7,4 @@ ai:
             tools:
                 - 'App\Agent\Tool\SiteTools'
                 - 'App\Agent\Tool\UiTools'
+                - 'App\Agent\Tool\ImageTools'

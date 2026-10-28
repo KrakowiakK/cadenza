@@ -60,6 +60,7 @@ final class PublishingTools
             'version' => $v->getNumber(),
             'summary' => $v->getSummary(),
             'publishedAt' => $v->getPublishedAt()?->format(\DATE_ATOM),
+            'pages' => \count($v->getDocument()['pages']),
         ], $this->versions->history($limit));
     }
 

@@ -50,9 +50,9 @@ class Conversation
     /**
      * @param list<array<string, string>> $selection
      */
-    public function addUserTurn(string $text, array $selection, string $path): void
+    public function addUserTurn(string $text, array $selection, string $path, array $attachments = []): void
     {
-        $this->turns[] = ['role' => 'user', 'text' => $text, 'selection' => $selection, 'path' => $path, 'at' => date(\DATE_ATOM)];
+        $this->turns[] = ['role' => 'user', 'text' => $text, 'selection' => $selection, 'attachments' => $attachments, 'path' => $path, 'at' => date(\DATE_ATOM)];
     }
 
     /**

@@ -18,6 +18,13 @@ const I18N = {
         before: 'Before', after: 'After', published: 'Published — the change is live.', discarded: 'Draft rejected.',
         error: 'Something went wrong', harnessDown: 'Cannot reach the Cadenza studio (harness). Is it running?',
         steps: 'steps', selection: 'Selected', showChanges: 'Show changes',
+        attach: 'Attach photos', draw: 'Draw a sketch', sketchPrompt: 'Build the page following my sketch',
+        uploading: 'Uploading…', chat: 'Conversation', history: 'History', version: 'Version', current: 'current',
+        preview: 'Preview', restore: 'Restore', restoreThis: 'Restore this version', close: 'Close', undo: 'Undo',
+        startOver: 'Start over', startOverConfirm: 'Sure? Click again — history is kept.', restored: 'Restored — a new version was published.',
+        pickPhoto: 'Pick a photo', picked: 'In the sketch', noHistory: 'Nothing published yet.',
+        pen: 'Pen', box: 'Box', text: 'Text', eraser: 'Eraser', clear: 'Clear', cancel: 'Cancel', useSketch: 'Add to message',
+        sketchHint: 'Draw the layout: boxes for sections, words for what goes where. Cadenza will read it.', typeLabel: 'Type a label, Enter',
     },
     pl: {
         placeholder: 'Powiedz, co zmienić…',
@@ -33,6 +40,13 @@ const I18N = {
         before: 'Przed', after: 'Po', published: 'Opublikowano — zmiana jest na stronie.', discarded: 'Szkic odrzucony.',
         error: 'Coś poszło nie tak', harnessDown: 'Nie mogę połączyć się ze studiem Cadenzy (harness). Czy działa?',
         steps: 'kroki', selection: 'Zaznaczone', showChanges: 'Pokaż zmiany',
+        attach: 'Dołącz zdjęcia', draw: 'Narysuj szkic', sketchPrompt: 'Zbuduj stronę według mojego szkicu',
+        uploading: 'Wysyłam…', chat: 'Rozmowa', history: 'Historia', version: 'Wersja', current: 'bieżąca',
+        preview: 'Podgląd', restore: 'Przywróć', restoreThis: 'Przywróć tę wersję', close: 'Zamknij', undo: 'Cofnij',
+        startOver: 'Zacznij od nowa', startOverConfirm: 'Na pewno? Kliknij jeszcze raz — historia zostaje.', restored: 'Przywrócono — opublikowano nową wersję.',
+        pickPhoto: 'Wybierz zdjęcie', picked: 'W szkicu', noHistory: 'Nic jeszcze nie opublikowano.',
+        pen: 'Ołówek', box: 'Ramka', text: 'Tekst', eraser: 'Gumka', clear: 'Wyczyść', cancel: 'Anuluj', useSketch: 'Dodaj do wiadomości',
+        sketchHint: 'Narysuj układ: ramki to sekcje, słowa mówią, co gdzie ma być. Cadenza to odczyta.', typeLabel: 'Wpisz etykietę, Enter',
     },
 };
 const LANG = (navigator.language || 'en').toLowerCase().startsWith('pl') ? 'pl' : 'en';
@@ -81,6 +95,15 @@ const ICONS = {
     tool: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
     chevron: '<path d="m9 18 6-6-6-6"/>',
     alert: '<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>',
+    clip: '<path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',
+    pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    chat: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    square: '<rect x="4" y="4" width="16" height="16" rx="1"/>',
+    type: '<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>',
+    eraser: '<path d="m7 21-4.3-4.3a1 1 0 0 1 0-1.4l10-10a1 1 0 0 1 1.4 0l5.6 5.6a1 1 0 0 1 0 1.4L11 21z"/><path d="M22 21H7"/>',
+    undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/>',
+    trash: '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>',
 };
 const icon = (name, cls = 'size-4') => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cls}">${ICONS[name]}</svg>`;
 
@@ -89,6 +112,7 @@ class Studio {
         this.root = root;
         this.conversationId = store.get('conversation');
         this.selection = [];
+        this.attachments = [];
         this.busy = false;
         this.proposals = new Map();
         this.exitingSketch = false;
@@ -107,6 +131,7 @@ class Studio {
     <span class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white">${icon('sparkle')}</span>
     <button type="button" data-cz="pick" title="${t('pick')}" class="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('target')}</button>
     <div data-cz="bar-chips" class="flex shrink-0 gap-1"></div>
+    <button type="button" data-cz="bar-draw" title="${t('draw')}" class="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('pencil')}</button>
     <input data-cz="bar-input" class="h-9 min-w-0 flex-1 bg-transparent px-1 text-[15px] outline-none placeholder:text-muted-foreground" placeholder="${t('placeholder')}" autocomplete="off">
     <span data-cz="bar-status" class="hidden shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground sm:flex"></span>
     <button type="button" data-cz="open" title="${t('open')} (⌘K)" class="flex h-8 shrink-0 items-center gap-1 rounded-lg px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">${icon('panel')}<kbd class="hidden font-sans sm:inline">⌘K</kbd></button>
@@ -121,16 +146,24 @@ class Studio {
       <div class="text-sm font-semibold leading-tight">Cadenza</div>
       <div class="flex items-center gap-2 text-xs text-muted-foreground"><span data-cz="status" class="flex items-center gap-1.5"></span><span data-cz="model" class="truncate opacity-70"></span></div>
     </div>
+    <button type="button" data-cz="tab-history" title="${t('history')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('clock')}</button>
     <button type="button" data-cz="new" title="${t('newChat')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('plus')}</button>
     <button type="button" data-cz="collapse" title="${t('collapse')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('minimize')}</button>
     <button type="button" data-cz="hide" title="${t('hide')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('x')}</button>
   </header>
   <div data-cz="messages" class="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-5 text-[14px] leading-relaxed"></div>
+  <div data-cz="history" class="hidden flex-1 flex-col overflow-y-auto px-4 py-4 text-[13px]"></div>
   <form data-cz="form" class="border-t border-border p-3">
     <div data-cz="chips" class="mb-2 hidden flex-wrap gap-1.5"></div>
+    <div data-cz="attachments" class="mb-2 hidden flex-wrap gap-2"></div>
+    <input type="file" data-cz="file" accept="image/*" multiple class="hidden">
     <div class="flex items-end gap-2 rounded-xl border border-border bg-muted/40 p-1.5 focus-within:border-foreground/30">
-      <button type="button" data-cz="pick" title="${t('pick')}" class="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-background hover:text-foreground">${icon('target')}</button>
+      <div class="flex shrink-0 flex-col">
+        <button type="button" data-cz="pick" title="${t('pick')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-background hover:text-foreground">${icon('target')}</button>
+      </div>
       <textarea data-cz="input" rows="1" class="max-h-40 min-h-8 flex-1 resize-none bg-transparent px-1 py-1.5 text-[14px] outline-none placeholder:text-muted-foreground" placeholder="${t('placeholder')}"></textarea>
+      <button type="button" data-cz="attach" title="${t('attach')}" class="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-background hover:text-foreground">${icon('clip')}</button>
+      <button type="button" data-cz="draw" title="${t('draw')}" class="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-background hover:text-foreground">${icon('pencil')}</button>
       <button type="submit" class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-foreground text-background disabled:opacity-40">${icon('send')}</button>
     </div>
   </form>
@@ -157,6 +190,25 @@ class Studio {
         this.el('hide').addEventListener('click', () => this.setState('hidden'));
         this.el('show').addEventListener('click', () => this.setState('open'));
         this.el('new').addEventListener('click', () => this.newConversation());
+        this.el('tab-history').addEventListener('click', () => this.toggleHistory());
+        this.el('attach').addEventListener('click', () => this.el('file').click());
+        this.el('file').addEventListener('change', (e) => { this.addFiles([...e.target.files]); e.target.value = ''; });
+        this.el('draw').addEventListener('click', () => this.openSketchPad());
+        this.el('bar-draw').addEventListener('click', () => { this.setState('open'); this.openSketchPad(); });
+        const onPaste = (e) => {
+            const files = [...(e.clipboardData?.files ?? [])].filter((f) => f.type.startsWith('image/'));
+            if (files.length) { e.preventDefault(); this.setState('open'); this.addFiles(files); }
+        };
+        this.input.addEventListener('paste', onPaste);
+        this.barInput.addEventListener('paste', onPaste);
+        const sheet = this.root.querySelector('.cz-sheet');
+        sheet.addEventListener('dragover', (e) => { e.preventDefault(); sheet.classList.add('ring-2', 'ring-violet-500'); });
+        sheet.addEventListener('dragleave', () => sheet.classList.remove('ring-2', 'ring-violet-500'));
+        sheet.addEventListener('drop', (e) => {
+            e.preventDefault();
+            sheet.classList.remove('ring-2', 'ring-violet-500');
+            this.addFiles([...e.dataTransfer.files].filter((f) => f.type.startsWith('image/')));
+        });
 
         this.el('bar-form').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -169,7 +221,7 @@ class Studio {
         this.el('form').addEventListener('submit', (e) => {
             e.preventDefault();
             const text = this.input.value.trim();
-            if (!text) return;
+            if (!text && !this.attachments.length) return;
             this.input.value = '';
             this.autosize();
             this.send(text);
@@ -231,12 +283,20 @@ class Studio {
         bar.classList.toggle('sm:flex', kind !== 'idle');
     }
 
-    toast(text, kind = 'ok') {
+    toast(text, kind = 'ok', action = null) {
         const el = document.createElement('div');
         el.className = 'cz-msg pointer-events-auto flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm shadow-lg';
         el.innerHTML = (kind === 'ok' ? `<span class="text-emerald-600">${icon('check')}</span>` : `<span class="text-rose-600">${icon('alert')}</span>`) + escapeHtml(text);
+        if (action) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'ml-2 flex items-center gap-1 rounded-full bg-foreground px-2.5 py-0.5 text-xs font-semibold text-background';
+            b.innerHTML = icon('undo', 'size-3.5') + escapeHtml(action.label);
+            b.addEventListener('click', () => { el.remove(); action.run(); });
+            el.append(b);
+        }
         this.el('toasts').append(el);
-        setTimeout(() => { el.style.transition = 'opacity .4s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }, 3200);
+        setTimeout(() => { el.style.transition = 'opacity .4s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }, action ? 8000 : 3200);
     }
 
     // ---------------------------------------------------------------------------------------------- messages
@@ -245,10 +305,10 @@ class Studio {
         requestAnimationFrame(() => { this.messages.scrollTop = this.messages.scrollHeight; });
     }
 
-    addUser(text, selection = []) {
+    addUser(text, selection = [], attachments = []) {
         const el = document.createElement('div');
         el.className = 'cz-msg ml-10 self-end rounded-2xl rounded-br-md bg-foreground px-3.5 py-2 text-background';
-        el.innerHTML = (selection.length ? `<div class="mb-1 flex flex-wrap gap-1">${selection.map((s) => `<span class="rounded-md bg-background/15 px-1.5 py-0.5 text-[11px]">◎ ${escapeHtml(s.label)}</span>`).join('')}</div>` : '') + `<div class="whitespace-pre-wrap">${escapeHtml(text)}</div>`;
+        el.innerHTML = (attachments.length ? `<div class="mb-1.5 flex flex-wrap gap-1.5">${attachments.map((a) => `<img src="${escapeHtml(a.url)}" alt="" class="h-16 max-w-28 rounded-lg bg-white object-cover">`).join('')}</div>` : '') + (selection.length ? `<div class="mb-1 flex flex-wrap gap-1">${selection.map((s) => `<span class="rounded-md bg-background/15 px-1.5 py-0.5 text-[11px]">◎ ${escapeHtml(s.label)}</span>`).join('')}</div>` : '') + `<div class="whitespace-pre-wrap">${escapeHtml(text)}</div>`;
         this.messages.append(el);
         this.scrollDown();
     }
@@ -385,7 +445,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
             const data = await this.api(`/api/conversations/${encodeURIComponent(this.conversationId)}`);
             if (!data.turns?.length) { this.welcome(); }
             for (const turn of data.turns ?? []) {
-                if (turn.role === 'user') this.addUser(turn.text, turn.selection ?? []);
+                if (turn.role === 'user') this.addUser(turn.text, turn.selection ?? [], turn.attachments ?? []);
                 else {
                     const tt = this.addAssistantText(turn.text || '');
                     if (!turn.text) tt.part('text').classList.add('hidden');
@@ -410,10 +470,14 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
 
     async send(text) {
         if (this.busy) return;
+        if (this.attachments.some((a) => a.uploading)) { this.toast(t('uploading')); return; }
         const selection = this.selection.map(({ id, label, type }) => ({ id, label, type }));
-        if (!text) text = '';
-        this.addUser(text, selection);
+        const attachments = this.attachments.map(({ id, kind, name, url }) => ({ id, kind, name, url }));
+        if (!text) text = attachments.some((a) => a.kind === 'sketch') ? t('sketchPrompt') : '';
+        this.addUser(text, selection, attachments);
         this.clearSelection();
+        this.attachments = [];
+        this.renderAttachments();
         if (this.picking) this.togglePicker(false);
         this.busy = true;
         this.setStatus('thinking');
@@ -427,6 +491,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
                 body: JSON.stringify({
                     conversationId: this.conversationId,
                     message: text,
+                    attachments: attachments.map(({ id, kind, name }) => ({ id, kind, name })),
                     context: { path: url.pathname, draftId: meta('cz-draft') ? Number(meta('cz-draft')) : null, selection, language: LANG, viewport: innerWidth < 768 ? 'mobile' : 'desktop' },
                 }),
             });
@@ -489,6 +554,13 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
                 break;
             case 'proposal':
                 this.proposalCard(turn.part('cards'), data);
+                break;
+            case 'choice':
+                this.choiceGrid(turn.part('cards'), data);
+                break;
+            case 'generated':
+                turn.part('cards').insertAdjacentHTML('beforeend', `<img src="${escapeHtml(data.url)}" alt="" title="${escapeHtml(data.prompt)}" class="cz-msg w-full rounded-xl">`);
+                this.scrollDown();
                 break;
             case 'message': {
                 const box = turn.part('text');
@@ -595,6 +667,16 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
     async bannerAction(action) {
         const draft = meta('cz-draft');
         const url = new URL(location.href);
+        if (action === 'close-preview') {
+            url.searchParams.delete('cz_version');
+            await this.visit(url.pathname + url.search, { exitSketch: true });
+            return;
+        }
+        if (action === 'restore') {
+            const version = document.querySelector('[data-cz-action="restore"]')?.dataset.version;
+            if (version) await this.historyAction(`/api/history/${version}/restore`);
+            return;
+        }
         if (action === 'before' || action === 'after') {
             action === 'before' ? url.searchParams.set('cz_view', 'before') : url.searchParams.delete('cz_view');
             await this.visit(url.pathname + url.search);
@@ -635,8 +717,10 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         url.searchParams.delete('cz_view');
         const path = action === 'approve' ? (res.path || url.pathname) : url.pathname;
         if (inSketch || action === 'approve') await this.visit(path + (url.search === '?' ? '' : url.search), { exitSketch: true });
-        this.toast(action === 'approve' ? t('published') : t('discarded'));
+        if (action === 'approve') this.toast(t('published'), 'ok', { label: t('undo'), run: () => this.historyAction('/api/history/undo') });
+        else this.toast(t('discarded'));
         this.refreshWaiting();
+        if (this.showingHistory) this.loadTimeline();
     }
 
     afterLoad() {
@@ -645,6 +729,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         root.style.setProperty('--cz-label-added', JSON.stringify(t('added')));
         root.style.setProperty('--cz-label-changed', JSON.stringify(t('changed')));
         root.style.setProperty('--cz-label-removed', JSON.stringify(t('removed')));
+        document.querySelectorAll('#cz-version-banner [data-cz-i18n]').forEach((el) => { el.textContent = t(el.dataset.czI18n === 'restore' ? 'restoreThis' : el.dataset.czI18n); });
         if (banner) {
             banner.querySelectorAll('[data-cz-i18n]').forEach((el) => { el.textContent = t(el.dataset.czI18n); });
             const marks = banner.querySelector('[data-cz-action="marks"]');
@@ -666,6 +751,162 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         });
         // Selection highlights survive navigation
         for (const s of this.selection) document.querySelector(`.cz-node[data-node-id="${CSS.escape(s.id)}"]`)?.classList.add('cz-picked');
+    }
+
+    // ---------------------------------------------------------------------------------------------- attachments
+
+    async addFiles(files) {
+        for (const file of files.slice(0, 6)) {
+            const item = { id: null, kind: 'photo', name: file.name, url: URL.createObjectURL(file), uploading: true };
+            this.attachments.push(item);
+            this.renderAttachments();
+            try {
+                const form = new FormData();
+                form.append('file', file);
+                const res = await fetch(HARNESS + '/api/uploads', { method: 'POST', headers: { 'X-Cadenza-Token': TOKEN }, body: form });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error ?? res.status);
+                Object.assign(item, { id: data.id, url: data.url, uploading: false });
+            } catch (e) {
+                this.attachments = this.attachments.filter((a) => a !== item);
+                this.toast(t('error') + ': ' + e.message, 'error');
+            }
+            this.renderAttachments();
+        }
+    }
+
+    async addDataUrl(dataUrl, kind, name) {
+        const item = { id: null, kind, name, url: dataUrl, uploading: true };
+        this.attachments.push(item);
+        this.renderAttachments();
+        try {
+            const data = await this.api('/api/uploads', { dataUrl, name });
+            Object.assign(item, { id: data.id, url: data.url, uploading: false });
+        } catch (e) {
+            this.attachments = this.attachments.filter((a) => a !== item);
+            this.toast(t('error') + ': ' + e.message, 'error');
+        }
+        this.renderAttachments();
+    }
+
+    renderAttachments() {
+        const box = this.el('attachments');
+        box.classList.toggle('hidden', !this.attachments.length);
+        box.classList.toggle('flex', !!this.attachments.length);
+        box.innerHTML = this.attachments.map((a, i) => `<div class="relative"><img src="${escapeHtml(a.url)}" alt="" class="size-16 rounded-lg border border-border bg-white object-cover ${a.uploading ? 'opacity-50' : ''}">${a.kind === 'sketch' ? `<span class="absolute bottom-1 left-1 rounded bg-violet-600 px-1 text-[10px] font-semibold text-white">✎</span>` : ''}${a.uploading ? '<span class="absolute inset-0 m-auto size-4 animate-spin rounded-full border-2 border-violet-500 border-t-transparent"></span>' : ''}<button type="button" data-remove="${i}" class="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-foreground text-[11px] text-background">×</button></div>`).join('');
+        box.querySelectorAll('[data-remove]').forEach((b) => b.addEventListener('click', () => { this.attachments.splice(Number(b.dataset.remove), 1); this.renderAttachments(); }));
+    }
+
+    // ---------------------------------------------------------------------------------------------- sketch pad
+
+    openSketchPad() {
+        new SketchPad((dataUrl) => {
+            this.addDataUrl(dataUrl, 'sketch', 'sketch.png');
+            if (!this.input.value.trim()) this.input.value = t('sketchPrompt');
+            this.setState('open');
+        });
+    }
+
+    // ---------------------------------------------------------------------------------------------- photo choices
+
+    choiceGrid(container, offer) {
+        const card = document.createElement('div');
+        card.className = 'cz-msg rounded-xl border border-border p-3';
+        card.innerHTML = `<div class="mb-2 flex items-center justify-between gap-2"><div class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">${t('pickPhoto')}</div><div class="truncate text-xs font-medium">${escapeHtml(offer.label)}</div></div>
+<div class="grid grid-cols-2 gap-1.5">${offer.candidates.map((c) => `<button type="button" data-candidate="${escapeHtml(c.id)}" class="group relative overflow-hidden rounded-lg bg-muted text-left ring-offset-2 ring-offset-background">
+  <img src="${escapeHtml(c.thumb)}" alt="${escapeHtml(c.title)}" loading="lazy" class="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105">
+  <span class="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-1.5 pb-1 pt-4 text-[10px] text-white/90">${escapeHtml((c.author ?? '').replace(/\s+/g, ' ').slice(0, 40))}${c.license ? ' · ' + escapeHtml(c.license) : ''}</span>
+  <span data-state class="absolute inset-0 hidden items-center justify-center bg-black/40 text-white"></span>
+</button>`).join('')}</div>`;
+        card.querySelectorAll('[data-candidate]').forEach((tile) => tile.addEventListener('click', () => this.pickCandidate(offer, tile, card)));
+        container.append(card);
+        this.scrollDown();
+    }
+
+    async pickCandidate(offer, tile, card) {
+        const state = tile.querySelector('[data-state]');
+        card.querySelectorAll('[data-candidate]').forEach((b) => b.classList.remove('ring-2', 'ring-violet-500'));
+        state.className = 'absolute inset-0 flex items-center justify-center bg-black/40 text-white';
+        state.innerHTML = '<span class="size-5 animate-spin rounded-full border-2 border-white border-t-transparent"></span>';
+        try {
+            const res = await this.api(`/api/offers/${encodeURIComponent(offer.offerId)}/pick`, { candidateId: tile.dataset.candidate });
+            tile.classList.add('ring-2', 'ring-violet-500');
+            state.innerHTML = `<span class="flex items-center gap-1 rounded-full bg-violet-600 px-2 py-0.5 text-[11px] font-semibold">${icon('check', 'size-3')}${t('picked')}</span>`;
+            if (res.proposal) {
+                const existing = this.root.querySelector(`[data-proposal="${CSS.escape(res.proposal.proposalId)}"]`);
+                this.proposalCard(existing?.parentElement ?? card.parentElement, res.proposal);
+                await this.showSketch(res.proposal.draftId, location.pathname);
+            }
+        } catch (e) {
+            state.className = 'absolute inset-0 hidden';
+            this.toast(t('error') + ': ' + e.message, 'error');
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------- timeline
+
+    toggleHistory(force) {
+        this.showingHistory = force ?? !this.showingHistory;
+        this.messages.classList.toggle('hidden', this.showingHistory);
+        this.el('form').classList.toggle('hidden', this.showingHistory);
+        const history = this.el('history');
+        history.classList.toggle('hidden', !this.showingHistory);
+        history.classList.toggle('flex', this.showingHistory);
+        this.el('tab-history').classList.toggle('bg-muted', this.showingHistory);
+        this.el('tab-history').innerHTML = icon(this.showingHistory ? 'chat' : 'clock');
+        this.el('tab-history').title = this.showingHistory ? t('chat') : t('history');
+        if (this.showingHistory) this.loadTimeline();
+    }
+
+    async loadTimeline() {
+        const box = this.el('history');
+        box.innerHTML = `<div class="text-muted-foreground">…</div>`;
+        let versions = [];
+        try { versions = (await this.api('/api/history')).versions ?? []; } catch (e) { box.innerHTML = `<p class="text-rose-600">${escapeHtml(e.message)}</p>`; return; }
+        const viewing = meta('cz-version');
+        const rel = (iso) => {
+            const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+            const rtf = new Intl.RelativeTimeFormat(LANG, { numeric: 'auto' });
+            if (diff < 60) return rtf.format(-Math.round(diff), 'second');
+            if (diff < 3600) return rtf.format(-Math.round(diff / 60), 'minute');
+            if (diff < 86400) return rtf.format(-Math.round(diff / 3600), 'hour');
+            return rtf.format(-Math.round(diff / 86400), 'day');
+        };
+        box.innerHTML = `<h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">${t('history')}</h3>
+<ol class="relative flex flex-col gap-1 border-l border-border pl-4">${versions.map((v, i) => `
+  <li class="group relative rounded-lg px-2 py-2 ${String(v.version) === viewing ? 'bg-sky-500/10' : 'hover:bg-muted'}">
+    <span class="absolute -left-[21px] top-3 size-2.5 rounded-full ${i === 0 ? 'bg-emerald-500 ring-4 ring-emerald-500/20' : 'bg-border'}"></span>
+    <div class="flex items-center gap-2"><span class="font-semibold">v${v.version}</span>${i === 0 ? `<span class="rounded-full bg-emerald-500/15 px-1.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">${t('current')}</span>` : ''}<span class="ml-auto text-[11px] text-muted-foreground">${escapeHtml(rel(v.publishedAt))}</span></div>
+    <div class="mt-0.5 text-muted-foreground">${escapeHtml(v.summary)}</div>
+    <div class="mt-1.5 flex gap-1.5 ${i === 0 ? 'hidden' : ''}">
+      <button type="button" data-preview="${v.version}" class="rounded-md border border-border px-2 py-0.5 text-xs hover:bg-background">${t('preview')}</button>
+      <button type="button" data-restore="${v.version}" class="rounded-md bg-foreground px-2 py-0.5 text-xs font-medium text-background">${t('restore')}</button>
+    </div>
+  </li>`).join('') || `<li class="text-muted-foreground">${t('noHistory')}</li>`}</ol>
+<button type="button" data-start-over class="mt-6 flex items-center justify-center gap-2 rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground hover:border-rose-400 hover:text-rose-600">${icon('trash', 'size-3.5')}${t('startOver')}</button>`;
+        box.querySelectorAll('[data-preview]').forEach((b) => b.addEventListener('click', () => this.visit(`${location.pathname}?cz_version=${b.dataset.preview}`)));
+        box.querySelectorAll('[data-restore]').forEach((b) => b.addEventListener('click', () => this.historyAction(`/api/history/${b.dataset.restore}/restore`)));
+        const startOver = box.querySelector('[data-start-over]');
+        startOver.addEventListener('click', () => {
+            if (startOver.dataset.armed) { this.historyAction('/api/history/start-over'); return; }
+            startOver.dataset.armed = '1';
+            startOver.classList.add('border-rose-400', 'text-rose-600');
+            startOver.lastChild.textContent = t('startOverConfirm');
+            setTimeout(() => { delete startOver.dataset.armed; startOver.classList.remove('border-rose-400', 'text-rose-600'); startOver.lastChild.textContent = t('startOver'); }, 4000);
+        });
+    }
+
+    async historyAction(path) {
+        try {
+            await this.api(path, {});
+            const url = new URL(location.href);
+            ['cz_version', 'cz_draft', 'cz_view'].forEach((k) => url.searchParams.delete(k));
+            await this.visit(url.pathname + url.search, { exitSketch: true });
+            this.toast(t('restored'));
+            if (this.showingHistory) this.loadTimeline();
+        } catch (e) {
+            this.toast(t('error') + ': ' + e.message, 'error');
+        }
     }
 
     // ---------------------------------------------------------------------------------------------- picker
@@ -738,6 +979,158 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         document.querySelectorAll('.cz-picked').forEach((el) => el.classList.remove('cz-picked'));
         this.selection = [];
         this.renderChips();
+    }
+}
+
+/*
+ * A sheet of paper over the page: pen, boxes, text labels and an eraser. The drawing goes to the model as an image.
+ */
+class SketchPad {
+    constructor(onDone) {
+        this.onDone = onDone;
+        this.tool = 'pen';
+        this.history = [];
+        this.el = document.createElement('div');
+        this.el.className = 'cz-ui fixed inset-0 z-[90] flex flex-col bg-black/40 p-3 backdrop-blur-sm sm:p-6';
+        const tools = [['pen', 'pencil'], ['box', 'square'], ['text', 'type'], ['eraser', 'eraser']];
+        this.el.innerHTML = `
+<div class="mx-auto flex w-full max-w-6xl flex-1 flex-col overflow-hidden rounded-2xl bg-white text-neutral-900 shadow-2xl">
+  <div class="flex flex-wrap items-center gap-1.5 border-b border-neutral-200 px-3 py-2">
+    ${tools.map(([tool, ic]) => `<button type="button" data-tool="${tool}" class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm hover:bg-neutral-100">${icon(ic)}<span class="hidden sm:inline">${t(tool)}</span></button>`).join('')}
+    <span class="mx-1 h-5 w-px bg-neutral-200"></span>
+    ${['#171717', '#7c3aed', '#dc2626'].map((c) => `<button type="button" data-color="${c}" class="size-6 rounded-full ring-offset-2" style="background:${c}"></button>`).join('')}
+    <span class="mx-1 h-5 w-px bg-neutral-200"></span>
+    <button type="button" data-do="undo" class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm hover:bg-neutral-100">${icon('undo')}</button>
+    <button type="button" data-do="clear" class="rounded-lg px-2.5 py-1.5 text-sm hover:bg-neutral-100">${t('clear')}</button>
+    <span class="ml-auto hidden text-xs text-neutral-500 lg:inline">${t('sketchHint')}</span>
+    <button type="button" data-do="cancel" class="rounded-lg px-3 py-1.5 text-sm hover:bg-neutral-100">${t('cancel')}</button>
+    <button type="button" data-do="done" class="rounded-lg bg-neutral-900 px-3 py-1.5 text-sm font-semibold text-white">${t('useSketch')}</button>
+  </div>
+  <div class="relative flex-1"><canvas class="absolute inset-0 h-full w-full touch-none" style="cursor:crosshair"></canvas><input data-label class="absolute hidden rounded border border-violet-400 bg-white px-1 text-lg outline-none" placeholder="${t('typeLabel')}"></div>
+</div>`;
+        document.body.append(this.el);
+        this.canvas = this.el.querySelector('canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.label = this.el.querySelector('[data-label]');
+        this.color = '#171717';
+        this.resize();
+        this.bind();
+        this.select('pen');
+        this.selectColor(this.color);
+    }
+
+    resize() {
+        const r = this.canvas.getBoundingClientRect();
+        const ratio = window.devicePixelRatio || 1;
+        this.canvas.width = r.width * ratio;
+        this.canvas.height = r.height * ratio;
+        this.ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        this.paper();
+    }
+
+    paper() {
+        const { width, height } = this.canvas.getBoundingClientRect();
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillRect(0, 0, width, height);
+        this.ctx.fillStyle = '#e5e7eb';
+        for (let x = 12; x < width; x += 24) for (let y = 12; y < height; y += 24) this.ctx.fillRect(x, y, 1.5, 1.5);
+    }
+
+    snapshot() {
+        this.history.push(this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height));
+        if (this.history.length > 40) this.history.shift();
+    }
+
+    select(tool) {
+        this.tool = tool;
+        this.el.querySelectorAll('[data-tool]').forEach((b) => b.classList.toggle('bg-violet-100', b.dataset.tool === tool));
+    }
+
+    selectColor(color) {
+        this.color = color;
+        this.el.querySelectorAll('[data-color]').forEach((b) => b.classList.toggle('ring-2', b.dataset.color === color));
+        this.el.querySelectorAll('[data-color]').forEach((b) => { b.style.setProperty('--tw-ring-color', b.dataset.color); });
+    }
+
+    point(e) {
+        const r = this.canvas.getBoundingClientRect();
+        return { x: e.clientX - r.left, y: e.clientY - r.top };
+    }
+
+    bind() {
+        this.el.querySelectorAll('[data-tool]').forEach((b) => b.addEventListener('click', () => this.select(b.dataset.tool)));
+        this.el.querySelectorAll('[data-color]').forEach((b) => b.addEventListener('click', () => this.selectColor(b.dataset.color)));
+        this.el.querySelector('[data-do="undo"]').addEventListener('click', () => { const last = this.history.pop(); if (last) this.ctx.putImageData(last, 0, 0); });
+        this.el.querySelector('[data-do="clear"]').addEventListener('click', () => { this.snapshot(); this.paper(); });
+        this.el.querySelector('[data-do="cancel"]').addEventListener('click', () => this.close());
+        this.el.querySelector('[data-do="done"]').addEventListener('click', () => { this.commitLabel(); this.onDone(this.canvas.toDataURL('image/png')); this.close(); });
+        this.onKey = (e) => { if (e.key === 'Escape' && this.label.classList.contains('hidden')) this.close(); };
+        document.addEventListener('keydown', this.onKey);
+
+        this.canvas.addEventListener('pointerdown', (e) => {
+            const p = this.point(e);
+            if (this.tool === 'text') { this.placeLabel(p); return; }
+            this.commitLabel();
+            this.canvas.setPointerCapture(e.pointerId);
+            this.snapshot();
+            this.start = p;
+            this.last = p;
+            this.base = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+            this.drawing = true;
+        });
+        this.canvas.addEventListener('pointermove', (e) => {
+            if (!this.drawing) return;
+            const p = this.point(e);
+            const ctx = this.ctx;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            if (this.tool === 'box') {
+                ctx.putImageData(this.base, 0, 0);
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2.5;
+                ctx.strokeRect(this.start.x, this.start.y, p.x - this.start.x, p.y - this.start.y);
+                return;
+            }
+            ctx.strokeStyle = this.tool === 'eraser' ? '#ffffff' : this.color;
+            ctx.lineWidth = this.tool === 'eraser' ? 22 : 3;
+            ctx.beginPath();
+            ctx.moveTo(this.last.x, this.last.y);
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
+            this.last = p;
+        });
+        const stop = () => { this.drawing = false; };
+        this.canvas.addEventListener('pointerup', stop);
+        this.canvas.addEventListener('pointercancel', stop);
+        this.label.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); this.commitLabel(); }
+            if (e.key === 'Escape') { this.label.value = ''; this.commitLabel(); }
+        });
+    }
+
+    placeLabel(p) {
+        this.commitLabel();
+        this.labelAt = p;
+        Object.assign(this.label.style, { left: p.x + 'px', top: p.y - 16 + 'px' });
+        this.label.classList.remove('hidden');
+        this.label.value = '';
+        setTimeout(() => this.label.focus(), 0);
+    }
+
+    commitLabel() {
+        if (this.label.classList.contains('hidden')) return;
+        const text = this.label.value.trim();
+        this.label.classList.add('hidden');
+        if (!text) return;
+        this.snapshot();
+        this.ctx.fillStyle = this.color;
+        this.ctx.font = '600 20px "Comic Sans MS", "Segoe Print", ui-sans-serif, system-ui';
+        this.ctx.fillText(text, this.labelAt.x, this.labelAt.y + 6);
+    }
+
+    close() {
+        document.removeEventListener('keydown', this.onKey);
+        this.el.remove();
     }
 }
 

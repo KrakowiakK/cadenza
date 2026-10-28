@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cadenza\Runtime\Mcp\Agent;
 
 use Cadenza\Runtime\Draft\SiteManager;
+use Cadenza\Runtime\Media\MediaLibrary;
 use Cadenza\Runtime\Repository\SiteVersionRepository;
 use Cadenza\Runtime\Site\Document;
 use Cadenza\Runtime\Site\EditorGuide;
@@ -24,6 +25,7 @@ final class SiteTools
         private readonly SiteManager $site,
         private readonly SiteVersionRepository $versions,
         private readonly EditorGuide $guide,
+        private readonly MediaLibrary $media,
     ) {
     }
 
@@ -33,8 +35,19 @@ final class SiteTools
         ?int $draftId = null,
     ): string {
         $draft = null !== $draftId ? $this->versions->draft($draftId) : null;
+        $outline = Outline::site(null !== $draft ? $this->site->rebased($draft) : $this->site->document());
 
-        return Outline::site(null !== $draft ? $this->site->rebased($draft) : $this->site->document());
+        $media = $this->media->recent(20);
+        $outline .= "\n\nMedia library (".\count($media)." recent images, use their paths in image props):";
+        foreach ($media as $m) {
+            $d = $m->toArray();
+            $outline .= \sprintf("\n- %s %s %s \"%s\"", $d['path'], $d['orientation'], $d['source'], mb_substr($d['alt'] ?? '', 0, 80));
+        }
+        if ([] === $media) {
+            $outline .= ' none yet';
+        }
+
+        return $outline;
     }
 
     /**
@@ -50,6 +63,18 @@ final class SiteTools
         $doc = null !== $draft ? $this->site->rebased($draft) : $this->site->document();
 
         return Document::findPage($doc, $page) ?? ['error' => \sprintf('Page "%s" does not exist. Pages: %s', $page, implode(', ', array_column($doc['pages'], 'path')))];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[McpTool(name: 'node_get', description: 'One node with all its props, from the live site or a draft.', annotations: new ToolAnnotations(readOnlyHint: true))]
+    public function nodeGet(string $id, ?int $draftId = null): array
+    {
+        $draft = null !== $draftId ? $this->versions->draft($draftId) : null;
+        $doc = null !== $draft ? $this->site->rebased($draft) : $this->site->document();
+
+        return Document::findNode($doc, $id) ?? ['error' => \sprintf('Node "%s" does not exist.', $id)];
     }
 
     #[McpTool(name: 'editor_guide', description: 'The operation language, every node type with its props, theme presets and fonts.', annotations: new ToolAnnotations(readOnlyHint: true))]
@@ -88,8 +113,34 @@ final class SiteTools
             'focusPath' => $result->diff->focusPath($document) ?? '/',
             'changes' => $result->diff->summary(),
             'changedNodes' => array_keys($result->diff->nodes),
-            'createdIds' => $result->created,
+            'created' => $this->describeCreated($document, $result->created),
         ];
+    }
+
+    /**
+     * @param array<string, mixed> $document
+     * @param list<string>         $ids
+     *
+     * @return list<string> "id type label/title" for every created node and page
+     */
+    private function describeCreated(array $document, array $ids): array
+    {
+        $wanted = array_flip($ids);
+        $out = [];
+        foreach ($document['pages'] as $page) {
+            if (isset($wanted[$page['id']])) {
+                $out[] = \sprintf('%s page %s', $page['id'], $page['path']);
+            }
+        }
+        foreach (Document::walk($document) as $entry) {
+            $node = $entry['node'];
+            if (isset($wanted[$node['id']])) {
+                $hint = $node['label'] ?? $node['props']['title'] ?? $node['props']['text'] ?? $node['props']['label'] ?? '';
+                $out[] = trim(\sprintf('%s %s %s', $node['id'], $node['type'], \is_string($hint) ? '"'.mb_substr($hint, 0, 40).'"' : ''));
+            }
+        }
+
+        return $out;
     }
 
     #[McpPrompt(name: 'site-editor', description: 'Instructions for editing this Cadenza site: operations, node catalog and theme.')]

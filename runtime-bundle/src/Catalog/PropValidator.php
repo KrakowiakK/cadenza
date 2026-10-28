@@ -65,8 +65,13 @@ final class PropValidator
                 }
 
                 return \is_string($value) ? [$value, null] : [null, $path.' must be a string.'];
-            case 'url':
             case 'image':
+                if (!\is_string($value) || !preg_match('~^/media/[A-Za-z0-9._-]+$~', $value)) {
+                    return [null, $path.' must be an image from the site media library ("/media/…"); import images first (media tools), or leave it empty.'];
+                }
+
+                return [$value, null];
+            case 'url':
                 if (!\is_string($value)) {
                     return [null, $path.' must be a URL string.'];
                 }

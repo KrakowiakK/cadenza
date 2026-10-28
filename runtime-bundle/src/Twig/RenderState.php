@@ -17,6 +17,10 @@ final class RenderState
     public bool $showBefore = false;
     public ?string $draftSummary = null;
 
+    /** Published version shown read-only (timeline preview). */
+    public ?\Cadenza\Runtime\Entity\SiteVersion $previewVersion = null;
+    public int $currentNumber = 0;
+
     /** @var array<string, mixed> */
     public array $document = [];
 
