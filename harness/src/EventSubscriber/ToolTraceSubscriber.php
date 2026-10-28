@@ -74,7 +74,7 @@ final class ToolTraceSubscriber
     {
         $name = $event->getDefinition()->getName();
         $result = $event->getResult()->getResult();
-        $failed = \is_string($result) && str_starts_with($result, 'The site rejected');
+        $failed = \is_string($result) && (str_starts_with($result, 'The site rejected') || str_starts_with($result, 'Nothing was built'));
         $this->turn->emit('tool', ['id' => $this->take($name), 'name' => $name, 'label' => $this->label($name), 'state' => $failed ? 'error' : 'done', 'detail' => $failed ? $this->firstError($result) : $this->detail($name, $event->getArguments())]);
     }
 

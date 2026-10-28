@@ -17,6 +17,8 @@ use Symfony\AI\Agent\Toolbox\Attribute\AsTool;
 #[AsTool('widget_status', 'The widgets of this site and the last error a browser reported for each — read it when the owner says a game or animation does not work.', method: 'status')]
 final class WidgetTools
 {
+    private const BUILDS_PER_REPLY = 2;
+
     public function __construct(
         private readonly SiteClient $site,
         private readonly WidgetWorkshop $workshop,
@@ -32,11 +34,20 @@ final class WidgetTools
      * @param string $label Human name, e.g. "Snake"
      * @param string $shape Its frame on the page: "wide" (16:9), "square", "tall" (3:4), "banner" (3:1), "auto" (as tall as its content) or "background" (behind a hero's title); empty keeps the current one
      */
-    public function create(string $brief, string $name = '', string $label = '', ?string $shape = null): string
+    public function create(string $brief = '', string $name = '', string $label = '', ?string $shape = null): string
     {
         // Models sometimes leave the name out: one is made from the label.
         if ('' === trim($name) && '' === trim($label)) {
-            return 'Give the widget a "name" (e.g. "tatra-flyover"; the same name again changes an existing one).';
+            $existing = array_map(static fn (array $w): string => \sprintf('%s (%s)', $w['name'] ?? '?', $w['label'] ?? ''), $this->site->widgets());
+
+            return 'Nothing was built: give the widget a "name". A new one gets a new name (e.g. "tatra-flyover"); to change an existing one use its name'.([] !== $existing ? ': '.implode(', ', \array_slice($existing, 0, 40)) : '').'.';
+        }
+        if ('' === trim($brief)) {
+            return 'Nothing was built: describe in "brief" what it should be (or, for an existing one, what to change).';
+        }
+        // A widget takes a minute and a model call of its own: at most two per reply.
+        if (++$this->turn->widgetBuilds > self::BUILDS_PER_REPLY) {
+            return 'Nothing was built: no more widget builds in this reply. Place what is ready (propose_changes) or tell the owner plainly what is not done yet and offer to continue — never say it is done.';
         }
         $name = self::slug('' !== trim($name) ? $name : $label);
         $pl = 'pl' === substr($this->turn->language, 0, 2);

@@ -18,6 +18,8 @@ final class Turn
     public ?int $viewedDraftId = null;
     public string $language = 'en';
     public int $toolCalls = 0;
+    /** Widgets actually written in this turn (each takes a minute and a model call of its own). */
+    public int $widgetBuilds = 0;
 
     /** @var list<array<string, string>> */
     public array $selection = [];
@@ -37,6 +39,7 @@ final class Turn
         $this->emitter = $emitter;
         $this->proposals = [];
         $this->toolCalls = 0;
+        $this->widgetBuilds = 0;
     }
 
     /**

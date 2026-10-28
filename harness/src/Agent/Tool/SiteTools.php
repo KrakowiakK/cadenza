@@ -19,6 +19,7 @@ final class SiteTools
         private readonly SiteClient $site,
         private readonly Turn $turn,
         private readonly Proposals $proposals,
+        private readonly \App\Repository\ProposalRepository $openProposals,
     ) {
     }
 
@@ -143,7 +144,19 @@ final class SiteTools
      */
     public function readPage(string $page, ?int $draftId = null): string
     {
-        return $this->site->pageTree($page, $draftId);
+        $tree = $this->site->pageTree($page, $draftId);
+        if (null !== $draftId || !str_contains($tree, 'does not exist') || null === $this->turn->conversation) {
+            return $tree;
+        }
+        // A page that so far exists only in a sketch of this conversation: read it there, to keep working on it.
+        foreach (array_reverse($this->openProposals->open($this->turn->conversation)) as $proposal) {
+            $inSketch = $this->site->pageTree($page, $proposal->getDraftId());
+            if (!str_contains($inSketch, 'does not exist')) {
+                return \sprintf("(This page is not live yet: it is in sketch %d. To change it, call propose_changes with reviseDraftId %d.)\n%s", $proposal->getDraftId(), $proposal->getDraftId(), $inSketch);
+            }
+        }
+
+        return $tree;
     }
 
     /**

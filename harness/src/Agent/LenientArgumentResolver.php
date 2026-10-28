@@ -30,8 +30,20 @@ final class LenientArgumentResolver implements ToolCallArgumentResolverInterface
         $arguments = $toolCall->getArguments();
         $changed = false;
 
+        $known = array_map(static fn (\ReflectionParameter $p): string => $p->getName(), $method->getParameters());
         foreach ($method->getParameters() as $parameter) {
             $name = $parameter->getName();
+            if (!\array_key_exists($name, $arguments)) {
+                // The text under another name ("description" for "brief"): models rename what they do not remember.
+                foreach (self::ALIASES[$name] ?? [] as $alias) {
+                    if (\is_string($arguments[$alias] ?? null) && !\in_array($alias, $known, true)) {
+                        $arguments[$name] = $arguments[$alias];
+                        unset($arguments[$alias]);
+                        $changed = true;
+                        break;
+                    }
+                }
+            }
             if (!\array_key_exists($name, $arguments)) {
                 continue;
             }
@@ -52,6 +64,9 @@ final class LenientArgumentResolver implements ToolCallArgumentResolverInterface
                 $coerced = \is_array($decoded) ? $decoded : array_values(array_filter(array_map('trim', explode(',', $value)), 'strlen'));
             } elseif (\is_int($value) && \in_array('string', $types, true) && !\in_array('int', $types, true)) {
                 $coerced = (string) $value;
+            } elseif (\is_string($value) && str_contains($value, '\\u')) {
+                // JSON escapes left in a text ("dw\u00f3ch") — what the owner reads must be the letters.
+                $coerced = self::unescapeUnicode($value);
             }
 
             if ($coerced !== $value) {
@@ -65,6 +80,21 @@ final class LenientArgumentResolver implements ToolCallArgumentResolverInterface
         }
 
         return $this->inner->resolveArguments($metadata, $toolCall);
+    }
+
+    private const ALIASES = [
+        'brief' => ['description', 'prompt', 'instructions', 'spec', 'request', 'details', 'changes', 'change', 'text'],
+        'summary' => ['description', 'message', 'title'],
+        'operations' => ['ops', 'changes', 'batch'],
+    ];
+
+    public static function unescapeUnicode(string $text): string
+    {
+        return (string) preg_replace_callback('/\\\\u([0-9a-fA-F]{4})(?:\\\\u([dD][c-fC-F][0-9a-fA-F]{2}))?/', static function (array $m): string {
+            $decoded = json_decode('"\\u'.$m[1].(isset($m[2]) ? '\\u'.$m[2] : '').'"');
+
+            return \is_string($decoded) ? $decoded : $m[0];
+        }, $text);
     }
 
     /**

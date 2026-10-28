@@ -62,7 +62,7 @@ final class Conductor
         if ('pl' !== substr($language, 0, 2)) {
             return [];
         }
-        preg_match_all('~`[a-z0-9_-]+`|[\p{Cyrillic}\p{Greek}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}\p{Arabic}]+|(?<![\p{L}/_.-])(?:weitere|und|oder|nicht|ajout\p{L}*|the|owners?|site|drafts?|sketch|widgets?|live|preview|layout|feedback|create_\w+|propose_\w+)(?![\p{L}/_-]|\.\p{L})~iu', $text, $m);
+        preg_match_all('~`[a-z0-9_-]+`|[\p{Cyrillic}\p{Greek}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}\p{Arabic}]+|(?<![\p{L}/_.-])(?:weitere|und|oder|nicht|ajout\p{L}*|the|owners?|site|drafts?|sketch|widgets?|live|preview|layout|feedback|changes?|approve[ds]?|ready|done|page|section|update[ds]?|skic\p{L}*|create_\w+|propose_\w+)(?![\p{L}/_-]|\.\p{L})~iu', $text, $m);
 
         return array_values(array_unique($m[0]));
     }
@@ -158,9 +158,16 @@ final class Conductor
         if ('' === $text && 0 === $this->turn->toolCalls) {
             throw new \RuntimeException('The model returned an empty answer.');
         }
+        $pl = 'pl' === substr($this->turn->language, 0, 2);
+        if ('' === $text && [] !== $this->turn->proposals) {
+            // Work was done but the model said nothing: the owner hears what the sketches are, in the words they carry.
+            $summaries = array_map(static fn ($p): string => rtrim($p->getSummary(), '. '), $this->turn->proposals);
+            $text = ($pl ? 'Szkic gotowy: ' : 'The sketch is ready: ').implode('; ', array_unique($summaries)).'. '
+                .($pl ? 'Zobacz go na stronie i zatwierdź albo napisz, co zmienić.' : 'Have a look on the page and approve it, or tell me what to change.');
+        }
         if ('' === $text) {
-            // Work was done but the model said nothing about it: ask for the words once.
-            $text = trim((string) preg_replace('~<think>.*?</think>~s', '', $this->callAgent($bag->with(Message::ofUser('You did the work but said nothing. Answer me now, without calling tools, in 1–3 sentences: what you did or what you found.')), $context)));
+            // Tools ran but nothing was proposed and nothing said: ask once for what they showed.
+            $text = trim((string) preg_replace('~<think>.*?</think>~s', '', $this->callAgent($bag->with(Message::ofUser('Your last reply was empty, although your tools already ran and returned results (above). Without calling tools again, tell me in 1–3 sentences what they showed and what you suggest.')), $context)));
         }
         if ('' === $text) {
             // Still nothing: the owner gets a word anyway.
@@ -205,6 +212,8 @@ final class Conductor
             - Never invent facts about the business: prices, discounts, offers, addresses, opening hours, names,
               numbers, awards. Use what the site already says or what the owner told you; when a text needs a fact
               you do not have, leave it out (or ask). Making copy more inviting is fine; promising things is not.
+              Opinions, testimonials, reviews, client names and logos are NEVER written by you — fake reviews
+              mislead visitors. Ask the owner to paste real ones (or point to where they are), then build the section.
             - Act, don't interrogate. If the request is clear enough, propose a complete, beautiful result right away;
               ask at most one short question only when you really cannot guess (e.g. the name of their business).
             - Build rich, real pages: a hero, several sections with alternating backgrounds, specific copy in the
@@ -262,7 +271,9 @@ final class Conductor
               with "media-gallery" nodes (they show the library live, filtered by source, hashtag, year) — use
               media_overview to plan albums (e.g. one gallery per top hashtag or year). Never list imported images
               one by one in props.
-            - When the owner points at elements (selection with node ids), change exactly those.
+            - When the owner points at elements (selection with node ids), change exactly those. "This / ten / ta"
+              with nothing selected and no clear candidate on the page they look at: ask which one in one short
+              sentence (they can also click it with the pointer button), do not guess the whole site.
             - When the owner asks how the site could look, wants ideas or options, or starts a new site from scratch,
               use propose_variants: write the content once (a complete page from patterns) and give 3 design
               directions that fit the business, e.g. "directions": ["warm", "elegant", "minimal"]. Otherwise one proposal with propose_changes.
@@ -270,7 +281,8 @@ final class Conductor
               view — pages and texts, photos, sign-ups and answers, other languages, members-only pages, and things
               that move: games, animations, 3D. End with 2–3 ideas that fit THEIR site.
             - Never only announce work ("I will prepare…"): call the tool in the same reply.
-            - Small follow-up tweaks to a sketch the owner is reviewing: extend it with reviseDraftId.
+            - Small follow-up tweaks to a sketch the owner is reviewing: extend it with reviseDraftId. A sketch never
+              has to be approved before you change it: read its pages with read_page (draftId) and revise it.
               A new, unrelated change: a new proposal.
             - One propose_changes call per proposal with the whole batch. If it returns errors, fix and call again.
             - Use show_page / point_at to guide the owner's eyes when you talk about something.
@@ -329,6 +341,10 @@ final class Conductor
             $lines[] = \sprintf('[Attached image %d, id %s: %s]', $i + 1, $attachment['id'], 'sketch' === ($attachment['kind'] ?? '')
                 ? 'a layout SKETCH the owner drew — read it as a wireframe: boxes are sections/blocks, their position is the layout, handwritten words are labels or content'
                 : 'a photo/image from the owner'.(isset($attachment['name']) ? ' ("'.$attachment['name'].'")' : '').' — if it belongs on the site, import it with use_image');
+        }
+        if ('pl' !== substr($this->turn->language, 0, 2)) {
+            // The site and the studio are in Polish; a message in English gets an answer in English.
+            $lines[] = '[The owner writes in English: answer in English, summaries too]';
         }
         $lines[] = '' !== trim($message) ? $message : ([] !== $attachments ? '(see the attached image)' : '(no text — the owner selected elements and expects a suggestion)');
 

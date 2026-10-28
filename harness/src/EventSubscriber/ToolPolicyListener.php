@@ -21,12 +21,8 @@ final class ToolPolicyListener
 
     private const PROPOSAL_ATTEMPTS = 4;
 
-    /** Writing a widget takes a minute and a model call of its own: at most this many per reply. */
-    private const WIDGET_BUILDS = 2;
-
     private int $imageCalls = 0;
     private int $proposalAttempts = 0;
-    private int $widgetBuilds = 0;
     private bool $waitingForOwner = false;
     private ?string $turnKey = null;
 
@@ -45,18 +41,12 @@ final class ToolPolicyListener
         $key = spl_object_hash($this->turn).($this->turn->conversation?->getId() ?? '');
         if ($key !== $this->turnKey) {
             $this->turnKey = $key;
-            $this->imageCalls = $this->proposalAttempts = $this->widgetBuilds = 0;
+            $this->imageCalls = $this->proposalAttempts = 0;
             $this->waitingForOwner = false;
         }
 
         if (\in_array($name, ['photos_from_phone', 'connect_account', 'import_content'], true)) {
             $this->waitingForOwner = true;
-
-            return;
-        }
-        if ('create_widget' === $name && ++$this->widgetBuilds > self::WIDGET_BUILDS) {
-            $event->deny($reason = 'No more widget builds in this reply. Place what is ready (propose_changes) or tell the owner in one or two sentences what did not work and what you suggest.');
-            $this->trace->finish($name, false, $reason);
 
             return;
         }
