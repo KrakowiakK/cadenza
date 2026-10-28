@@ -27,6 +27,16 @@ final class ProposalRepository extends ServiceEntityRepository
         return $this->findBy(['conversation' => $conversation, 'status' => ['drafted', 'sketched']], ['createdAt' => 'ASC']);
     }
 
+    /**
+     * Sketches still waiting for the owner, from every conversation, newest first.
+     *
+     * @return list<Proposal>
+     */
+    public function allOpen(): array
+    {
+        return $this->findBy(['status' => ['drafted', 'sketched']], ['createdAt' => 'DESC']);
+    }
+
     public function byDraft(int $draftId): ?Proposal
     {
         return $this->findOneBy(['draftId' => $draftId]);

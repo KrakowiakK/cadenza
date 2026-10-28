@@ -41,8 +41,8 @@ final class LenientArgumentsListener
             $decoded = [$decoded];
         }
         if (!\is_array($decoded)) {
-            $event->deny(\sprintf('"%s" must be a JSON array, not a string. Call the tool again passing the array itself.', $listArgument));
-            $this->trace->finish($call->getName(), false);
+            $event->deny($why = \sprintf('"%s" must be a JSON array, not a string. Call the tool again passing the array itself.', $listArgument));
+            $this->trace->finish($call->getName(), false, $why);
 
             return;
         }
@@ -52,6 +52,6 @@ final class LenientArgumentsListener
             'point_at' => $this->uiTools->highlight(array_map('strval', $decoded)),
         };
         $event->setResult(new ToolResult($call, $result));
-        $this->trace->finish($call->getName(), !str_starts_with($result, 'The site rejected'));
+        $this->trace->finish($call->getName(), !str_starts_with($result, 'The site rejected'), $result);
     }
 }

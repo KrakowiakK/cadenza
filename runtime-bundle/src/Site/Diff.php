@@ -46,6 +46,11 @@ final readonly class Diff
             }
         }
 
+        // Blocks moved among their siblings (the fewest that explain the new order).
+        foreach (self::moved($baseNodes, $draftNodes) as $id) {
+            $nodes[$id] ??= 'changed';
+        }
+
         // A sketch that brings a new version of a widget changes every block that shows it.
         foreach ($draftNodes as $id => $entry) {
             $widget = $entry['node']['props']['widget'] ?? null;
@@ -137,6 +142,53 @@ final readonly class Diff
      *
      * @return array<string, array{node: array<string, mixed>, parent: string, index: int}> parent = "pageId" or "pageId:nodeId.slot"
      */
+    /**
+     * Nodes that changed place among the siblings they had before: everything outside the longest run of siblings
+     * that kept their order.
+     *
+     * @param array<string, array{parent: string, index: int}> $base
+     * @param array<string, array{parent: string, index: int}> $draft
+     *
+     * @return list<string>
+     */
+    private static function moved(array $base, array $draft): array
+    {
+        $lists = [];
+        foreach ($draft as $id => $entry) {
+            if (isset($base[$id]) && $base[$id]['parent'] === $entry['parent']) {
+                $lists[$entry['parent']][$entry['index']] = $id;
+            }
+        }
+        $moved = [];
+        foreach ($lists as $list) {
+            ksort($list);
+            $ids = array_values($list);
+            $order = array_map(static fn (string $id): int => $base[$id]['index'], $ids);
+            $n = \count($order);
+            // Longest increasing subsequence, quadratic: sibling lists are short.
+            $length = array_fill(0, $n, 1);
+            $previous = array_fill(0, $n, -1);
+            for ($i = 0; $i < $n; ++$i) {
+                for ($j = 0; $j < $i; ++$j) {
+                    if ($order[$j] < $order[$i] && $length[$j] + 1 > $length[$i]) {
+                        [$length[$i], $previous[$i]] = [$length[$j] + 1, $j];
+                    }
+                }
+            }
+            $kept = [];
+            for ($i = [] === $length ? -1 : array_search(max($length), $length, true); -1 !== $i; $i = $previous[$i]) {
+                $kept[$ids[$i]] = true;
+            }
+            foreach ($ids as $id) {
+                if (!isset($kept[$id])) {
+                    $moved[] = $id;
+                }
+            }
+        }
+
+        return $moved;
+    }
+
     private static function index(array $doc): array
     {
         $index = [];

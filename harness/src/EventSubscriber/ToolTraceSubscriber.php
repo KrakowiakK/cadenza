@@ -40,6 +40,8 @@ final class ToolTraceSubscriber
         'create_widget' => ['en' => 'Programming', 'pl' => 'Programuję'],
         'leaderboard' => ['en' => 'Reading the leaderboard', 'pl' => 'Sprawdzam tablicę wyników'],
         'widget_status' => ['en' => 'Checking the widgets', 'pl' => 'Sprawdzam elementy'],
+        'pending_sketches' => ['en' => 'Looking at waiting sketches', 'pl' => 'Przeglądam szkice'],
+        'discard_sketches' => ['en' => 'Throwing sketches away', 'pl' => 'Usuwam szkice'],
         'add_document' => ['en' => 'Putting the document on the site', 'pl' => 'Dodaję dokument do strony'],
         'translate_page' => ['en' => 'Translating the page', 'pl' => 'Tłumaczę stronę'],
         'guest_list' => ['en' => 'Updating the guest list', 'pl' => 'Aktualizuję listę gości'],
@@ -85,9 +87,10 @@ final class ToolTraceSubscriber
     /**
      * Closes a step whose result was produced by a listener (no ToolCallSucceeded is dispatched then).
      */
-    public function finish(string $name, bool $ok): void
+    public function finish(string $name, bool $ok, ?string $why = null): void
     {
-        $this->turn->emit('tool', ['id' => $this->take($name), 'name' => $name, 'label' => $this->label($name), 'state' => $ok ? 'done' : 'error']);
+        $this->turn->emit('tool', ['id' => $this->take($name), 'name' => $name, 'label' => $this->label($name), 'state' => $ok ? 'done' : 'error']
+            + (!$ok && null !== $why ? ['detail' => str_starts_with($why, 'The site rejected') ? $this->firstError($why) : mb_substr($why, 0, 160)] : []));
     }
 
     private function take(string $name): string

@@ -69,6 +69,11 @@ class Proposal
         return $this->conversation;
     }
 
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
     public function getDraftId(): int
     {
         return $this->draftId;

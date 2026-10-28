@@ -37,6 +37,22 @@ final class DiffTest extends TestCase
         self::assertSame('/', $diff->focusPath($draft));
     }
 
+    public function testMovingABlockIsAChangeOfThatBlockOnly(): void
+    {
+        $applier = new OperationApplier(new Catalog([new CoreNodeTypes()]));
+        $base = $applier->apply(Document::empty(), [['op' => 'page.create', 'path' => '/', 'title' => 'Home', 'nodes' => array_map(
+            static fn (string $t): array => ['type' => 'heading', 'props' => ['text' => $t]], ['Hero', 'About', 'Menu', 'Course', 'Pricing', 'Contact'],
+        )]])->document;
+        $ids = array_column($base['pages'][0]['nodes'], 'id');
+
+        $draft = $applier->apply($base, [['op' => 'node.move', 'id' => $ids[4], 'after' => $ids[0]]])->document;
+        self::assertSame([$ids[4] => 'changed'], Diff::between($base, $draft)->nodes, 'only the pricing moved, not the blocks it jumped over');
+
+        $draft = $applier->apply($base, [['op' => 'node.move', 'id' => $ids[0], 'page' => '/', 'position' => 2]])->document;
+        self::assertSame($ids[0], $draft['pages'][0]['nodes'][2]['id'], '"position" works as "index"');
+        self::assertCount(1, Diff::between($base, $draft)->nodes);
+    }
+
     public function testNoChangesIsEmpty(): void
     {
         $doc = Document::empty();

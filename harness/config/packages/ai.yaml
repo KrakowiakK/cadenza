@@ -19,6 +19,7 @@ ai:
                 - 'App\Agent\Tool\DocumentTools'
                 - 'App\Agent\Tool\BlockTools'
                 - 'App\Agent\Tool\WidgetTools'
+                - 'App\Agent\Tool\SketchTools'
         # Used when the main model does not answer in time (local servers can be busy).
         studio_fallback:
             platform: 'ai.platform.generic.fallback'
@@ -39,6 +40,7 @@ ai:
                 - 'App\Agent\Tool\DocumentTools'
                 - 'App\Agent\Tool\BlockTools'
                 - 'App\Agent\Tool\WidgetTools'
+                - 'App\Agent\Tool\SketchTools'
         studio_vision:
             platform: 'ai.platform.generic.vision'
             model: '%env(CADENZA_LLM_VISION_MODEL)%'
@@ -58,3 +60,4 @@ ai:
                 - 'App\Agent\Tool\DocumentTools'
                 - 'App\Agent\Tool\BlockTools'
                 - 'App\Agent\Tool\WidgetTools'
+                - 'App\Agent\Tool\SketchTools'

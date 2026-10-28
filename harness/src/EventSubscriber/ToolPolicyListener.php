@@ -58,7 +58,7 @@ final class ToolPolicyListener
             };
             if (null !== $reason) {
                 $event->deny($reason);
-                $this->trace->finish($name, false);
+                $this->trace->finish($name, false, $reason);
             }
 
             return;
@@ -78,7 +78,7 @@ final class ToolPolicyListener
 
         if (null !== $reason) {
             $event->deny($reason);
-            $this->trace->finish($name, false);
+            $this->trace->finish($name, false, $reason);
         }
     }
 }

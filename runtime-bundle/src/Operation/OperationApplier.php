@@ -535,6 +535,10 @@ final class OperationApplier
      */
     private function insertAt(array $doc, array $op, array $nodes): array
     {
+        // Models also say "position" for the index.
+        if (!isset($op['index']) && \is_int($op['position'] ?? null)) {
+            $op['index'] = $op['position'];
+        }
         $anchor = $op['before'] ?? $op['after'] ?? null;
         if (null !== $anchor) {
             $anchor = (string) $anchor;
