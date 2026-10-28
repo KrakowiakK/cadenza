@@ -34,10 +34,16 @@ final class PhoneCheck
             if (r.right > vw + 2 && cs.position !== 'fixed' && !el.closest('[style*="overflow"], .overflow-x-auto, .overflow-hidden')) out.push(label(el));
             const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 2);
             if (own && parseFloat(cs.fontSize) < 12) small.push(label(el));
-            if (el.matches('a[href], button, input, select, textarea') && (r.height < 32 || r.width < 32) && el.offsetParent) tiny.push(label(el));
+            // A radio or a checkbox is tapped with its label; a link inside a sentence is part of the text.
+            const target = el.matches('a[href], button, select, textarea, input:not([type=radio]):not([type=checkbox]):not([type=hidden])') && !el.closest('p, li, label');
+            if (target && (r.height < 32 || r.width < 32) && el.offsetParent) tiny.push(label(el));
         }
         const uniq = (a) => [...new Set(a)].slice(0, 6);
-        return {wide: document.documentElement.scrollWidth > vw + 2, height: document.documentElement.scrollHeight, out: uniq(out), small: uniq(small), tiny: uniq(tiny)};
+        const nav = performance.getEntriesByType('navigation')[0];
+        const files = performance.getEntriesByType('resource').map((r) => ({name: r.name.replace(location.origin, '').split('?')[0], kb: Math.round((r.transferSize || r.encodedBodySize || 0) / 1024)}));
+        const heavy = files.filter((f) => f.kb > 0).sort((a, b) => b.kb - a.kb).slice(0, 4).map((f) => f.name + ' ' + f.kb + ' KB');
+        return {wide: document.documentElement.scrollWidth > vw + 2, height: document.documentElement.scrollHeight, out: uniq(out), small: uniq(small), tiny: uniq(tiny),
+            loadMs: nav ? Math.round(nav.loadEventEnd || nav.domComplete) : null, totalKb: files.reduce((t, f) => t + f.kb, 0) + Math.round((nav?.transferSize || 0) / 1024), heavy};
         JS;
 
     public function __construct(

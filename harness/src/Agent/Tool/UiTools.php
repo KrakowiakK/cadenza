@@ -9,7 +9,7 @@ use App\Studio\Turn;
 use Symfony\AI\Agent\Toolbox\Attribute\AsTool;
 
 #[AsTool('show_page', 'Take the owner to a page of the site (the browser navigates there). Use it to show what you talk about.', method: 'navigate')]
-#[AsTool('check_on_phone', 'How a page of the LIVE site looks on a phone: shows the owner the page in a phone frame, and a test browser at phone size reports what sticks out of the screen, text too small, buttons too small, and what a visitor would struggle with. Use it when the owner asks about phones, or after big layout changes.', method: 'phone')]
+#[AsTool('check_on_phone', 'How a page of the LIVE site looks on a phone: shows the owner the page in a phone frame, and a test browser at phone size reports what sticks out of the screen, text too small, buttons too small, and what a visitor would struggle with. It also measures how long the page takes to load and its heaviest files. Use it when the owner asks about phones or speed, or after big layout changes.', method: 'phone')]
 #[AsTool('point_at', 'Highlight elements on the page the owner is looking at (scrolls to them, outlines them, moves the Cadenza cursor).', method: 'highlight')]
 final class UiTools
 {
@@ -42,8 +42,10 @@ final class UiTools
             [] !== ($m['tiny'] ?? []) ? 'links or buttons smaller than a thumb (under 32 px): '.implode('; ', (array) $m['tiny']) : null,
         ]);
 
-        return \sprintf("The owner now sees %s in a phone frame. Measured at 390 px: %s.\nWhat a model saw on %d screens: %s\nTell the owner briefly what reads well and what could be better; offer to fix concrete problems (a sketch), do not change anything yet.",
-            $path, [] === $facts ? 'nothing sticks out, text and buttons are big enough' : implode('. ', $facts), $r['screens'], $r['look'] ?? 'no opinion (the vision model did not answer)');
+        $speed = null !== ($m['loadMs'] ?? null) ? \sprintf("\nLoading (from this computer, so a phone on mobile data is slower): %.1f s, %d KB in total; heaviest: %s.", $m['loadMs'] / 1000, $m['totalKb'] ?? 0, implode(', ', (array) ($m['heavy'] ?? [])) ?: 'nothing big') : '';
+
+        return \sprintf("The owner now sees %s in a phone frame. Measured at 390 px: %s.%s\nWhat a model saw on %d screens: %s\nTell the owner briefly what reads well and what could be better; offer to fix concrete problems (a sketch), do not change anything yet.",
+            $path, [] === $facts ? 'nothing sticks out, text and buttons are big enough' : implode('. ', $facts), $speed, $r['screens'], $r['look'] ?? 'no opinion (the vision model did not answer)');
     }
 
     /**
