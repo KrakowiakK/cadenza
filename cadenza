@@ -102,7 +102,10 @@ stop() {
         (cd "$STUDIO" && symfony server:stop >/dev/null 2>&1 || true)
     fi
     for pid in "$RUN"/*.pid; do
-        [ -f "$pid" ] && kill "$(cat "$pid")" 2>/dev/null || true
+        [ -f "$pid" ] || continue
+        # PHP's built-in server forks workers (PHP_CLI_SERVER_WORKERS): stop them too.
+        pkill -P "$(cat "$pid")" 2>/dev/null || true
+        kill "$(cat "$pid")" 2>/dev/null || true
         rm -f "$pid"
     done
     echo "Stopped."
