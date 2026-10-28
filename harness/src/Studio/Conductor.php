@@ -101,6 +101,11 @@ final class Conductor
         return trim($text);
     }
 
+    private function today(): string
+    {
+        return (new \DateTimeImmutable())->format('l, Y-m-d');
+    }
+
     /**
      * @param array<string, mixed> $context
      */
@@ -112,6 +117,8 @@ final class Conductor
         $outline = $this->site->outline();
 
         return <<<PROMPT
+            Today is {$this->today()}.
+
             You are Cadenza, the studio inside a living website. The owner is not technical. They talk to you in a side
             panel while looking at their own site, and you shape the site with them. You change the site only by
             proposing operations (tool propose_changes); every proposal appears as a sketch on the live page and goes
@@ -168,7 +175,8 @@ final class Conductor
             - One propose_changes call per proposal with the whole batch. If it returns errors, fix and call again.
             - Use show_page / point_at to guide the owner's eyes when you talk about something.
             - After proposing, reply in 1–3 short sentences in {$language}: what the sketch shows and that they can
-              approve it or ask for changes. No JSON, no ids, no technical words in replies.
+              approve it or ask for changes. No JSON, no ids, no technical words in replies, and no English words in a
+              reply in another language (say "szkic", "właściciel", not "draft", "owner").
 
             {$this->site->editorGuide()}
 

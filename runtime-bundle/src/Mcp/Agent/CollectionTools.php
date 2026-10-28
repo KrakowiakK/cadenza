@@ -109,7 +109,7 @@ final class CollectionTools
     #[McpTool(name: 'record_save', description: 'Write a record as a DRAFT: a new one (no slug) or changes to an existing one (its slug; only the given fields change). The owner sees drafts marked on the page and publishes them; visitors see nothing until then.')]
     public function save(
         string $collection,
-        #[Schema(description: 'Field values by key or label, e.g. {"tytul": "Otwieramy ogródek", "data": "2027-05-01", "tresc": "…"}')]
+        #[Schema(type: 'object', description: 'Field values by key or label, e.g. {"tytul": "Otwieramy ogródek", "data": "2027-05-01", "tresc": "…"}', additionalProperties: true)]
         array $values,
         #[Schema(description: 'Slug of an existing record to change; empty = a new record')]
         ?string $slug = null,
@@ -160,6 +160,22 @@ final class CollectionTools
         $records = array_values(array_filter($this->collections->records($c, 10000, true), static fn ($r): bool => '' === $needle || str_contains(mb_strtolower(json_encode($r->getData(), \JSON_UNESCAPED_UNICODE) ?: ''), $needle)));
 
         return ['ok' => true, 'fields' => $c->getFields(), 'titleField' => $c->getTitleField(), 'count' => \count($records), 'records' => array_map(static fn ($r): array => ['slug' => $r->getSlug(), 'pending' => $r->pending(), 'data' => array_map(static fn (mixed $v): mixed => \is_string($v) && mb_strlen($v) > 300 ? mb_substr($v, 0, 300).'…' : $v, $r->getData())], \array_slice($records, 0, $limit))];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    #[McpTool(name: 'records_pending', description: 'Entries waiting for the owner\'s approval, grouped by collection.', annotations: new ToolAnnotations(readOnlyHint: true))]
+    public function pending(): array
+    {
+        $groups = [];
+        foreach ($this->collections->pending() as $record) {
+            $c = $record->getCollection();
+            $groups[$c->getSlug()] ??= ['collection' => $c->getSlug(), 'name' => $c->getName(), 'items' => []];
+            $groups[$c->getSlug()]['items'][] = ['slug' => $record->getSlug(), 'title' => $record->title(), 'pending' => $record->pending(), 'url' => '/'.$c->getSlug().'/'.$record->getSlug()];
+        }
+
+        return array_values($groups);
     }
 
     private function download(string $url): string

@@ -256,6 +256,16 @@ final class SiteClient
     }
 
     /**
+     * @return list<array{collection: string, name: string, items: list<array<string, mixed>>}>
+     */
+    public function pendingRecords(): array
+    {
+        $r = $this->json($this->mcp->get('site')->callTool('records_pending'));
+
+        return array_is_list($r) ? $r : ($r['result'] ?? []);
+    }
+
+    /**
      * The owner's decision — only through the control server.
      *
      * @param list<string>|null $slugs

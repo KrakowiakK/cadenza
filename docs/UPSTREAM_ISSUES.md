@@ -65,3 +65,13 @@ Adding two columns to an entity whose table has a foreign key with `ON DELETE CA
 COLUMN` for both, followed by a table rebuild (`CREATE TEMPORARY TABLE … / DROP TABLE / CREATE TABLE … / INSERT …`)
 whose `CREATE TABLE` lacks the two new columns. Running it leaves the schema out of sync with the mapping
 (`doctrine:schema:validate` fails). Workaround: keep only the `ADD COLUMN` statements.
+
+## 11. Tool schemas: an associative `array` parameter becomes a JSON `array`, never an `object`
+
+**Where:** `symfony/ai-platform` `Contract\JsonSchema` (tool parameters) and `mcp/sdk` (tool input schemas).
+
+A tool parameter `array $values` meant as a map (`@param array<string, mixed>`) is described as `{"type": "array"}`;
+the docblock description is dropped as well. Models then send a list, and the MCP server rejects the object the client
+forwards ("Invalid type. Expected array"). The MCP SDK's `#[Schema(type: 'object')]` fixes the server side; Symfony
+AI's `#[Schema]` has no `type`, so the agent side needs a DTO or tolerant input handling. Suggestion: map
+`array<string, …>` to `object` with `additionalProperties`, keep the description, and allow a `type` override.

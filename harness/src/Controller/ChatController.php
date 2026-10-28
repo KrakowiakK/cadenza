@@ -30,6 +30,7 @@ final class ChatController
         private readonly Turn $turn,
         private readonly EntityManagerInterface $em,
         private readonly LoggerInterface $logger,
+        private readonly \App\Studio\SiteClient $site,
         #[Autowire('%env(CADENZA_LLM_MODEL)%')]
         private readonly string $model,
         #[Autowire('%env(CADENZA_LLM_BASE_URL)%')]
@@ -110,6 +111,13 @@ final class ChatController
             $turns[$i]['proposals'] = array_values(array_filter(array_map(static fn (string $id): ?array => isset($proposals[$id]) ? $proposals[$id]->toArray() : null, $turn['proposals'] ?? [])));
         }
 
-        return new JsonResponse(['id' => $conversation->getId(), 'turns' => $turns]);
+        try {
+            // Entries waiting for approval are the site's state, not the conversation's: always offer them.
+            $records = $this->site->pendingRecords();
+        } catch (\Throwable) {
+            $records = [];
+        }
+
+        return new JsonResponse(['id' => $conversation->getId(), 'turns' => $turns, 'records' => $records]);
     }
 }

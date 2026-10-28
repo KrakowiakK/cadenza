@@ -541,6 +541,12 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
                     }
                 }
             }
+            // Entries the owner has not decided on yet, whatever conversation wrote them.
+            if (data.records?.length) {
+                const tt = this.addAssistantText('');
+                tt.part('text').classList.add('hidden');
+                for (const group of data.records) this.recordsCard(tt.part('cards'), group);
+            }
             this.refreshWaiting();
         } catch (e) {
             this.welcome();

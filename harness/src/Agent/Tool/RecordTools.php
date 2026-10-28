@@ -44,11 +44,15 @@ final class RecordTools
 
     /**
      * @param string               $collection Collection slug
-     * @param array<string, mixed> $values     Field values by key, e.g. {"tytul": "…", "data": "2027-05-01", "tresc": "Markdown…"}; for a change only the fields that change
+     * @param array<mixed> $values     An OBJECT of field values by key, e.g. {"tytul": "…", "data": "2027-05-01", "tresc": "Markdown…"}; for a change only the fields that change
      * @param string|null          $slug       Slug of the existing record to change; empty for a new one
      */
     public function save(string $collection, array $values, ?string $slug = null): string
     {
+        $values = self::fieldValues($values);
+        if ([] === $values) {
+            return 'Not saved: "values" must be an object of field values, e.g. {"tytul": "…", "tresc": "…"}.';
+        }
         $r = $this->site->saveRecord($collection, $values, $slug);
         if (!($r['ok'] ?? false)) {
             return 'Not saved: '.($r['error'] ?? 'unknown error');
@@ -87,16 +91,47 @@ final class RecordTools
     }
 
     /**
+     * The schema can only say "array", so models send field values in several shapes: an object (fine), a list with
+     * one object, a list of {"field"/"key"/"name", "value"} pairs, or "key: value" strings.
+     *
+     * @param array<mixed> $values
+     *
+     * @return array<string, mixed>
+     */
+    public static function fieldValues(array $values): array
+    {
+        if (!array_is_list($values)) {
+            return $values;
+        }
+        if (1 === \count($values) && \is_array($values[0]) && !array_is_list($values[0]) && !isset($values[0]['value'])) {
+            return $values[0];
+        }
+        $out = [];
+        foreach ($values as $item) {
+            if (\is_array($item) && \array_key_exists('value', $item) && \is_string($name = $item['field'] ?? $item['key'] ?? $item['name'] ?? null)) {
+                $out[$name] = $item['value'];
+            } elseif (\is_string($item) && preg_match('/^\s*([^:=]+?)\s*[:=]\s*(.*)$/su', $item, $m)) {
+                $out[$m[1]] = $m[2];
+            } elseif (\is_array($item) && !array_is_list($item)) {
+                $out += $item;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
      * Shows (or refreshes) the card with the collection's waiting changes in the panel.
      */
     private function announce(string $collection): void
     {
-        $r = $this->site->findRecords($collection, null, 500);
-        $pending = array_values(array_filter($r['records'] ?? [], static fn (array $x): bool => null !== $x['pending']));
-        $title = $r['titleField'] ?? $r['fields'][0]['key'] ?? null;
-        $this->turn->emit('records', [
-            'collection' => $collection,
-            'items' => array_map(static fn (array $x): array => ['slug' => $x['slug'], 'pending' => $x['pending'], 'title' => (string) ($x['data'][$title] ?? $x['slug']), 'url' => '/'.$collection.'/'.$x['slug']], $pending),
-        ]);
+        foreach ($this->site->pendingRecords() as $group) {
+            if ($group['collection'] === $collection) {
+                $this->turn->emit('records', $group);
+
+                return;
+            }
+        }
+        $this->turn->emit('records', ['collection' => $collection, 'items' => []]);
     }
 }
