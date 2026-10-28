@@ -551,3 +551,38 @@ jest prosta) i zbieramy listę w README.
   Pagination, Icons, Notify, Inspector, Native, **Toolkit** (EXPERIMENTAL; kity shadcn ~90 komponentów — w tym
   `Message`, `MessageScroller`, `Trace`, `Questionnaire`, `Attachment`, `Sheet`, `Command`, `Skeleton` — oraz
   flowbite-4, bootstrap, common; przepisy z `manifest.json`, typy `component` i `block`, `ux:install` kopiuje pliki).
+
+---
+
+## 13. Stan realizacji (28.10.2026)
+
+Zrobione i działające end-to-end (sprawdzone w przeglądarce; testy: `./cadenza test`, 34 testy):
+
+| Obszar | Stan |
+|---|---|
+| Panel studia (§3.2), celownik (§3.3), szkic z różnicami po najechaniu, Przed/Po, zatwierdzanie z View Transitions (§3.4) | ✅ |
+| Oś czasu, podgląd wersji, przywracanie, „Cofnij”, „Zacznij od nowa” (§3.6) | ✅ |
+| Drzewo strony i język operacji, walidacja katalogiem, deterministyczne id, rebase szkiców (§4–5) | ✅ |
+| Proposal Workflow (Symfony Workflow), dwa serwery MCP aplikacji (agent/control), harness jako klient MCP (§7.2, §7.7) | ✅ |
+| Kierunki stylu (6), wzorce sekcji (15), hero w 4 wariantach, warianty strony obok siebie z żywymi miniaturami | ✅ |
+| Biblioteka mediów, zdjęcia z Wikimedia (Pexels/Unsplash z kluczem), wybór zdjęcia w panelu, generowanie FLUX (z kluczem HF) | ✅ |
+| Szkic rysowany ołówkiem / wklejony obraz → układ strony (model wizyjny) | ✅ |
+| Zdjęcia z telefonu przez kod QR, EXIF, albumy wyjazdów (Nominatim), żywa galeria | ✅ |
+| Konektor Instagram jako pierwsza paczka biblioteki (`library/sources/instagram`): eksport ZIP + Instagram Login, import w tle (Messenger), codzienna synchronizacja (Scheduler) | ✅ (OAuth bez testu na koncie) |
+| Kolekcje z arkuszy (§6.3 Records + SpreadsheetImport): analiza typów kolumn, import, siatka z filtrami, tabela, strona rekordu | ✅ |
+| Strona ucząca: interaktywny quiz | ✅ (LearningPath/Flashcards/AskThisPage — nie) |
+| Diagnostyka przez Symfony AI Mate, izolacja błędów renderu, model zapasowy, tolerancja błędów modeli (JsonRepair, lenient resolver), polityka narzędzi w kodzie | ✅ |
+| Uruchomienie jednym poleceniem, README EN, licencja MIT, lista zgłoszeń do upstreamu, scenariusz filmu | ✅ |
+
+Nie zrobione (świadomie poza zakresem lub na później):
+- tworzenie nowych klocków z kodem przez agenta, bramki PHPStan/testy, worktree i tryb cienia (§6.4, §7.3–7.4);
+- samonaprawa z ponawianiem komunikatów z failure transport (§7.5) — jest diagnostyka przez Mate, brak pętli naprawy;
+- wizualna kontrola szkiców zrzutami Panther + model wizyjny;
+- MCP Apps (§7.7), interfejs EN/PL przez Translator (panel ma własny słownik EN/PL);
+- PHPStan na poziomie max (testy są, analiza statyczna nie).
+
+Decyzje podjęte w trakcie:
+- Modele: lokalne GPU zajęte → darmowe modele w chmurze (Ollama Cloud `beam`, OpenRouter `:free`); klucze z 1Password
+  tylko w środowisku procesu (`harness/bin/serve-with-1password`).
+- Instagram: bez scrapingu i bez logowania hasłem; dla kont prywatnych ścieżką domyślną jest telefon (QR), potem eksport.
+- Warianty: treść pisana raz, warianty różnią się kierunkiem stylu (mniej tokenów, mniej błędów modeli).

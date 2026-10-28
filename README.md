@@ -104,7 +104,7 @@ script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in th
 | **Symfony AI Mate** | the agent reads the app's logs and profiler, even when the app does not boot |
 | **Messenger, Scheduler, Workflow** | imports and events; daily sync of connected accounts; the proposal state machine |
 | **UX Toolkit (shadcn), Twig/Live Components, Turbo, Icons** | patterns, the panel, View Transitions between versions |
-| **Doctrine, Uid, HttpClient, Security-free owner token, PhpSpreadsheet** | drafts and versions, media, collections |
+| **Doctrine, Uid, HttpClient, PhpSpreadsheet** | drafts and versions, media, collections |
 
 ## Models
 
@@ -112,10 +112,10 @@ The studio talks to any OpenAI-compatible chat API with tool calling. Configure 
 
 | | `CADENZA_LLM_BASE_URL` | `CADENZA_LLM_MODEL` |
 |---|---|---|
-| Hugging Face (default) | `https://router.huggingface.co` | `Qwen/Qwen3-Coder-480B-A35B-Instruct` |
+| Hugging Face (default, not yet tested by us) | `https://router.huggingface.co` | `Qwen/Qwen3-Coder-480B-A35B-Instruct` |
 | Ollama Cloud *(tested)* | `https://ollama.com` | `beam?max_tokens=12000&reasoning_effort=low` |
 | OpenRouter *(tested, free models)* | `https://openrouter.ai/api` | `nvidia/nemotron-3-ultra-550b-a55b:free?max_tokens=12000` |
-| LM Studio / Ollama, local *(tested)* | `http://127.0.0.1:1234` | the loaded model |
+| LM Studio / Ollama, local *(LM Studio tested)* | `http://127.0.0.1:1234` | the loaded model |
 
 Also `CADENZA_LLM_API_KEY`, and optionally a fallback (`CADENZA_LLM_FALLBACK_*`, used when the main model is silent for
 75 s) and a vision model (`CADENZA_LLM_VISION_*`, used for messages with images). Model options travel in the model
