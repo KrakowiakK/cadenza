@@ -523,6 +523,10 @@ final class OperationApplier
      */
     private function buildNode(mixed $spec, string $path, ?string $keepId = null): array
     {
+        // {"type": "features", "node": {"type": "features", "props": …}}: the block is the inner one.
+        if (\is_array($spec) && \is_array($spec['node'] ?? null) && !isset($spec['props']) && \is_string($spec['node']['type'] ?? null)) {
+            $spec = $spec['node'] + (isset($spec['id']) ? ['id' => $spec['id']] : []);
+        }
         if (!\is_array($spec) || !\is_string($spec['type'] ?? null)) {
             throw new OperationException(\sprintf('%s needs a "type" (one of: %s).', $path, implode(', ', array_keys($this->catalog->all()))));
         }

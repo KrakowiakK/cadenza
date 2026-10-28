@@ -29,6 +29,8 @@ final class JsonRepairTest extends TestCase
         yield 'brackets inside strings' => ['{"text":"a ] b }"} trailing', ['text' => 'a ] b }']];
         yield 'trailing commas' => ['[{"op":"a","nodes":[{"x":1},]},]', [['op' => 'a', 'nodes' => [['x' => 1]]]]];
         yield 'cut off before the end' => ['[{"op":"a","nodes":[{"text":"Co zabrać"}', [['op' => 'a', 'nodes' => [['text' => 'Co zabrać']]]]];
+        yield 'an item not closed in the middle' => ['[{"op":"a","nodes":[{"type":"steps","props":{"x":1}, {"type":"cta","props":{"y":2}}]}]',
+            [['op' => 'a', 'nodes' => [['type' => 'steps', 'props' => ['x' => 1]], ['type' => 'cta', 'props' => ['y' => 2]]]]]];
         yield 'hopeless' => ['not json at all', null];
     }
 }

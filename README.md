@@ -53,7 +53,9 @@ appears first as a **sketch on the live page**; nothing goes live until you appr
   (start, a few keys, screenshots, the browser's errors); a model that can see looks at the screenshots and what is
   wrong goes back for a fix, before the owner sees the sketch. Widgets run as documents of their own with the sandbox
   in the response itself (an opaque origin: no cookies, no storage, no network but the site's libraries and photos);
-  the page keeps a game's best score for each visitor.
+  the page keeps a game's best score for each visitor, and a game can have a shared leaderboard. Every version of a
+  widget is kept and a page pins the one it shows: *“make the snake slower”* becomes a sketch with the new version
+  while visitors keep playing the approved one, and restoring an old version of the site brings its games back too.
 - **Content that grows, by chat.** *“Add a post: the bus for guests leaves at 11:00”*, *“change the price of the vase
   to 140 zł”* — news, events, menus and products are collections the agent writes entry by entry. Every entry is a
   draft the owner sees marked on the page and publishes from a card in the panel; visitors keep the live version.
@@ -63,7 +65,14 @@ appears first as a **sketch on the live page**; nothing goes live until you appr
 - **Documents to download.** Attach a PDF (a menu, rules, a price list) and say where it belongs: it is stored by the
   site and shown with its type, size and number of pages.
 - **Made for phones too** — visitors get a compact menu with the language switch, the owner gets the whole studio in a
-  full-screen panel.
+  full-screen panel. *“How does my site look on a phone?”* — the owner sees the page (or its sketch) in a phone frame,
+  and the agent opens it in a headless Chrome at phone size: it measures what sticks out, text too small to read and
+  buttons too small for a thumb, and a model that can see looks at the screens.
+- **The owner stays in charge.** Nothing goes live without approval — new pages, a moved section, a new version of a
+  game, an undo (*“bring back how it was”* is a sketch of an earlier version too). Sketches from earlier conversations
+  wait in a card of their own; *“what is waiting for me?”* gets a short answer and *“drop the weather one”* drops
+  just that. The agent asks before removing pages, never writes reviews or prices it was not given, and says plainly
+  what it could not do.
 - **Pages for invited people only.** *“Make the accommodation page visible only to our guests”* — the page gets a lock;
   the owner adds guests (or tells the agent *“invite Kasia and Piotr…”*) and copies each one's personal sign-in link
   (Symfony login links: signed, expiring, no passwords). Strangers see a closed door that does not reveal what is

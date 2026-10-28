@@ -17,6 +17,7 @@ final class JsonRepair
         $candidates = [$json, stripcslashes($json)];
         foreach ([$json, stripcslashes($json)] as $damaged) {
             $candidates[] = self::closed((string) preg_replace('/,\s*([\]}])/', '$1', $damaged));
+            $candidates[] = self::closed(self::rebalanced((string) preg_replace('/,\s*([\]}])/', '$1', $damaged)));
         }
         foreach ($candidates as $candidate) {
             $value = json_decode($candidate, true);
@@ -33,6 +34,53 @@ final class JsonRepair
         }
 
         return null;
+    }
+
+    /**
+     * Brackets a model forgot in the middle of a list: an object that is not closed before the next item
+     * ('{"a":{…}, {"b":…}' — after a comma an object wants a key, not "{"), and closing brackets that do not match.
+     */
+    private static function rebalanced(string $text): string
+    {
+        $out = '';
+        $stack = [];
+        $inString = false;
+        $previous = '';
+        for ($i = 0, $n = \strlen($text); $i < $n; ++$i) {
+            $c = $text[$i];
+            if ($inString) {
+                $out .= $c;
+                if ('\\' === $c && $i + 1 < $n) {
+                    $out .= $text[++$i];
+                } elseif ('"' === $c) {
+                    $inString = false;
+                    $previous = '"';
+                }
+                continue;
+            }
+            if ('"' === $c) {
+                $inString = true;
+            } elseif ('{' === $c || '[' === $c) {
+                // "{" where a key should come: close the objects until we are back in a list.
+                if ('{' === $c && ',' === $previous && '}' === end($stack)) {
+                    while ('}' === end($stack)) {
+                        $out = rtrim(rtrim($out), ',').array_pop($stack).',';
+                    }
+                }
+                $stack[] = '{' === $c ? '}' : ']';
+            } elseif ('}' === $c || ']' === $c) {
+                if ($c !== end($stack)) {
+                    continue;
+                }
+                array_pop($stack);
+            }
+            $out .= $c;
+            if (!ctype_space($c)) {
+                $previous = $c;
+            }
+        }
+
+        return $out;
     }
 
     /**
