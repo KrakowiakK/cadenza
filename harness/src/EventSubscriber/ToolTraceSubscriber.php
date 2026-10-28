@@ -37,6 +37,8 @@ final class ToolTraceSubscriber
         'delete_record' => ['en' => 'Removing an entry', 'pl' => 'Usuwam wpis'],
         'find_records' => ['en' => 'Looking through the entries', 'pl' => 'Przeglądam wpisy'],
         'create_block' => ['en' => 'Designing a new block', 'pl' => 'Projektuję nowy blok'],
+        'create_widget' => ['en' => 'Programming', 'pl' => 'Programuję'],
+        'widget_status' => ['en' => 'Checking the widgets', 'pl' => 'Sprawdzam elementy'],
         'add_document' => ['en' => 'Putting the document on the site', 'pl' => 'Dodaję dokument do strony'],
         'translate_page' => ['en' => 'Translating the page', 'pl' => 'Tłumaczę stronę'],
         'guest_list' => ['en' => 'Updating the guest list', 'pl' => 'Aktualizuję listę gości'],
@@ -109,6 +111,7 @@ final class ToolTraceSubscriber
             'read_page', 'show_page' => (string) ($arguments['page'] ?? $arguments['path'] ?? ''),
             'find_images', 'offer_images' => (string) ($arguments['query'] ?? ''),
             'generate_image' => mb_substr((string) ($arguments['prompt'] ?? ''), 0, 120),
+            'create_widget' => (string) ($arguments['label'] ?? $arguments['name'] ?? ''),
             default => null,
         };
     }

@@ -1,0 +1,19 @@
+{%- set widget = cadenza_widget(props.widget) -%}
+{%- set aspects = {wide: 'aspect-video', square: 'aspect-square max-w-2xl mx-auto', tall: 'aspect-[3/4] max-w-md mx-auto', banner: 'aspect-[3/1]', auto: 'min-h-24'} -%}
+{%- set aspect = props.aspect ?: (widget and widget.shape in aspects|keys ? widget.shape : 'wide') -%}
+{%- set widths = {narrow: 'max-w-3xl mx-auto', normal: '', full: ''} -%}
+{%- if props.width == 'full' %}
+<section class="cz-section relative {{ {default: 'bg-background', muted: 'bg-muted', primary: 'bg-primary text-primary-foreground', secondary: 'bg-secondary text-secondary-foreground', accent: 'bg-accent text-accent-foreground', dark: 'dark bg-background text-foreground'}[props.background|default('default')] }}">
+    {%- if props.eyebrow or props.title or props.intro %}<div class="mx-auto w-full max-w-6xl px-6">{% include '@CadenzaRuntime/node/_head.html.twig' %}</div>{% endif %}
+    {% include '@CadenzaRuntime/node/_widget_frame.html.twig' with {widget: widget, name: props.widget, class: aspects[aspect]|replace({'max-w-2xl mx-auto': '', 'max-w-md mx-auto': ''}), auto: aspect == 'auto'} %}
+    {%- if props.caption %}<p class="mx-auto mt-4 max-w-6xl px-6 text-center text-sm opacity-70">{{ props.caption }}</p>{% endif %}
+</section>
+{%- else %}
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+<figure class="{{ widths[props.width|default('normal')] }}">
+    {% include '@CadenzaRuntime/node/_widget_frame.html.twig' with {widget: widget, name: props.widget, class: aspects[aspect] ~ ' overflow-hidden rounded-[var(--radius)]', auto: aspect == 'auto'} %}
+    {%- if props.caption %}<figcaption class="mt-4 text-center text-sm opacity-70">{{ props.caption }}</figcaption>{% endif %}
+</figure>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}
+{%- endif %}

@@ -66,6 +66,8 @@ setup() {
     mkdir -p "$APP/var/cadenza/blocks" # templates of blocks the agent writes; a @source of the stylesheet
     (cd "$APP" && php bin/console importmap:install --quiet && php bin/console tailwind:build --quiet)
     (cd "$APP" && php bin/console cadenza:init "My site" --quiet || true)
+    step "harness: a browser driver, to try the widgets the agent writes (optional: needs Chrome)"
+    (cd "$ROOT/harness" && vendor/bin/bdi detect drivers >/dev/null 2>&1 || echo "  no Chrome found: widgets are not tried in a browser before you see them")
 
     bold "Done."
     if ! grep -q '^CADENZA_LLM_API_KEY=.\+' "$STUDIO/.env.local" 2>/dev/null && [ -z "${CADENZA_LLM_API_KEY:-}" ]; then

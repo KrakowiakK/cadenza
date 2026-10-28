@@ -32,6 +32,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         private readonly \Cadenza\Runtime\Media\MapPoints $mapPoints,
         private readonly \Cadenza\Runtime\Media\FileLibrary $files,
         private readonly \Cadenza\Runtime\Block\CustomBlocks $customBlocks,
+        private readonly \Cadenza\Runtime\Widget\Widgets $widgets,
         private readonly ?IconRendererInterface $icons = null,
         private readonly ?\Psr\Log\LoggerInterface $logger = null,
     ) {
@@ -51,6 +52,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
             new TwigFunction('cadenza_fonts_url', static fn (array $theme): string => Theme::googleFontsUrl($theme)),
             new TwigFunction('cadenza_nav', static fn (array $doc, ?array $page = null): array => Document::navItems($doc, $page)),
             new TwigFunction('cadenza_translations', static fn (array $doc, array $page): array => Document::translations($doc, $page)),
+            new TwigFunction('cadenza_widget', fn (?string $name): ?\Cadenza\Runtime\Entity\Widget => null !== $name && '' !== $name ? $this->widgets->get($name) : null),
             new TwigFunction('cadenza_state', fn (): RenderState => $this->state),
             new TwigFunction('cadenza_media', fn (array $p): array => $this->media->query($p['source'] ?? null, $p['tag'] ?? null, $p['year'] ?? null, $p['sort'] ?? 'newest', (int) ($p['limit'] ?? 60), $p['album'] ?? null)),
             new TwigFunction('cadenza_collection', fn (string $slug): ?\Cadenza\Runtime\Entity\Collection => $this->collections->get($slug)),

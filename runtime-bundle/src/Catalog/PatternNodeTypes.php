@@ -182,6 +182,13 @@ final class PatternNodeTypes implements NodeTypeProviderInterface
             'doneMessage' => ['type' => 'string', 'default' => null, 'description' => 'shown once the date has passed'],
         ]);
 
+        yield new NodeType('widget', 'Living element', 'Pattern: a widget written for this site with its own code (see create_widget) — a game, a 3D scene, an animation, an interactive chart or calculator. It runs in a sandbox of its own.', 'pattern', $head + [
+            'widget' => ['type' => 'string', 'required' => true, 'description' => 'the name the widget was created with'],
+            'aspect' => ['type' => 'enum', 'values' => ['wide', 'square', 'tall', 'banner', 'auto'], 'default' => null, 'description' => 'shape of its frame (empty = the shape it was written for): wide 16:9, square, tall 3:4 (phones), banner 3:1, auto = as tall as its content'],
+            'width' => ['type' => 'enum', 'values' => ['narrow', 'normal', 'full'], 'default' => 'normal', 'description' => 'full = edge to edge'],
+            'caption' => ['type' => 'string', 'default' => null, 'description' => 'a line under it, e.g. how to play'],
+        ]);
+
         yield new NodeType('map', 'Map', 'Pattern: an interactive map. source "photos" = the owner\'s photos where they were taken (GPS from the phone), joined into a travel route in time order, optionally one album or hashtag — "my trips on a map". source "places" = pins for addresses (shops, venues, a wedding church and party hall, a walking tour); addresses are located automatically.', 'pattern', $head + [
             'source' => ['type' => 'enum', 'values' => ['photos', 'places'], 'default' => 'photos'],
             'album' => ['type' => 'string', 'default' => null, 'description' => 'photos: only this album'],

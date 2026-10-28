@@ -239,3 +239,41 @@ document.addEventListener('click', (e) => {
         if (!menu.contains(e.target) || e.target.closest('a')) menu.removeAttribute('open');
     });
 });
+
+/*
+ * Widgets: games, 3D scenes and animations the agent wrote, each in a sandboxed frame. The page keeps what a widget
+ * stores (a high score) in this browser, sizes frames that fit their content, and tells the owner's studio when a
+ * widget breaks. Messages from frames are only trusted for what they are: a number, a small object, a line of text.
+ */
+const widgetKey = (name) => `cz-widget:${name}`;
+const widgets = () => {
+    document.querySelectorAll('iframe[data-cz-widget]:not([src])').forEach((frame) => {
+        let stored = '';
+        try { stored = localStorage.getItem(widgetKey(frame.dataset.czWidget)) || ''; } catch (e) { /* storage blocked */ }
+        frame.src = frame.dataset.src + (stored ? '#' + encodeURIComponent(stored) : '');
+    });
+};
+const reported = new Set();
+window.addEventListener('message', (e) => {
+    const frame = [...document.querySelectorAll('iframe[data-cz-widget]')].find((f) => f.contentWindow === e.source);
+    if (!frame || !e.data || e.data.cadenzaWidget !== frame.dataset.czWidget) return;
+    const name = frame.dataset.czWidget;
+    if (typeof e.data.height === 'number' && frame.src.includes('auto=1')) {
+        frame.style.height = Math.min(Math.max(e.data.height, 48), 4000) + 'px';
+    }
+    if (e.data.store && typeof e.data.store === 'object') {
+        const json = JSON.stringify(e.data.store);
+        if (json.length < 50000) { try { localStorage.setItem(widgetKey(name), json); } catch (err) { /* storage full or blocked */ } }
+    }
+    if (typeof e.data.error === 'string' && !reported.has(name + e.data.error)) {
+        // Kept only when the owner is looking (the site answers 404 to anyone else).
+        reported.add(name + e.data.error);
+        fetch(`/_cadenza/widget/${encodeURIComponent(name)}/error`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ version: Number(frame.dataset.version), error: e.data.error.slice(0, 500) }),
+        }).catch(() => {});
+    }
+});
+document.addEventListener('turbo:load', widgets);
+document.addEventListener('turbo:frame-load', widgets);
+if (document.readyState !== 'loading') widgets(); else document.addEventListener('DOMContentLoaded', widgets);

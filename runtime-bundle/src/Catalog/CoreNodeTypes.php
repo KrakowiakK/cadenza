@@ -33,6 +33,7 @@ final class CoreNodeTypes implements NodeTypeProviderInterface
             'imagePosition' => ['type' => 'enum', 'values' => ['background', 'right', 'none'], 'default' => 'background', 'description' => 'legacy; prefer variant'],
             'align' => ['type' => 'enum', 'values' => ['start', 'center'], 'default' => 'center'],
             'height' => ['type' => 'enum', 'values' => ['sm', 'md', 'lg', 'screen'], 'default' => 'md'],
+            'widget' => ['type' => 'string', 'default' => null, 'description' => 'a widget (create_widget) that makes the opening come alive: behind the text in the typographic variant, in place of the photo in split'],
         ], ['actions']);
 
         yield new NodeType('heading', 'Heading', 'A title.', 'content', [

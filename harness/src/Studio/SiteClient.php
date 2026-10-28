@@ -186,6 +186,38 @@ final class SiteClient
     /**
      * @return array<string, mixed>
      */
+    public function defineWidget(string $name, string $label, string $description, string $code, ?string $shape = null): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('widget_define', ['name' => $name, 'label' => $label, 'description' => $description, 'code' => $code, 'shape' => $shape]));
+    }
+
+    /**
+     * @return array<string, mixed> the widget's code and last error, or an "error"
+     */
+    public function widgetCode(string $name): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('widget_code', ['name' => $name]));
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function widgets(): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('widgets_list', []));
+    }
+
+    /**
+     * @return array<string, string> import name => version
+     */
+    public function widgetLibraries(): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('widget_libraries', []));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function importFile(string $url, string $name): array
     {
         return $this->json($this->mcp->get('site')->callTool('file_import', ['url' => $url, 'name' => $name]));

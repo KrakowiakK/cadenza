@@ -31,4 +31,11 @@ return [
     'tw-animate-css/dist/tw-animate.css' => ['version' => '1.4.0', 'type' => 'css'],
     'leaflet' => ['version' => '1.9.4'],
     'leaflet/dist/leaflet.min.css' => ['version' => '1.9.4', 'type' => 'css'],
+    'three' => ['version' => '0.186.1'],
+    'three/addons/controls/OrbitControls.js' => ['version' => '0.186.1'],
+    'three/addons/loaders/GLTFLoader.js' => ['version' => '0.186.1'],
+    'chart.js' => ['version' => '4.6.1'],
+    'canvas-confetti' => ['version' => '1.9.4'],
+    'matter-js' => ['version' => '0.20.0'],
+    '@kurkle/color' => ['version' => '0.3.4'],
 ];

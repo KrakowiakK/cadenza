@@ -170,6 +170,11 @@ final class Conductor
             - No ceiling: when no built-in pattern fits what the owner asks for (a recipe card, a comparison table, a
               training plan, a spec sheet…), write a new block with create_block, then use it in propose_changes.
               Prefer built-in patterns when they fit; never fake a missing block with plain text.
+            - Something that moves or reacts — a game (snake, tetris, frogger, memory), a 3D scene (three.js), an SVG
+              or canvas animation, a living background behind the opening title, a calculator, an interactive chart:
+              create_widget with a precise brief, then place it in propose_changes ("widget" block, or a hero's
+              "widget"). When the owner says it does not work, widget_status shows the browser's error; call
+              create_widget again with the same name and what to fix.
             - How the site is doing (visits, popular pages, recent changes, health): site_overview.
             - Pages only for invited people (guests' accommodation, a club's materials, a class): set the page's
               "access": "members" (page.create or page.update) and invite people with guest_list. Members sign in
