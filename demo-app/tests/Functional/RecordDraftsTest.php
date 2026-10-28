@@ -75,5 +75,17 @@ final class RecordDraftsTest extends WebTestCase
         self::assertSelectorTextContains('main', 'Otwieramy ogródek');
         self::assertSelectorTextContains('main', 'Zimowe godziny (do 17)');
         self::assertSelectorNotExists('.cz-record-pending');
+
+        // A new shop and its products written in one go: approving the sketch that shows the shop shows them too.
+        $shop = $collections->create('sklepik', 'Sklepik', [['label' => 'Nazwa'], ['label' => 'Cena', 'type' => 'number']]);
+        $collections->save($shop, ['nazwa' => 'Mata', 'cena' => 120]);
+        $collections->save($shop, ['nazwa' => 'Klocki', 'cena' => 40]);
+        $sketch = $site->propose([['op' => 'page.create', 'path' => '/sklep', 'title' => 'Sklep', 'nodes' => [['type' => 'collection-grid', 'props' => ['collection' => 'sklepik']]]]], 'Shop');
+        $site->publish((int) $sketch->draft->getId());
+        self::assertSame([], $collections->pending($shop));
+        self::assertCount(2, $collections->records($shop));
+        $collections->save($shop, ['nazwa' => 'Pasek', 'cena' => 25]);
+        $site->publish((int) $site->propose([['op' => 'page.update', 'page' => '/sklep', 'title' => 'Sklepik']], 'Rename')->draft->getId());
+        self::assertCount(1, $collections->pending($shop), 'a shop already on the site keeps its new entries waiting');
     }
 }

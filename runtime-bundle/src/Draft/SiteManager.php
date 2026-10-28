@@ -21,6 +21,7 @@ final class SiteManager
         private readonly SiteVersionRepository $versions,
         private readonly OperationApplier $applier,
         private readonly EntityManagerInterface $em,
+        private readonly ?\Cadenza\Runtime\Collection\Collections $collections = null,
     ) {
     }
 
@@ -138,10 +139,38 @@ final class SiteManager
     public function publish(int $draftId): SiteVersion
     {
         $draft = $this->versions->draft($draftId) ?? throw new \InvalidArgumentException(\sprintf('Draft %d does not exist or is not a draft.', $draftId));
-        $draft->publish($this->currentNumber() + 1, $this->rebased($draft));
+        $live = $this->document();
+        $document = $this->rebased($draft);
+        $draft->publish($this->currentNumber() + 1, $document);
         $this->em->flush();
+        // A sketch that shows a collection for the first time (a new shop, a new blog) shows its entries: approving
+        // it publishes the entries the agent wrote for it, or the owner would approve an empty shop.
+        if (null !== $this->collections) {
+            foreach (array_diff(self::collectionsShown($document), self::collectionsShown($live)) as $slug) {
+                if (null !== $collection = $this->collections->get($slug)) {
+                    $this->collections->decide($collection, true);
+                }
+            }
+        }
 
         return $draft;
+    }
+
+    /**
+     * @param array<string, mixed> $document
+     *
+     * @return list<string> slugs of the collections its pages show
+     */
+    private static function collectionsShown(array $document): array
+    {
+        $slugs = [];
+        foreach (Document::walk($document) as $entry) {
+            if (\is_string($slug = $entry['node']['props']['collection'] ?? null)) {
+                $slugs[$slug] = $slug;
+            }
+        }
+
+        return array_values($slugs);
     }
 
     public function discard(int $draftId): void
