@@ -252,3 +252,16 @@ a.cz-card:hover, .cz-card-link:hover { transform: translateY(-3px); box-shadow: 
 .cz-embed .cz-reveal { opacity: 1; transform: none; }
 /* In-page links (#node-id) land below the sticky header. */
 .cz-node[id] { scroll-margin-top: 5rem; }
+
+/* Map pins and popups */
+.cz-map { z-index: 0; }
+/* OpenStreetMap tiles, quieted down so the pins and the site's colours lead. */
+.cz-map .leaflet-tile-pane { filter: grayscale(.85) contrast(.92) brightness(1.04); }
+.cz-map.cz-map-dark .leaflet-tile-pane { filter: grayscale(1) invert(1) contrast(.85) brightness(.9); }
+.cz-pin { display: flex; width: 32px; height: 32px; align-items: center; justify-content: center; border-radius: 9999px; background: var(--primary); color: var(--primary-foreground); font: 600 13px/1 var(--font-sans, system-ui); box-shadow: 0 0 0 3px var(--background), 0 6px 16px -4px rgb(0 0 0 / .4); }
+.cz-pin-photo { width: 44px; height: 44px; background-size: cover; background-position: center; transition: transform .2s; }
+.cz-pin-photo:hover { transform: scale(1.12); }
+.cz-pop { display: grid; gap: 4px; font-size: 14px; }
+.cz-pop-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 4px; }
+.cz-pop-meta { opacity: .65; font-size: 12px; }
+.leaflet-popup-content-wrapper { border-radius: calc(var(--radius) * 1.2); }

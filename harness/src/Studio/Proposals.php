@@ -24,6 +24,16 @@ final class Proposals
     }
 
     /**
+     * The owner reads the summary: no markup or leftovers of it (models sometimes end with "</" or a tag).
+     */
+    public static function cleanSummary(string $summary): string
+    {
+        $text = trim((string) preg_replace(['~</?[a-z!][^>]*>~i', '~\s+~u'], ['', ' '], $summary), " \t\n\r\0\x0B<>/");
+
+        return '' !== $text ? mb_substr($text, 0, 240) : 'Changes';
+    }
+
+    /**
      * Models sometimes send each operation as a JSON string, or the whole list wrapped once more.
      *
      * @param array<mixed> $operations
@@ -69,6 +79,7 @@ final class Proposals
             }
         }
 
+        $summary = self::cleanSummary($summary);
         $result = $this->site->propose(self::normalise($operations), $summary, $reviseDraftId);
         if (!($result['ok'] ?? false)) {
             return ['proposal' => null, 'errors' => array_values((array) ($result['errors'] ?? ['unknown error'])), 'created' => []];

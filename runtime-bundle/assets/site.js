@@ -179,3 +179,54 @@ const tick = () => {
 setInterval(tick, 1000);
 document.addEventListener('turbo:load', tick);
 if (document.readyState !== 'loading') tick(); else document.addEventListener('DOMContentLoaded', tick);
+
+/*
+ * Maps (Leaflet, loaded only when a page has one): photo pins with a route in time order, or places.
+ */
+const escapeText = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const maps = async () => {
+    const boxes = [...document.querySelectorAll('[data-cz-map]:not([data-ready])')];
+    if (!boxes.length) return;
+    const L = (await import('leaflet')).default;
+    for (const box of boxes) {
+        box.dataset.ready = '1';
+        const { points, route, dark } = JSON.parse(box.dataset.czMap);
+        const map = L.map(box, { scrollWheelZoom: false, zoomControl: true, attributionControl: true });
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        }).addTo(map);
+        box.classList.toggle('cz-map-dark', !!dark);
+        const markers = points.map((p, i) => {
+            const html = p.image
+                ? `<span class="cz-pin cz-pin-photo" style="background-image:url('${encodeURI(p.image)}')"></span>`
+                : `<span class="cz-pin">${i + 1}</span>`;
+            const marker = L.marker([p.lat, p.lng], { icon: L.divIcon({ html, className: '', iconSize: p.image ? [44, 44] : [32, 32], iconAnchor: p.image ? [22, 22] : [16, 16] }) });
+            const body = [
+                p.image ? `<img src="${encodeURI(p.image)}" alt="" class="cz-pop-img">` : '',
+                `<strong>${escapeText(p.title)}</strong>`,
+                p.date ? `<span class="cz-pop-meta">${escapeText(new Date(p.date).toLocaleDateString(document.documentElement.lang || undefined, { day: 'numeric', month: 'long', year: 'numeric' }))}</span>` : '',
+                p.text ? `<span class="cz-pop-meta">${escapeText(p.text)}</span>` : '',
+                p.href ? `<a href="${encodeURI(p.href)}">→</a>` : '',
+            ].join('');
+            marker.bindPopup(`<div class="cz-pop">${body}</div>`, { maxWidth: 260 });
+            marker.addTo(map);
+            marker.group = p.group;
+            return marker;
+        });
+        if (route && points.length > 1) {
+            L.polyline(points.map((p) => [p.lat, p.lng]), { color: getComputedStyle(box).getPropertyValue('--primary') || '#555', weight: 2, opacity: 0.7, dashArray: '6 8' }).addTo(map);
+        }
+        const fit = (list) => list.length === 1 ? map.setView(list[0].getLatLng(), 13) : map.fitBounds(L.featureGroup(list).getBounds().pad(0.15));
+        fit(markers);
+        box.closest('.cz-node')?.querySelectorAll('[data-cz-map-focus]').forEach((b) => b.addEventListener('click', () => {
+            const group = markers.filter((m) => m.group === b.dataset.czMapFocus);
+            if (group.length) { map.flyToBounds(L.featureGroup(group).getBounds().pad(0.4), { maxZoom: 14, duration: 1.2 }); group[0].openPopup(); }
+        }));
+        box.czMap = map;
+    }
+};
+document.addEventListener('turbo:load', maps);
+if (document.readyState !== 'loading') maps(); else document.addEventListener('DOMContentLoaded', maps);
+// Turbo keeps a snapshot of the page; a live Leaflet map in it would come back broken.
+document.addEventListener('turbo:before-cache', () => document.querySelectorAll('[data-cz-map][data-ready]').forEach((box) => { box.czMap?.remove(); delete box.dataset.ready; }));

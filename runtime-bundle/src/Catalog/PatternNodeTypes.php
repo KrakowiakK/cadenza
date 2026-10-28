@@ -178,6 +178,22 @@ final class PatternNodeTypes implements NodeTypeProviderInterface
             'doneMessage' => ['type' => 'string', 'default' => null, 'description' => 'shown once the date has passed'],
         ]);
 
+        yield new NodeType('map', 'Map', 'Pattern: an interactive map. source "photos" = the owner\'s photos where they were taken (GPS from the phone), joined into a travel route in time order, optionally one album or hashtag — "my trips on a map". source "places" = pins for addresses (shops, venues, a wedding church and party hall, a walking tour); addresses are located automatically.', 'pattern', $head + [
+            'source' => ['type' => 'enum', 'values' => ['photos', 'places'], 'default' => 'photos'],
+            'album' => ['type' => 'string', 'default' => null, 'description' => 'photos: only this album'],
+            'tag' => ['type' => 'string', 'default' => null, 'description' => 'photos: only this hashtag'],
+            'route' => ['type' => 'bool', 'default' => true, 'description' => 'photos: draw the route between places in time order'],
+            'places' => ['type' => 'list', 'items' => [
+                'name' => ['type' => 'string', 'required' => true],
+                'address' => ['type' => 'string', 'description' => 'street, city, country — located automatically'],
+                'text' => ['type' => 'string'],
+                'href' => ['type' => 'url'],
+                'lat' => ['type' => 'string', 'description' => 'optional, when known'],
+                'lng' => ['type' => 'string'],
+            ], 'default' => []],
+            'height' => ['type' => 'enum', 'values' => ['medium', 'tall'], 'default' => 'medium'],
+        ]);
+
         yield new NodeType('cta-band', 'Call to action band', 'Pattern: a strong closing invitation with one or two buttons, optionally with an image.', 'pattern', [
             'title' => ['type' => 'string', 'required' => true],
             'text' => ['type' => 'text', 'default' => null],

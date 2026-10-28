@@ -104,6 +104,9 @@ final class AlbumBuilder
         }
         $a = $data['address'] ?? [];
 
-        return $a['city'] ?? $a['town'] ?? $a['village'] ?? $a['municipality'] ?? $a['county'] ?? $a['state'] ?? $data['name'] ?? null;
+        $name = $a['city'] ?? $a['town'] ?? $a['village'] ?? $a['municipality'] ?? $a['county'] ?? $a['state'] ?? $data['name'] ?? null;
+
+        // Places without a name in a Latin script (Arabic, Greek, Cyrillic…) are written the way the owner can read.
+        return \is_string($name) && !preg_match('/\p{Latin}/u', $name) ? (transliterator_transliterate('Any-Latin; Latin-ASCII; Any-Title', $name) ?: $name) : $name;
     }
 }

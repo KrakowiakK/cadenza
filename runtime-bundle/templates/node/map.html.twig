@@ -1,0 +1,19 @@
+{%- set state = cadenza_state() -%}
+{%- set points = cadenza_map_points(props) -%}
+{%- set pl = state.document.language|default('en')|slice(0, 2) == 'pl' -%}
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+{%- if points is empty %}
+    <div class="cz-empty-slot">{{ props.source == 'places' ? (pl ? 'Nie udało się znaleźć tych adresów na mapie.' : 'These addresses could not be found on the map.') : (pl ? 'Mapa pokaże zdjęcia z lokalizacją (z telefonu, z GPS).' : 'The map shows photos with a location (taken with a phone, with GPS).') }}</div>
+{%- else %}
+    <link rel="stylesheet" href="{{ asset('vendor/leaflet/dist/leaflet.min.css') }}">
+    <div class="cz-card cz-map relative isolate overflow-hidden {{ props.height == 'tall' ? 'h-[36rem]' : 'h-[26rem]' }}"
+         data-cz-map="{{ {points: points, route: props.source == 'photos' and props.route, dark: state.document.theme.mode|default('light') == 'dark'}|json_encode }}"></div>
+    {%- set groups = points|map(p => p.group|default(null))|filter(g => g)|reduce((acc, g) => g in acc ? acc : acc|merge([g]), []) -%}
+    {%- if groups|length > 1 %}
+        <ol class="mt-6 flex flex-wrap justify-center gap-2 text-sm">
+            {%- for g in groups %}<li><button type="button" data-cz-map-focus="{{ g }}" class="rounded-full border border-current/15 px-3.5 py-1.5 transition hover:border-primary hover:text-primary"><span class="mr-1 opacity-50">{{ loop.index }}</span>{{ g }}</button></li>{% endfor %}
+        </ol>
+    {%- endif %}
+{%- endif %}
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

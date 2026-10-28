@@ -29,6 +29,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         private readonly MediaLibrary $media,
         private readonly Collections $collections,
         private readonly \Cadenza\Runtime\Form\Forms $forms,
+        private readonly \Cadenza\Runtime\Media\MapPoints $mapPoints,
         private readonly ?IconRendererInterface $icons = null,
         private readonly ?\Psr\Log\LoggerInterface $logger = null,
     ) {
@@ -55,6 +56,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
             new TwigFunction('cadenza_format', static fn (string $type, mixed $value): string => Collections::format($type, $value)),
             new TwigFunction('cadenza_form_stats', fn (array $node): ?array => null !== $this->forms->published($node['id']) ? $this->forms->stats($node) : null),
             new TwigFunction('cadenza_submissions', fn (string $formId, int $limit = 50): array => $this->forms->submissions($formId, $limit)),
+            new TwigFunction('cadenza_map_points', fn (array $props): array => $this->mapPoints->points($props)),
             new TwigFunction('cadenza_icon', $this->icon(...), ['is_safe' => ['html']]),
         ];
     }
@@ -155,7 +157,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
 
         $html = '';
         foreach ($entries as $entry) {
-            $html .= $this->renderNode($twig, $entry['node'], $page, $entry['removed'], $inheritedState);
+            $html .= $this->renderNode($twig, $entry['node'], $page, $entry['removed'], $inheritedState, $parentKey === $page);
         }
 
         return new Markup($html, 'UTF-8');
@@ -164,7 +166,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
     /**
      * @param array<string, mixed> $node
      */
-    private function renderNode(Environment $twig, array $node, string $page, bool $removed, ?string $inheritedState = null): string
+    private function renderNode(Environment $twig, array $node, string $page, bool $removed, ?string $inheritedState = null, bool $topLevel = false): string
     {
         if (!$this->catalog->has($node['type'])) {
             return \sprintf('<div class="cz-missing">Unknown node type “%s”</div>', htmlspecialchars($node['type']));
@@ -187,6 +189,10 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
             $inner = $this->state->owner
                 ? \sprintf('<div class="cz-node-error rounded-xl border-2 border-dashed border-rose-300 bg-rose-50 p-4 text-sm text-rose-800"><strong>%s</strong> could not be shown: %s</div>', htmlspecialchars($type->label), htmlspecialchars(mb_substr(($e->getPrevious() ?? $e)->getMessage(), 0, 300)))
                 : '';
+        }
+        // Patterns and sections bring their own width and spacing; a plain block placed directly on the page gets them here.
+        if ($topLevel && !\in_array($type->category, ['pattern', 'meta'], true) && 'section' !== $type->name) {
+            $inner = '<div class="mx-auto w-full max-w-6xl px-6 py-6 md:py-8">'.$inner.'</div>';
         }
 
         return \sprintf(
