@@ -1,0 +1,24 @@
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+<div class="mx-auto max-w-3xl space-y-6" data-cz-quiz>
+    {%- for q in props.questions %}
+        <div class="cz-card p-6 md:p-8" data-cz-question data-correct="{{ q.correct }}">
+            <p class="text-sm font-semibold text-primary">{{ loop.index }} / {{ loop.length }}</p>
+            <h3 class="cz-heading mt-2 text-lg font-semibold md:text-xl">{{ q.question }}</h3>
+            <div class="mt-5 grid gap-2.5">
+                {%- for option in q.options|default([]) %}
+                    <button type="button" data-option="{{ loop.index0 }}" class="flex items-center gap-3 rounded-[calc(var(--radius)*0.8)] border border-current/15 px-4 py-3 text-left transition hover:border-primary hover:bg-primary/5 disabled:cursor-default data-[state=right]:border-emerald-500 data-[state=right]:bg-emerald-500/10 data-[state=wrong]:border-rose-500 data-[state=wrong]:bg-rose-500/10">
+                        <span class="flex size-7 shrink-0 items-center justify-center rounded-full border border-current/20 text-sm font-semibold">{{ 'ABCDEFGH'|slice(loop.index0, 1) }}</span>
+                        <span>{{ option }}</span>
+                    </button>
+                {%- endfor %}
+            </div>
+            {%- if q.explanation %}<p data-explanation hidden class="mt-4 rounded-lg bg-muted px-4 py-3 text-sm">{{ q.explanation|nl2br }}</p>{% endif %}
+        </div>
+    {%- endfor %}
+    <div data-cz-score hidden class="cz-card p-6 text-center">
+        <p class="cz-display text-4xl"><span data-points>0</span> / {{ props.questions|length }}</p>
+        <button type="button" data-cz-quiz-reset class="mt-4 text-sm font-medium text-primary underline-offset-4 hover:underline">↺</button>
+    </div>
+</div>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

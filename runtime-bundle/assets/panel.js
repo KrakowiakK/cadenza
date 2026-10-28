@@ -489,7 +489,16 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
                 else {
                     const tt = this.addAssistantText(turn.text || '');
                     if (!turn.text) tt.part('text').classList.add('hidden');
-                    for (const p of turn.proposals ?? []) this.proposalCard(tt.part('cards'), p);
+                    const groups = new Map();
+                    for (const p of turn.proposals ?? []) {
+                        if (p.variantGroup) { if (!groups.has(p.variantGroup)) groups.set(p.variantGroup, []); groups.get(p.variantGroup).push(p); continue; }
+                        this.proposalCard(tt.part('cards'), p);
+                    }
+                    for (const [groupId, items] of groups) {
+                        const open = items.filter((p) => p.status === 'sketched');
+                        if (open.length > 1) this.variantsCard(tt.part('cards'), { groupId, items: open });
+                        else for (const p of items.filter((p) => p.status !== 'rejected')) this.proposalCard(tt.part('cards'), { ...p, variantPicked: true });
+                    }
                 }
             }
             this.refreshWaiting();

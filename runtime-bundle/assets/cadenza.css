@@ -190,7 +190,7 @@ body:has(.sf-toolbar) #cz-panel .cz-sheet { bottom: 3rem; }
    Design directions — html[data-cz-style]. Patterns use semantic hooks (.cz-heading, .cz-eyebrow, .cz-card,
    .cz-section, .cz-img, .cz-btn, .cz-display) and each direction gives them a character.
    ------------------------------------------------------------------------------------------------------------ */
-:root { --cz-section-y: 1; --cz-display-weight: 700; --cz-display-tracking: -0.02em; --cz-heading-transform: none; }
+:root, body { --cz-section-y: 1; --cz-display-weight: 700; --cz-display-tracking: -0.02em; --cz-heading-transform: none; }
 .cz-section { padding-block: calc(4rem * var(--cz-section-y)); }
 @media (min-width: 768px) { .cz-section { padding-block: calc(6rem * var(--cz-section-y)); } }
 .cz-display { font-family: var(--cz-font-heading); font-weight: var(--cz-display-weight); letter-spacing: var(--cz-display-tracking); text-transform: var(--cz-heading-transform); line-height: 1.04; text-wrap: balance; }

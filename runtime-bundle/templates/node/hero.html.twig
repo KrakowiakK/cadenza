@@ -29,7 +29,7 @@
         <div class="relative">
             <div class="absolute -inset-4 -z-10 rounded-[calc(var(--radius)*2)] bg-primary/10 blur-2xl"></div>
             {%- if props.image %}<img src="{{ props.image }}" alt="" class="cz-img aspect-[4/5] w-full object-cover shadow-2xl md:aspect-[4/5]">
-            {%- else %}<div class="cz-img flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 border-2 border-dashed border-current/15 bg-muted/60 text-muted-foreground">{{ cadenza_icon('image-plus', 'size-10 opacity-50') }}<span class="text-sm">{{ app.request.locale starts with 'pl' or cadenza_state().document.name matches '/[ąćęłńóśźż]/i' ? 'Tu będzie zdjęcie' : 'Photo goes here' }}</span></div>{% endif %}
+            {%- else %}<div class="cz-img flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 border-2 border-dashed border-current/15 bg-muted/60 text-muted-foreground">{{ cadenza_icon('image-plus', 'size-10 opacity-50') }}</div>{% endif %}
         </div>
     </div>
 </section>

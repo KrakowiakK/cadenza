@@ -1,7 +1,7 @@
 {%- set state = cadenza_state() -%}
 {%- set doc = state.document -%}
 <!DOCTYPE html>
-<html lang="{{ app.request.locale|default('en') }}" class="{{ doc.theme.mode|default('light') == 'dark' ? 'dark' : '' }}" data-cz-style="{{ doc.theme.style|default('minimal') }}">
+<html lang="{{ app.request.locale|default('en') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -23,7 +23,8 @@
         <script type="module" src="{{ asset('@cadenza/runtime/panel.js') }}"></script>
     {%- endif %}
 </head>
-<body class="flex min-h-screen flex-col bg-background text-foreground antialiased{{ state.isSketch and not state.embed ? ' cz-sketch' : '' }}{{ state.embed ? ' cz-embed' : '' }}{{ state.showBefore ? ' cz-before' : '' }}">
+{#- Theme attributes live on <body>: Turbo swaps the body on navigation, but not the <html> element. -#}
+<body data-cz-style="{{ doc.theme.style|default('minimal') }}" class="{{ doc.theme.mode|default('light') == 'dark' ? 'dark ' : '' }}flex min-h-screen flex-col bg-background text-foreground antialiased{{ state.isSketch and not state.embed ? ' cz-sketch' : '' }}{{ state.embed ? ' cz-embed' : '' }}{{ state.showBefore ? ' cz-before' : '' }}">
     {%- if state.isSketch and not state.embed %}{% include '@CadenzaRuntime/_sketch_banner.html.twig' %}{% endif %}
     {%- if state.previewVersion %}{% include '@CadenzaRuntime/_version_banner.html.twig' %}{% endif %}
     <header class="sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur" style="view-transition-name:cz-header">

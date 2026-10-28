@@ -126,6 +126,15 @@ final class PatternNodeTypes implements NodeTypeProviderInterface
             'image' => ['type' => 'image', 'default' => null],
         ]);
 
+        yield new NodeType('quiz', 'Quiz', 'Pattern: questions with answers to click; the visitor sees at once whether they were right, with an explanation, and a score at the end. For learning pages, trivia, "which product suits you".', 'pattern', $head + [
+            'questions' => ['type' => 'list', 'items' => [
+                'question' => ['type' => 'string', 'required' => true],
+                'options' => ['type' => 'list', 'of' => 'string', 'required' => true],
+                'correct' => ['type' => 'int', 'required' => true, 'description' => 'index of the right option, from 0'],
+                'explanation' => ['type' => 'text'],
+            ], 'default' => []],
+        ]);
+
         yield new NodeType('cta-band', 'Call to action band', 'Pattern: a strong closing invitation with one or two buttons, optionally with an image.', 'pattern', [
             'title' => ['type' => 'string', 'required' => true],
             'text' => ['type' => 'text', 'default' => null],
