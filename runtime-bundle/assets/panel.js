@@ -14,7 +14,7 @@ const I18N = {
         suggestions: ['A website for my café with a menu and opening hours', 'A portfolio for my travel photos', 'A page that explains photosynthesis for high school'],
         showSketch: 'Show sketch', approve: 'Approve', reject: 'Reject', revise: 'Ask for changes',
         approved: 'Published', rejected: 'Rejected', pending: 'Waiting for your decision', sketch: 'Sketch',
-        added: 'added', changed: 'changed', removed: 'removed', pages: 'pages', themeChanged: 'theme',
+        added: 'added', changed: 'changed', removed: 'removed', pages: 'pages', themeChanged: 'theme', siteChanged: 'site',
         before: 'Before', after: 'After', published: 'Published — the change is live.', discarded: 'Draft rejected.',
         error: 'Something went wrong', harnessDown: 'Cannot reach the Cadenza studio (harness). Is it running?',
         steps: 'steps', selection: 'Selected', showChanges: 'Show changes',
@@ -45,7 +45,7 @@ const I18N = {
         suggestions: ['Strona mojej kawiarni z menu i godzinami otwarcia', 'Portfolio moich zdjęć z podróży', 'Strona, która wytłumaczy fotosyntezę na poziomie matury'],
         showSketch: 'Pokaż szkic', approve: 'Zatwierdź', reject: 'Odrzuć', revise: 'Popraw',
         approved: 'Opublikowano', rejected: 'Odrzucono', pending: 'Czeka na Twoją decyzję', sketch: 'Szkic',
-        added: 'nowe', changed: 'zmienione', removed: 'usunięte', pages: 'strony', themeChanged: 'motyw',
+        added: 'nowe', changed: 'zmienione', removed: 'usunięte', pages: 'strony', themeChanged: 'motyw', siteChanged: 'ustawienia strony',
         before: 'Przed', after: 'Po', published: 'Opublikowano — zmiana jest na stronie.', discarded: 'Szkic odrzucony.',
         error: 'Coś poszło nie tak', harnessDown: 'Nie mogę połączyć się ze studiem Cadenzy (harness). Czy działa?',
         steps: 'kroki', selection: 'Zaznaczone', showChanges: 'Pokaż zmiany',
@@ -426,6 +426,7 @@ class Studio {
         if (c.removed) chips.push(`<span class="rounded-full bg-rose-500/15 px-2 py-0.5 text-rose-700 dark:text-rose-300">−${c.removed} ${t('removed')}</span>`);
         if (c.pagesAdded) chips.push(`<span class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-emerald-700 dark:text-emerald-300">+${c.pagesAdded} ${t('pages')}</span>`);
         if (c.theme) chips.push(`<span class="rounded-full bg-violet-500/15 px-2 py-0.5 text-violet-700 dark:text-violet-300">${t('themeChanged')}</span>`);
+        if (c.site) chips.push(`<span class="rounded-full bg-violet-500/15 px-2 py-0.5 text-violet-700 dark:text-violet-300">${t('siteChanged')}</span>`);
         const decided = p.status === 'applied' || p.status === 'rejected';
         const statusLine = p.status === 'applied' ? `<span class="text-emerald-600">${icon('check', 'size-3.5')}</span>${t('approved')}`
             : p.status === 'rejected' ? t('rejected') : `<span class="size-1.5 animate-pulse rounded-full bg-amber-500"></span>${t('pending')}`;

@@ -40,7 +40,7 @@ final class EditorGuide
             - {"op": "node.remove", "id": "<node id>"}                                  (or "ids": [...])
             - {"op": "theme.update", "direction": "editorial"}   (best first step for a new site: choose a design direction)
             - {"op": "theme.update", "preset": "warm", "mode": "light", "fontHeading": "Fraunces", "fontBody": "Inter", "radius": "lg", "tokens": {"primary": "#b45309"}}
-            - {"op": "site.update", "name": "Café Aroma", "tagline": "...", "language": "pl", "footer": "...", "nav": [{"label": "Menu", "href": "/menu"}] or null for automatic}
+            - {"op": "site.update", "name": "Café Aroma", "tagline": "...", "language": "pl", "announcement": {"text": "Closed on Monday", "href": null, "until": "2027-05-01"} or null, "footer": "...", "nav": [{"label": "Menu", "href": "/menu"}] or null for automatic}
 
             How to compose beautiful pages:
             - First choose a design direction (theme.update {"direction": …}) that fits the business and mood.
@@ -55,6 +55,7 @@ final class EditorGuide
             - Hero: "split" or "image" when there is a good photo, "typographic" when there is none, "collage" for
               several photos. Keep titles short and specific; one idea per section.
             - Real, specific copy in the language of the site; never lorem ipsum.
+            - To link to a section, use its node id as an anchor: "#nabc123" on the same page, "/page#nabc123" elsewhere.
             - Images: image props accept only paths from the site's media library (/media/…); leave them empty until
               images are chosen. Use a "stub" node for anything that needs a capability that does not exist yet.
             TXT;

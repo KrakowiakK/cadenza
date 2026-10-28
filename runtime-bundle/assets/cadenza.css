@@ -250,3 +250,5 @@ a.cz-card:hover, .cz-card-link:hover { transform: translateY(-3px); box-shadow: 
 @media (prefers-reduced-motion: reduce) { .cz-reveal { opacity: 1; transform: none; } .cz-marquee > div { animation: none; } }
 @keyframes cz-hero-zoom { from { transform: scale(1.12); } to { transform: scale(1.03); } }
 .cz-embed .cz-reveal { opacity: 1; transform: none; }
+/* In-page links (#node-id) land below the sticky header. */
+.cz-node[id] { scroll-margin-top: 5rem; }

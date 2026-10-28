@@ -66,6 +66,8 @@ final class RenderEveryNodeTypeTest extends WebTestCase
             'bool' => true,
             'url' => '/',
             'image' => '/media/sample.jpg',
+            'date' => '2030-06-14',
+            'time' => '15:00',
             'list' => isset($schema['items'])
                 ? [array_map(static fn (array $s): mixed => self::sample($s), array_filter($schema['items'], static fn (array $s): bool => $s['required'] ?? false))]
                 : [self::sample(['type' => $schema['of'] ?? 'string'])],

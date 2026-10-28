@@ -9,6 +9,7 @@
             {%- if sum.changed|default(0) %}<span class="rounded-full bg-sky-600/15 px-2 py-0.5 font-medium text-sky-800 dark:text-sky-200">~{{ sum.changed }}</span>{% endif %}
             {%- if sum.removed|default(0) %}<span class="rounded-full bg-rose-600/15 px-2 py-0.5 font-medium text-rose-800 dark:text-rose-200">−{{ sum.removed }}</span>{% endif %}
             {%- if sum.theme|default(false) %}<span class="rounded-full bg-violet-600/15 px-2 py-0.5 font-medium text-violet-800 dark:text-violet-200" data-cz-i18n="themeChanged">theme</span>{% endif %}
+            {%- if sum.site|default(false) %}<span class="rounded-full bg-violet-600/15 px-2 py-0.5 font-medium text-violet-800 dark:text-violet-200" data-cz-i18n="siteChanged">site</span>{% endif %}
             {%- if sum.pagesAdded|default(0) %}<span class="rounded-full bg-emerald-600/15 px-2 py-0.5 font-medium text-emerald-800 dark:text-emerald-200">+{{ sum.pagesAdded }} <span data-cz-i18n="pages">pages</span></span>{% endif %}
         </span>
         <label class="inline-flex cursor-pointer items-center gap-1.5 text-xs select-none"><input type="checkbox" data-cz-action="marks" class="accent-amber-800"><span data-cz-i18n="showChanges">Show changes</span></label>

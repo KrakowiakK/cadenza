@@ -164,9 +164,18 @@ final class PatternNodeTypes implements NodeTypeProviderInterface
             'successMessage' => ['type' => 'text', 'default' => null, 'description' => 'shown after sending'],
             'capacity' => ['type' => 'int', 'default' => null, 'description' => 'places available; the form shows how many are left and closes when full'],
             'peopleField' => ['type' => 'string', 'default' => null, 'description' => 'label of the number field that says how many places one answer takes'],
-            'closesAt' => ['type' => 'string', 'default' => null, 'description' => 'last day to answer, YYYY-MM-DD'],
+            'closesAt' => ['type' => 'date', 'default' => null, 'description' => 'last day to answer'],
             'closedMessage' => ['type' => 'text', 'default' => null],
             'image' => ['type' => 'image', 'default' => null, 'description' => 'optional image beside the form'],
+        ]);
+
+        yield new NodeType('countdown', 'Countdown / event', 'Pattern: the big date of an event — a live countdown (days, hours, minutes), place, and an "add to calendar" button for visitors. For weddings, launches, concerts, workshops, sales.', 'pattern', $head + [
+            'date' => ['type' => 'date', 'required' => true],
+            'time' => ['type' => 'time', 'default' => null, 'description' => 'local time'],
+            'endTime' => ['type' => 'time', 'default' => null],
+            'place' => ['type' => 'string', 'default' => null],
+            'calendarLabel' => ['type' => 'string', 'default' => null, 'description' => 'label of the add-to-calendar button; empty = no button'],
+            'doneMessage' => ['type' => 'string', 'default' => null, 'description' => 'shown once the date has passed'],
         ]);
 
         yield new NodeType('cta-band', 'Call to action band', 'Pattern: a strong closing invitation with one or two buttons, optionally with an image.', 'pattern', [

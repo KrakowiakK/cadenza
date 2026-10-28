@@ -1,0 +1,22 @@
+{%- set state = cadenza_state() -%}
+{%- set pl = state.document.language|default('en')|slice(0, 2) == 'pl' -%}
+{%- set units = pl ? ['dni', 'godz.', 'min', 'sek'] : ['days', 'hours', 'min', 'sec'] -%}
+{%- set at = (props.date ~ ' ' ~ (props.time ?: '00:00'))|date('Y-m-d\\TH:i:s') -%}
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+<div class="mx-auto max-w-3xl text-center" data-cz-countdown="{{ at }}">
+    <div data-running class="grid grid-cols-4 gap-3 md:gap-6">
+        {%- for unit in units %}
+            <div class="cz-card px-2 py-5 md:py-8"><p class="cz-display text-4xl tabular-nums md:text-6xl" data-unit="{{ loop.index0 }}">–</p><p class="mt-2 text-xs tracking-widest uppercase opacity-60 md:text-sm">{{ unit }}</p></div>
+        {%- endfor %}
+    </div>
+    <p data-done hidden class="cz-display text-3xl md:text-4xl">{{ props.doneMessage ?: '✦' }}</p>
+    <p class="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-lg">
+        <span class="inline-flex items-center gap-2">{{ cadenza_icon('calendar', 'size-5 text-primary') }}{{ props.date|format_date('long', locale: pl ? 'pl' : 'en') }}{% if props.time %}, {{ props.time }}{% endif %}</span>
+        {%- if props.place %}<span class="inline-flex items-center gap-2">{{ cadenza_icon('map-pin', 'size-5 text-primary') }}{{ props.place }}</span>{% endif %}
+    </p>
+    {%- if props.calendarLabel %}
+        <twig:Button as="a" href="/_cadenza/event/{{ node.id }}.ics" data-turbo="false" variant="outline" class="cz-btn mt-8 h-12 px-7 text-base">{{ cadenza_icon('calendar-plus', 'size-5') }}{{ props.calendarLabel }}</twig:Button>
+    {%- endif %}
+</div>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

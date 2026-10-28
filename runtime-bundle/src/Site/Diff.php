@@ -69,7 +69,7 @@ final readonly class Diff
             array_values(array_map(static fn (array $p): string => $p['path'], array_diff_key($basePages, $draftPages))),
             $pagesChanged,
             $base['theme'] !== $draft['theme'],
-            [$base['name'], $base['tagline'], $base['nav'], $base['footer']] !== [$draft['name'], $draft['tagline'], $draft['nav'], $draft['footer']],
+            [$base['name'], $base['tagline'], $base['nav'], $base['footer'], $base['language'] ?? null, $base['announcement'] ?? null] !== [$draft['name'], $draft['tagline'], $draft['nav'], $draft['footer'], $draft['language'] ?? null, $draft['announcement'] ?? null],
         );
     }
 

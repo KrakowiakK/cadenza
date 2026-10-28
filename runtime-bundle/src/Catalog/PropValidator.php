@@ -78,6 +78,14 @@ final class PropValidator
                 $ok = str_starts_with($value, '/') || str_starts_with($value, '#') || preg_match('~^(https?://|mailto:|tel:)~i', $value);
 
                 return $ok ? [$value, null] : [null, $path.' must be an absolute URL (https://…), a site path (/…), mailto: or tel:.'];
+            case 'date':
+                if (\is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', trim($value)) && checkdate((int) substr(trim($value), 5, 2), (int) substr(trim($value), 8, 2), (int) substr(trim($value), 0, 4))) {
+                    return [trim($value), null];
+                }
+
+                return [null, $path.' must be a date YYYY-MM-DD, e.g. "2027-06-14".'];
+            case 'time':
+                return \is_string($value) && preg_match('/^([01]?\d|2[0-3]):[0-5]\d$/', trim($value)) ? [trim($value), null] : [null, $path.' must be a time HH:MM, e.g. "15:00".'];
             case 'color':
                 return \is_string($value) && preg_match(self::COLOR, trim($value)) ? [trim($value), null] : [null, $path.' must be a CSS color (#hex, oklch(), rgb(), hsl()).'];
             case 'int':

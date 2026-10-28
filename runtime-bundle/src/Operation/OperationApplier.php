@@ -302,6 +302,16 @@ final class OperationApplier
             }
             $doc['language'] = $op['language'];
         }
+        if (\array_key_exists('announcement', $op)) {
+            $a = \is_string($op['announcement']) ? ['text' => $op['announcement']] : $op['announcement'];
+            if (null !== $a && (!\is_array($a) || !\is_string($a['text'] ?? null) || '' === trim($a['text']))) {
+                throw new OperationException('"announcement" is {"text": "...", "href": optional link, "until": optional last day YYYY-MM-DD} or null to remove it.');
+            }
+            if (null !== $a && isset($a['until']) && (!\is_string($a['until']) || false === strtotime($a['until']))) {
+                throw new OperationException('"announcement.until" must be a date, e.g. "2027-05-01".');
+            }
+            $doc['announcement'] = null === $a ? null : array_filter(['text' => trim($a['text']), 'href' => $a['href'] ?? null, 'until' => $a['until'] ?? null], static fn (mixed $v): bool => null !== $v && '' !== $v);
+        }
         if (\array_key_exists('footer', $op)) {
             $doc['footer']['text'] = \is_array($op['footer']) ? ($op['footer']['text'] ?? null) : $op['footer'];
         }

@@ -143,3 +143,39 @@ document.addEventListener('submit', async (e) => {
         button.disabled = false;
     }
 });
+
+/*
+ * Announcement bar: a visitor who closed it does not see the same note again.
+ */
+const announcement = () => {
+    const bar = document.querySelector('[data-cz-announcement]');
+    try {
+        if (bar && localStorage.getItem('cz-announcement') === bar.dataset.czAnnouncement) bar.hidden = true;
+    } catch {}
+};
+document.addEventListener('turbo:load', announcement);
+if (document.readyState !== 'loading') announcement(); else document.addEventListener('DOMContentLoaded', announcement);
+document.addEventListener('click', (e) => {
+    const close = e.target.closest('[data-cz-announcement-close]');
+    if (!close) return;
+    const bar = close.closest('[data-cz-announcement]');
+    bar.hidden = true;
+    try { localStorage.setItem('cz-announcement', bar.dataset.czAnnouncement); } catch {}
+});
+
+/*
+ * Countdown to an event, in the visitor's clock.
+ */
+const tick = () => {
+    document.querySelectorAll('[data-cz-countdown]').forEach((box) => {
+        const left = Math.max(0, new Date(box.dataset.czCountdown) - Date.now());
+        const done = left === 0;
+        box.querySelector('[data-running]').hidden = done;
+        box.querySelector('[data-done]').hidden = !done;
+        const parts = [Math.floor(left / 864e5), Math.floor(left / 36e5) % 24, Math.floor(left / 6e4) % 60, Math.floor(left / 1e3) % 60];
+        parts.forEach((value, i) => { box.querySelector(`[data-unit="${i}"]`).textContent = i ? String(value).padStart(2, '0') : value; });
+    });
+};
+setInterval(tick, 1000);
+document.addEventListener('turbo:load', tick);
+if (document.readyState !== 'loading') tick(); else document.addEventListener('DOMContentLoaded', tick);

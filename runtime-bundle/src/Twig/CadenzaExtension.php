@@ -190,7 +190,8 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         }
 
         return \sprintf(
-            '<div class="cz-node%s" data-node-id="%s" data-node-type="%s" data-node-label="%s"%s style="view-transition-name:cz-%s">%s</div>',
+            '<div%s class="cz-node%s" data-node-id="%s" data-node-type="%s" data-node-label="%s"%s style="view-transition-name:cz-%s">%s</div>',
+            $removed ? '' : ' id="'.htmlspecialchars($node['id']).'"',
             null !== $state ? ' cz-'.$state : '',
             htmlspecialchars($node['id']),
             htmlspecialchars($node['type']),
