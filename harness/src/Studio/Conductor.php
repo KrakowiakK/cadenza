@@ -51,6 +51,22 @@ final class Conductor
     ) {
     }
 
+    private const POLISH = '/[ąćęłńśźż]|\b(jest|się|sie|mój|moj|moja|strona|stron[eę]|chc[eę]|zr[oó]b|zrub|dodaj|zmie[nń]|gr[eę]|[zż]eby|dla|czy|prosz[eę]|nie|tak|dobrze|wszystko|dzi[eę]ki|super|jeszcze|teraz)\b/iu';
+
+    /**
+     * The language of the owner's earlier messages in this conversation, when one of them was clearly Polish.
+     */
+    private static function languageOf(Conversation $conversation): ?string
+    {
+        foreach (array_reverse($conversation->getTurns()) as $turn) {
+            if ('user' === ($turn['role'] ?? null) && empty($turn['event']) && \is_string($turn['text'] ?? null) && '' !== trim($turn['text'])) {
+                return preg_match(self::POLISH, $turn['text']) ? 'pl' : (preg_match('/\b(the|please|would|could|add|make|my|our|is|are)\b/i', $turn['text']) ? 'en' : null);
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Words of another language in a reply to a Polish owner — free models slip into English, German or Russian
      * ("draft", "weitere", "живого") now and then.
@@ -62,7 +78,7 @@ final class Conductor
         if ('pl' !== substr($language, 0, 2)) {
             return [];
         }
-        preg_match_all('~`[a-z0-9_-]+`|[\p{Cyrillic}\p{Greek}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}\p{Arabic}]+|(?<![\p{L}/_.-])(?:weitere|und|oder|nicht|ajout\p{L}*|the|owners?|site|drafts?|sketch|widgets?|live|preview|layout|feedback|changes?|approve[ds]?|ready|done|page|section|update[ds]?|skic\p{L}*|create_\w+|propose_\w+)(?![\p{L}/_-]|\.\p{L})~iu', $text, $m);
+        preg_match_all('~(?<=\p{Ll})[A-Z][a-z]{2,}|`[a-z0-9_-]+`|[\p{Cyrillic}\p{Greek}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}\p{Arabic}]+|(?<![\p{L}/_.-])(?:weitere|und|oder|nicht|ajout\p{L}*|the|owners?|site|drafts?|sketch|widgets?|live|preview|layout|feedback|changes?|approve[ds]?|ready|done|page|section|update[ds]?|skic\p{L}*|create_\w+|propose_\w+)(?![\p{L}/_-]|\.\p{L})~iu', $text, $m);
 
         return array_values(array_unique($m[0]));
     }
@@ -108,9 +124,10 @@ final class Conductor
         $this->turn->selection = $context['selection'] ?? [];
         // The owner's language: what they write in beats the browser setting.
         $this->turn->language = match (true) {
-            (bool) preg_match('/[ąćęłńśźż]|\b(jest|się|sie|mój|moj|moja|strona|stron[eę]|chc[eę]|zr[oó]b|zrub|dodaj|zmie[nń]|gr[eę]|[zż]eby|dla|czy|prosz[eę]|nie)\b/iu', $message) => 'pl',
+            (bool) preg_match(self::POLISH, $message) => 'pl',
             (bool) preg_match('/\b(the|please|would|could|add|make|my|our|is|are)\b/i', $message) => 'en',
-            default => $context['language'] ?? 'en',
+            // A short "ok, thanks" keeps the language of the conversation so far.
+            default => self::languageOf($conversation) ?? $context['language'] ?? 'en',
         };
         $context['language'] = $this->turn->language;
 
