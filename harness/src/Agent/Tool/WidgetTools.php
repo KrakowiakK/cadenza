@@ -58,7 +58,7 @@ final class WidgetTools
 
         return \sprintf('Widget "%s" is ready (version %d, %d KB of code)%s%s.%s %s', $name, $r['version'], (int) ceil(\strlen($r['code']) / 1024),
             [] !== $syntax ? ' but its code may still have errors: '.implode('; ', $syntax) : '',
-            null !== $r['findings'] ? '. A test in a browser still shows: '.$r['findings'].' — tell the owner honestly and offer to fix it' : ($r['tested'] ? ', tried in a browser: it works' : ''),
+            null !== $r['findings'] ? '. A test in a browser still shows: '.$r['findings'].' — do not call create_widget again in this reply: tell the owner honestly what remains and offer to fix it' : ($r['tested'] ? ', tried in a browser: it works' : ''),
             [] !== $r['notes'] ? ' '.implode(' ', $r['notes']) : '',
             $r['version'] > 1 && null === $shape ? 'Pages that show it use the new version already; no sketch needed if it is placed.' : ('background' === $r['shape']
                 ? 'Now place it with propose_changes as the "widget" of a hero (variant "typographic").'
