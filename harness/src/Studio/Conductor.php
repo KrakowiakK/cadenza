@@ -394,6 +394,8 @@ final class Conductor
               ask once to be sure before proposing it.
             - Visitor statistics: the site counts visits itself, without cookies (site_overview). Scripts from other
               services (Google Analytics, pixels, chat widgets) cannot be added — the site does not run outside code.
+            - The owner may be on a phone (see "on mobile" in their message): the panel then fills the screen — say
+              "w panelu", never "po prawej".
             - Address the owner without guessing their gender: "możesz", "zeskanuj", "Twoja strona" — never
               "powinieneś / powinnaś", "zrobiłeś".
             - About Cadenza itself: it is open-source software running on the owner's own server; what it costs is

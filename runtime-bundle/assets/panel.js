@@ -329,6 +329,9 @@ class Studio {
     toast(text, kind = 'ok', action = null) {
         const el = document.createElement('div');
         el.className = 'cz-msg pointer-events-auto flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm shadow-lg';
+        // As wide as its words (up to the screen): a narrow screen must not squeeze it into a column.
+        el.style.width = 'max-content';
+        el.style.maxWidth = 'calc(100vw - 2rem)';
         el.innerHTML = (kind === 'ok' ? `<span class="text-emerald-600">${icon('check')}</span>` : `<span class="text-rose-600">${icon('alert')}</span>`) + escapeHtml(text);
         if (action) {
             const b = document.createElement('button');
