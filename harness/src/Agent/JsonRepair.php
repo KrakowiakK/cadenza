@@ -72,6 +72,10 @@ final class JsonRepair
                 if ($c !== end($stack)) {
                     continue;
                 }
+                // "}" that leaves an object which goes on with more keys (', "op": …') came too early.
+                if ('}' === $c && \count($stack) > 1 && ']' === $stack[\count($stack) - 2] && preg_match('/\G\s*,\s*"(?:[^"\\\\]|\\\\.)*"\s*:/', $text, $_, 0, $i + 1)) {
+                    continue;
+                }
                 array_pop($stack);
             }
             $out .= $c;

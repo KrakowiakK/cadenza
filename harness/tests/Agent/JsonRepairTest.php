@@ -31,6 +31,8 @@ final class JsonRepairTest extends TestCase
         yield 'cut off before the end' => ['[{"op":"a","nodes":[{"text":"Co zabrać"}', [['op' => 'a', 'nodes' => [['text' => 'Co zabrać']]]]];
         yield 'an item not closed in the middle' => ['[{"op":"a","nodes":[{"type":"steps","props":{"x":1}, {"type":"cta","props":{"y":2}}]}]',
             [['op' => 'a', 'nodes' => [['type' => 'steps', 'props' => ['x' => 1]], ['type' => 'cta', 'props' => ['y' => 2]]]]]];
+        yield 'an object closed too early' => ['[{"id":"a","op":"node.remove"},{"page":"/gry","node":{"widget":"snake"},"type":"widget"},"op":"node.insert"}]',
+            [['id' => 'a', 'op' => 'node.remove'], ['page' => '/gry', 'node' => ['widget' => 'snake'], 'type' => 'widget', 'op' => 'node.insert']]];
         yield 'hopeless' => ['not json at all', null];
     }
 }

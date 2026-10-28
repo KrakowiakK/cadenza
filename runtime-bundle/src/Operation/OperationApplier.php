@@ -246,6 +246,10 @@ final class OperationApplier
 
     private function nodeInsert(array $doc, array $op): array
     {
+        // {"op": "node.insert", "type": "widget", "node": {props…}}: the type ended up beside the node.
+        if (\is_array($op['node'] ?? null) && !isset($op['node']['type']) && \is_string($op['type'] ?? null)) {
+            $op['node']['type'] = $op['type'];
+        }
         $specs = isset($op['nodes']) ? $op['nodes'] : [$op['node'] ?? throw new OperationException('"node" (or "nodes") is required.')];
         if (!\is_array($specs) || !array_is_list($specs)) {
             throw new OperationException('"nodes" must be a list.');

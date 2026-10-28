@@ -64,6 +64,15 @@ final class OperationApplierTest extends TestCase
         self::assertSame('zapisy', Document::findPage($result->document, '/')['nodes'][0]['id']);
     }
 
+    public function testATypeBesideTheNodeIsItsType(): void
+    {
+        $base = $this->applier->apply(Document::empty('Test'), [['op' => 'page.create', 'path' => '/', 'title' => 'Home', 'nodes' => []]])->document;
+        $result = $this->applier->apply($base, [['op' => 'node.insert', 'page' => '/', 'type' => 'heading', 'node' => ['text' => 'Gry']]]);
+
+        self::assertTrue($result->isValid(), implode(' ', $result->errors));
+        self::assertSame('Gry', Document::findPage($result->document, '/')['nodes'][0]['props']['text']);
+    }
+
     public function testRejectsTheWholeBatchWhenOneOperationIsInvalid(): void
     {
         $doc = Document::empty();
