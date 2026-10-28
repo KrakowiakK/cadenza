@@ -198,7 +198,9 @@ name's query string. Widgets: `CADENZA_CODE_MODEL` (the model that writes their 
 `UNSPLASH_ACCESS_KEY`, `INSTAGRAM_CLIENT_ID`/`INSTAGRAM_CLIENT_SECRET`. In a side-by-side run on Ollama Cloud's free models (a
 Breakout with power-ups and a memory game, each written, played in Chrome and reviewed), `beam` wrote both working
 (about 1–3 minutes each); `gpt-oss:120b` was faster but one game crashed on load, and `nemotron-3-ultra` took six
-minutes and left the memory board empty — so the code model defaults to the main one.
+minutes and left the memory board empty — so the code model defaults to the main one. Replies in Polish are proofread by
+`CADENZA_PROOFREAD_MODEL` (default: the review model; Gemma's Polish is cleaner than the main model's), a pass that
+fixes words and forms and changes nothing else.
 
 Smaller and free models make mistakes in tool arguments (numbers as strings, JSON as strings, extra brackets). The
 studio tolerates them on purpose (`LenientArgumentResolver`, `JsonRepair`) and enforces the important rules in code.

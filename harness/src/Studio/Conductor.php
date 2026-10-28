@@ -48,6 +48,9 @@ final class Conductor
         private readonly ImageGenerator $generator,
         #[Autowire(service: 'ai.platform.generic.default')]
         private readonly \Symfony\AI\Platform\PlatformInterface $platform,
+        // A model of the main API with good Polish that proofreads replies (default: the widget review model).
+        #[Autowire('%env(default:cadenza.review_model:CADENZA_PROOFREAD_MODEL)%')]
+        private readonly string $proofreadModel = '',
     ) {
     }
 
@@ -96,14 +99,20 @@ final class Conductor
      */
     private function polish(string $text, string $language): string
     {
+        if ('pl' !== substr($language, 0, 2) || mb_strlen($text) < 30) {
+            return $text;
+        }
         $words = self::foreignWords($text, $language);
-        if ([] === $words) {
+        // A model with good Polish proofreads every reply (free models of the main API slip in words and forms);
+        // without one, only replies with foreign words get a pass of the main model.
+        $model = '' !== $this->proofreadModel ? $this->proofreadModel : ([] !== $words ? $this->model : null);
+        if (null === $model) {
             return $text;
         }
         try {
-            $fixed = trim($this->platform->invoke($this->model, new MessageBag(Message::forSystem('You correct texts. Answer with the corrected text only.'), Message::ofUser(\sprintf(
-                "This Polish message has words in another language (%s). Replace them with natural Polish words (\"szkic\" for draft/sketch, \"strona\" for site, \"widżet\" for widget; a `code-name` becomes the thing's plain name, e.g. `tetris-game` → Tetris; drop tool names), fix obvious typos, change nothing else, keep the formatting:\n\n%s",
-                implode(', ', $words), $text))), str_contains($this->model, '/') ? ['reasoning' => ['enabled' => false]] : [])->asText());
+            $fixed = trim($this->platform->invoke($model, new MessageBag(Message::forSystem('Jesteś korektorką. Odpowiadasz wyłącznie poprawionym tekstem, bez komentarzy.'), Message::ofUser(\sprintf(
+                "Popraw ten tekst do właścicielki strony: literówki, błędy gramatyczne, dziwne lub nieistniejące słowa i wtrącenia z innych języków%s zamień na naturalną polszczyznę (\"szkic\" zamiast draft/sketch, \"strona\" zamiast site; nazwę w `backtickach` zamień na zwykłą nazwę rzeczy, np. `tetris-game` → Tetris). Do właścicielki zwracaj się bez zgadywania płci (\"możesz\", nie \"powinieneś\"); o sobie autorka pisze w rodzaju żeńskim. Nie zmieniaj treści, faktów, liczb, nazw, adresów ani formatowania (Markdown zostaje). Odpowiedz samym poprawionym tekstem.\n\n%s",
+                [] !== $words ? ' (np. '.implode(', ', $words).')' : '', $text))), ['max_tokens' => 2000] + (str_contains($model, '/') ? ['reasoning' => ['enabled' => false]] : []))->asText());
         } catch (\Throwable) {
             return $text;
         }
