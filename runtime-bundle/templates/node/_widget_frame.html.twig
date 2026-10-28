@@ -1,6 +1,7 @@
 {#- The sandboxed frame of a widget. Expects: widget (entity or null), name, class, auto, decorative (a background). -#}
 {%- if widget -%}
-<iframe data-cz-widget="{{ widget.name }}" data-version="{{ widget.version }}" data-src="/_cadenza/widget/{{ widget.name }}?v={{ widget.version }}{{ auto|default(false) ? '&auto=1' : '' }}"
+{%- set version = cadenza_widget_version(widget) -%}
+<iframe data-cz-widget="{{ widget.name }}" data-version="{{ version }}" data-src="/_cadenza/widget/{{ widget.name }}?v={{ version }}{{ auto|default(false) ? '&auto=1' : '' }}"
     sandbox="allow-scripts allow-pointer-lock" allow="fullscreen; autoplay" loading="lazy" referrerpolicy="no-referrer"
     title="{{ widget.label }}" class="{{ class|default('') }} block w-full border-0 bg-transparent"
     {%- if decorative|default(false) %} aria-hidden="true" tabindex="-1" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"{% endif %}></iframe>

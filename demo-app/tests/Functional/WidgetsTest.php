@@ -111,5 +111,19 @@ final class WidgetsTest extends WebTestCase
         self::assertSame('THREE is not defined (line 3)', $widgets->get('cube')->getLastError());
         self::assertSame([], $widgets->save('cube', 'Spinning cube', 'A 3D cube', '<canvas></canvas>')['errors']);
         self::assertNull($widgets->get('cube')->getLastError(), 'a new version starts clean');
+
+        // A new version waits in a sketch: the live site keeps the approved one until the owner approves.
+        $client->request('GET', '/');
+        self::assertSame('/_cadenza/widget/cube?v=1', $client->getCrawler()->filter('[data-node-type="widget"] iframe')->attr('data-src'));
+        $client->request('GET', '/_cadenza/widget/cube?v=1');
+        self::assertStringContainsString('THREE', (string) $client->getResponse()->getContent());
+        $client->request('GET', '/_cadenza/widget/cube?v=2');
+        self::assertStringNotContainsString('THREE', (string) $client->getResponse()->getContent());
+        $sketch = $site->propose([['op' => 'widget.use', 'widget' => 'cube', 'version' => 2]], 'New cube');
+        self::assertTrue($sketch->isValid(), implode("\n", $sketch->errors));
+        self::assertCount(2, array_filter($site->diff($sketch->draft)->nodes, static fn (string $s): bool => 'changed' === $s), 'both blocks that show it are marked');
+        $site->publish((int) $sketch->draft->getId());
+        $client->request('GET', '/');
+        self::assertSame('/_cadenza/widget/cube?v=2', $client->getCrawler()->filter('[data-node-type="widget"] iframe')->attr('data-src'));
     }
 }

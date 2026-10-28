@@ -46,6 +46,14 @@ final readonly class Diff
             }
         }
 
+        // A sketch that brings a new version of a widget changes every block that shows it.
+        foreach ($draftNodes as $id => $entry) {
+            $widget = $entry['node']['props']['widget'] ?? null;
+            if (\is_string($widget) && isset($baseNodes[$id]) && ($base['widgets'][$widget] ?? null) !== ($draft['widgets'][$widget] ?? null)) {
+                $nodes[$id] ??= 'changed';
+            }
+        }
+
         $removed = [];
         foreach ($baseNodes as $id => $entry) {
             if (!isset($draftNodes[$id])) {

@@ -17,7 +17,7 @@ use Cadenza\Runtime\Theme\Theme;
  */
 final class OperationApplier
 {
-    public const OPERATIONS = ['page.create', 'page.update', 'page.delete', 'node.insert', 'node.replace', 'node.update', 'node.move', 'node.remove', 'theme.update', 'site.update'];
+    public const OPERATIONS = ['page.create', 'page.update', 'page.delete', 'node.insert', 'node.replace', 'node.update', 'node.move', 'node.remove', 'theme.update', 'site.update', 'widget.use'];
 
     /** @var array<string, true> */
     private array $usedIds = [];
@@ -130,6 +130,7 @@ final class OperationApplier
             'node.remove' => $this->nodeRemove($doc, $op),
             'theme.update' => $this->themeUpdate($doc, $op),
             'site.update' => $this->siteUpdate($doc, $op),
+            'widget.use' => $this->widgetUse($doc, $op),
             default => throw new OperationException(\sprintf('unknown operation, use one of %s.', implode(', ', self::OPERATIONS))),
         };
     }
@@ -373,6 +374,21 @@ final class OperationApplier
             $theme['tokens'][$token] = trim($value);
         }
         $doc['theme'] = $theme;
+
+        return $doc;
+    }
+
+    /**
+     * Which version of a widget the site shows: a new version stays in its sketch until the owner approves it.
+     */
+    private function widgetUse(array $doc, array $op): array
+    {
+        $name = $op['widget'] ?? null;
+        $version = $op['version'] ?? null;
+        if (!\is_string($name) || !preg_match('/^[a-z][a-z0-9-]{2,38}$/', $name) || !\is_int($version) || $version < 1) {
+            throw new OperationException('needs "widget" (its name) and "version" (a number).');
+        }
+        $doc['widgets'][$name] = $version;
 
         return $doc;
     }

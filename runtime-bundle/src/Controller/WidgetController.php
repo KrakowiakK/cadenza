@@ -56,7 +56,7 @@ final class WidgetController
             $vars .= $var.':'.$value.';';
         }
         // Photos of the site come through an address that lets the sandbox use them (e.g. as 3D textures).
-        $code = (string) preg_replace('~(["\'`(]\s*)/media/~', '$1'.$origin.'/_cadenza/widget-media/', $widget->getCode());
+        $code = (string) preg_replace('~(["\'`(]\s*)/media/~', '$1'.$origin.'/_cadenza/widget-media/', $this->widgets->code($widget, $request->query->has('v') ? $request->query->getInt('v') : null));
         $html = strtr(self::SHELL, [
             '{lang}' => htmlspecialchars((string) ($this->site->document()['language'] ?? 'pl')),
             '{title}' => htmlspecialchars($widget->getLabel()),

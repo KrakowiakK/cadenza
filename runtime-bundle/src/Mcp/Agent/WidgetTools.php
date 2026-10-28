@@ -18,6 +18,7 @@ final class WidgetTools
     public function __construct(
         private readonly Widgets $widgets,
         private readonly WidgetLibraries $libraries,
+        private readonly \Cadenza\Runtime\Draft\SiteManager $site,
     ) {
     }
 
@@ -38,11 +39,20 @@ final class WidgetTools
     /**
      * @return list<array<string, mixed>>
      */
-    #[McpTool(name: 'widgets_list', description: 'Widgets of this site, with the last error a browser reported for each (null when it runs fine).', annotations: new ToolAnnotations(readOnlyHint: true))]
+    #[McpTool(name: 'widgets_list', description: 'Widgets of this site, with the last error a browser reported for each (null when it runs fine) and the version the live site shows ("live": null when no live page shows it).', annotations: new ToolAnnotations(readOnlyHint: true))]
     public function list(): array
     {
+        $document = $this->site->document();
+        $placed = [];
+        foreach (\Cadenza\Runtime\Site\Document::walk($document) as $entry) {
+            if (\is_string($name = $entry['node']['props']['widget'] ?? null)) {
+                $placed[$name] = true;
+            }
+        }
+
         return array_map(static fn (Widget $w): array => [
             'name' => $w->getName(), 'label' => $w->getLabel(), 'description' => $w->getDescription(), 'version' => $w->getVersion(), 'shape' => $w->getShape(),
+            'live' => isset($placed[$w->getName()]) ? Widgets::pinned($document, $w) : null,
             'size' => \strlen($w->getCode()), 'lastError' => $w->getLastError(),
         ], $this->widgets->all());
     }

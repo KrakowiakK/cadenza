@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cadenza\Runtime\Draft;
 
 use Cadenza\Runtime\Entity\SiteVersion;
+use Cadenza\Runtime\Entity\Widget;
 use Cadenza\Runtime\Operation\OperationApplier;
 use Cadenza\Runtime\Repository\SiteVersionRepository;
 use Cadenza\Runtime\Site\Diff;
@@ -58,6 +59,11 @@ final class SiteManager
         if (!$result->isValid()) {
             return DraftResult::invalid($result->errors);
         }
+        // A widget placed on a page shows the version it was placed with, until a sketch brings a newer one.
+        if ([] !== $pins = $this->unpinnedWidgets($result->document)) {
+            $allOperations = [...$allOperations, ...$pins];
+            $result = $this->applier->apply($base, $allOperations);
+        }
 
         $diff = Diff::between($base, $result->document);
         if ($diff->isEmpty()) {
@@ -73,6 +79,31 @@ final class SiteManager
         $this->em->flush();
 
         return DraftResult::valid($draft, $diff, $result->created);
+    }
+
+    /**
+     * @param array<string, mixed> $document
+     *
+     * @return list<array{op: string, widget: string, version: int}>
+     */
+    private function unpinnedWidgets(array $document): array
+    {
+        $names = [];
+        foreach (Document::walk($document) as $entry) {
+            $name = $entry['node']['props']['widget'] ?? null;
+            if (\is_string($name) && '' !== $name && !isset($document['widgets'][$name])) {
+                $names[$name] = true;
+            }
+        }
+        $pins = [];
+        foreach ($names as $name => $_) {
+            $widget = $this->em->getRepository(Widget::class)->findOneBy(['name' => $name]);
+            if (null !== $widget) {
+                $pins[] = ['op' => 'widget.use', 'widget' => $name, 'version' => $widget->getVersion()];
+            }
+        }
+
+        return $pins;
     }
 
     public function diff(SiteVersion $draft): Diff

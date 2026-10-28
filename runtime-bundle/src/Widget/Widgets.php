@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cadenza\Runtime\Widget;
 
 use Cadenza\Runtime\Entity\Widget;
+use Cadenza\Runtime\Entity\WidgetRevision;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -27,6 +28,29 @@ final class Widgets
     public function get(string $name): ?Widget
     {
         return $this->em->getRepository(Widget::class)->findOneBy(['name' => $name]);
+    }
+
+    /**
+     * The code of one version of a widget (the latest when that version was not kept).
+     */
+    public function code(Widget $widget, ?int $version): string
+    {
+        if (null === $version || $version === $widget->getVersion()) {
+            return $widget->getCode();
+        }
+        $revision = $this->em->getRepository(WidgetRevision::class)->findOneBy(['widget' => $widget->getName(), 'version' => $version]);
+
+        return $revision?->getCode() ?? $widget->getCode();
+    }
+
+    /**
+     * The version of each widget a page of this document shows: the one it pins, else the latest.
+     *
+     * @param array<string, mixed> $document
+     */
+    public static function pinned(array $document, Widget $widget): int
+    {
+        return (int) ($document['widgets'][$widget->getName()] ?? $widget->getVersion());
     }
 
     /**
@@ -89,6 +113,7 @@ final class Widgets
             $widget = new Widget($name, $label, $description, $code);
             $this->em->persist($widget);
         }
+        $this->em->persist(new WidgetRevision($name, $widget->getVersion(), $widget->getLabel(), $code));
         if (\in_array($shape, self::SHAPES, true)) {
             $widget->setShape($shape);
         }
@@ -100,7 +125,11 @@ final class Widgets
     public function reportError(string $name, int $version, string $error): bool
     {
         $widget = $this->get($name);
-        if (null === $widget || $widget->getVersion() !== $version || $widget->getLastError() === $error) {
+        if (null === $widget || $version < 1 || $version > $widget->getVersion()) {
+            return false;
+        }
+        $error = ($version !== $widget->getVersion() ? 'version '.$version.' (shown on the live site): ' : '').$error;
+        if ($widget->getLastError() === $error) {
             return false;
         }
         $widget->reportError($error);

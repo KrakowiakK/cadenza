@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Agent\Tool;
 
+use App\Repository\ProposalRepository;
+use App\Studio\Proposals;
 use App\Studio\SiteClient;
 use App\Studio\Turn;
 use App\Studio\WidgetProgrammer;
@@ -19,6 +21,8 @@ final class WidgetTools
         private readonly SiteClient $site,
         private readonly WidgetWorkshop $workshop,
         private readonly Turn $turn,
+        private readonly Proposals $proposals,
+        private readonly ProposalRepository $openProposals,
     ) {
     }
 
@@ -58,14 +62,52 @@ final class WidgetTools
             return "The widget was not saved:\n- ".implode("\n- ", $r['errors'])."\nCall create_widget again with a brief that avoids this.";
         }
         $syntax = WidgetProgrammer::syntaxErrors($r['code']);
+        $sketch = $r['version'] > 1 ? $this->sketchNewVersion($name, $label, $r['version']) : null;
 
         return \sprintf('Widget "%s" is ready (version %d, %d KB of code)%s%s.%s %s', $name, $r['version'], (int) ceil(\strlen($r['code']) / 1024),
             [] !== $syntax ? ' but its code may still have errors: '.implode('; ', $syntax) : '',
             null !== $r['findings'] ? '. A test in a browser still shows: '.$r['findings'].' — do not call create_widget again in this reply: tell the owner honestly what remains and offer to fix it' : ($r['tested'] ? ', tried in a browser: it works' : ''),
             [] !== $r['notes'] ? ' '.implode(' ', $r['notes']) : '',
-            $r['version'] > 1 && null === $shape ? 'Pages that show it use the new version already; no sketch needed if it is placed.' : ('background' === $r['shape']
-                ? 'Now place it with propose_changes as the "widget" of a hero (variant "typographic").'
-                : 'Now place it with propose_changes: {"type": "widget", "props": {"widget": "'.$name.'", …}} (its frame is '.$r['shape'].').'));
+            match (true) {
+                null !== $sketch => $sketch.' Do not call propose_changes for it; the owner approves the sketch like any other.',
+                $r['version'] > 1 && null === $shape => 'It is not on any page yet: place it with propose_changes.',
+                'background' === $r['shape'] => 'Now place it with propose_changes as the "widget" of a hero (variant "typographic").',
+                default => 'Now place it with propose_changes: {"type": "widget", "props": {"widget": "'.$name.'", …}} (its frame is '.$r['shape'].').',
+            });
+    }
+
+    /**
+     * A new version of a widget the site already shows waits in a sketch, like every other change: the live site keeps
+     * the approved one. When a sketch of this conversation is placing the widget, that sketch gets the new version.
+     */
+    private function sketchNewVersion(string $name, string $label, int $version): ?string
+    {
+        $live = null;
+        foreach ($this->site->widgets() as $widget) {
+            if (($widget['name'] ?? null) === $name) {
+                $live = $widget['live'] ?? null;
+            }
+        }
+        $open = $this->openProposals->open($this->turn->conversation);
+        $latest = [] !== $open ? end($open) : null;
+        if (null === $live && null === $latest) {
+            return null;
+        }
+        $pl = 'pl' === substr($this->turn->language, 0, 2);
+        $revise = null === $live ? $latest->getDraftId() : null;
+        $summary = null !== $revise ? $latest->getSummary() : ($pl ? 'Nowa wersja: ' : 'New version: ').$label;
+        $result = $this->proposals->propose($this->turn->conversation, [['op' => 'widget.use', 'widget' => $name, 'version' => $version]], $summary, $revise);
+        if (null === $result['proposal']) {
+            return 'The new version could not be put in a sketch: '.implode(' ', $result['errors']);
+        }
+        $proposal = $result['proposal'];
+        $this->turn->proposals[] = $proposal;
+        $this->turn->emit('proposal', $proposal->toArray());
+        $this->turn->emit('ui', ['command' => 'showSketch', 'draftId' => $proposal->getDraftId(), 'path' => $proposal->getFocusPath()]);
+
+        return null !== $revise
+            ? \sprintf('The sketch (draft %d) now shows this version.', $proposal->getDraftId())
+            : \sprintf('The live site keeps showing version %d until the owner approves the sketch (draft %d) with the new one.', $live, $proposal->getDraftId());
     }
 
     public function leaderboard(string $name, bool $clear = false): string
