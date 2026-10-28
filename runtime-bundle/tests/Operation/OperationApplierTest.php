@@ -35,6 +35,23 @@ final class OperationApplierTest extends TestCase
         self::assertCount(3, $result->created, 'page, hero and button get ids');
     }
 
+    public function testABlockWithTheHeadingOfASectionBecomesASection(): void
+    {
+        $result = $this->applier->apply(Document::empty('Test'), [
+            ['op' => 'page.create', 'path' => '/', 'title' => 'Home', 'nodes' => [
+                ['type' => 'faq', 'props' => ['eyebrow' => 'FAQ', 'title' => 'Pytania', 'background' => 'muted', 'align' => 'center',
+                    'items' => [['question' => 'Parking?', 'answer' => 'Za budynkiem.']]]],
+            ]],
+        ]);
+
+        self::assertTrue($result->isValid(), implode(' ', $result->errors));
+        $section = Document::findPage($result->document, '/')['nodes'][0];
+        self::assertSame(['section', 'muted'], [$section['type'], $section['props']['background']]);
+        self::assertSame(['heading', 'faq'], array_column($section['slots']['children'], 'type'));
+        self::assertSame(['text' => 'Pytania', 'eyebrow' => 'FAQ', 'align' => 'center'], $section['slots']['children'][0]['props']);
+        self::assertSame('Parking?', $section['slots']['children'][1]['props']['items'][0]['question']);
+    }
+
     public function testRejectsTheWholeBatchWhenOneOperationIsInvalid(): void
     {
         $doc = Document::empty();

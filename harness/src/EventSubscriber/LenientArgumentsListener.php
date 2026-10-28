@@ -20,6 +20,7 @@ final class LenientArgumentsListener
         private readonly SiteTools $siteTools,
         private readonly UiTools $uiTools,
         private readonly ToolTraceSubscriber $trace,
+        private readonly ?\Psr\Log\LoggerInterface $logger = null,
     ) {
     }
 
@@ -41,6 +42,7 @@ final class LenientArgumentsListener
             $decoded = [$decoded];
         }
         if (!\is_array($decoded)) {
+            $this->logger?->warning('A list argument that is not JSON: {value}', ['value' => mb_substr($args[$listArgument], 0, 4000)]);
             $event->deny($why = \sprintf('"%s" must be a JSON array, not a string. Call the tool again passing the array itself.', $listArgument));
             $this->trace->finish($call->getName(), false, $why);
 

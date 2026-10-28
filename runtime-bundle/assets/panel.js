@@ -13,7 +13,7 @@ const I18N = {
         hello: 'Hi! I am Cadenza. Tell me what your site should be — or point at anything on the page and tell me what to change.',
         suggestions: ['A website for my café with a menu and opening hours', 'A portfolio for my travel photos', 'A page that explains photosynthesis for high school'],
         showSketch: 'Show sketch', approve: 'Approve', reject: 'Reject', revise: 'Ask for changes',
-        approved: 'Published', rejected: 'Rejected', recordsTitle: 'Entries waiting', recordNew: 'new', recordChanged: 'changed', recordRemoved: 'to remove', pending: 'Waiting for your decision', sketch: 'Sketch',
+        approved: 'Published', rejected: 'Rejected', recordsTitle: 'Entries waiting', otherSketches: 'Sketches from earlier conversations', more: 'more', recordNew: 'new', recordChanged: 'changed', recordRemoved: 'to remove', pending: 'Waiting for your decision', sketch: 'Sketch',
         added: 'added', changed: 'changed', removed: 'removed', pages: 'pages', themeChanged: 'theme', siteChanged: 'site',
         before: 'Before', after: 'After', published: 'Published — the change is live.', discarded: 'Draft rejected.',
         error: 'Something went wrong', harnessDown: 'Cannot reach the Cadenza studio (harness). Is it running?',
@@ -44,7 +44,7 @@ const I18N = {
         hello: 'Cześć! Jestem Cadenza. Opowiedz, jaka ma być Twoja strona — albo wskaż coś na stronie i powiedz, co zmienić.',
         suggestions: ['Strona mojej kawiarni z menu i godzinami otwarcia', 'Portfolio moich zdjęć z podróży', 'Strona, która wytłumaczy fotosyntezę na poziomie matury'],
         showSketch: 'Pokaż szkic', approve: 'Zatwierdź', reject: 'Odrzuć', revise: 'Popraw',
-        approved: 'Opublikowano', rejected: 'Odrzucono', recordsTitle: 'Wpisy do zatwierdzenia', recordNew: 'nowy', recordChanged: 'zmiana', recordRemoved: 'do usunięcia', pending: 'Czeka na Twoją decyzję', sketch: 'Szkic',
+        approved: 'Opublikowano', rejected: 'Odrzucono', recordsTitle: 'Wpisy do zatwierdzenia', otherSketches: 'Szkice z wcześniejszych rozmów', more: 'więcej', recordNew: 'nowy', recordChanged: 'zmiana', recordRemoved: 'do usunięcia', pending: 'Czeka na Twoją decyzję', sketch: 'Szkic',
         added: 'nowe', changed: 'zmienione', removed: 'usunięte', pages: 'strony', themeChanged: 'motyw', siteChanged: 'ustawienia strony',
         before: 'Przed', after: 'Po', published: 'Opublikowano — zmiana jest na stronie.', discarded: 'Szkic odrzucony.',
         error: 'Coś poszło nie tak', harnessDown: 'Nie mogę połączyć się ze studiem Cadenzy (harness). Czy działa?',
@@ -491,6 +491,44 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         this.scrollDown();
     }
 
+    /**
+     * Sketches waiting from earlier conversations: a new conversation must not hide them. Each can be looked at,
+     * approved or rejected right here.
+     */
+    async otherSketches() {
+        let data;
+        try { data = await this.api('/api/sketches'); } catch { return; }
+        const items = (data.items ?? []).filter((p) => !this.proposals.has(p.proposalId));
+        this.root.querySelector('[data-other-sketches]')?.remove();
+        if (!items.length) return;
+        const card = document.createElement('div');
+        card.dataset.otherSketches = '';
+        card.className = 'rounded-xl border border-amber-400/60 bg-amber-50/60 p-3 dark:bg-amber-950/30';
+        const shown = items.slice(0, 8);
+        const others = Math.max(items.length, (data.total ?? 0) - (data.items.length - items.length));
+        const rest = others - shown.length;
+        card.innerHTML = `<div class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">${t('otherSketches')} · ${others}</div>
+<ul class="mt-2 space-y-1">${shown.map((p) => `<li class="flex items-center gap-1.5" data-draft="${p.draftId}">
+  <button type="button" data-do="show" class="min-w-0 flex-1 truncate rounded-md px-1 py-1 text-left hover:bg-background/70" title="${escapeHtml(p.summary)}">${escapeHtml(p.summary)}</button>
+  <button type="button" data-do="approve" title="${t('approve')}" class="flex size-7 shrink-0 items-center justify-center rounded-md bg-foreground text-background hover:opacity-90">${icon('check', 'size-3.5')}</button>
+  <button type="button" data-do="reject" title="${t('reject')}" class="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted">${icon('x', 'size-3.5')}</button>
+</li>`).join('')}</ul>${rest > 0 ? `<div class="mt-1 px-1 text-xs text-muted-foreground">+ ${rest} ${t('more')}</div>` : ''}`;
+        card.querySelectorAll('li').forEach((li, i) => {
+            const p = shown[i];
+            li.querySelector('[data-do="show"]').addEventListener('click', () => this.showSketch(p.draftId, p.focusPath));
+            for (const action of ['approve', 'reject']) {
+                li.querySelector(`[data-do="${action}"]`).addEventListener('click', async () => {
+                    li.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+                    await this.decideDraft(p.draftId, action);
+                    li.remove();
+                    if (!card.querySelector('li')) card.remove();
+                });
+            }
+        });
+        this.messages.append(card);
+        this.scrollDown();
+    }
+
     refreshWaiting() {
         if (this.busy) return;
         const pending = [...this.proposals.values()].filter((p) => p.status !== 'applied' && p.status !== 'rejected').length;
@@ -523,7 +561,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
 
     async loadHistory() {
         this.api('/api/info').then((info) => this.showModel(info.model)).catch(() => {});
-        if (!this.conversationId) { this.welcome(); this.setStatus('idle'); return; }
+        if (!this.conversationId) { this.welcome(); this.setStatus('idle'); this.otherSketches(); return; }
         try {
             const data = await this.api(`/api/conversations/${encodeURIComponent(this.conversationId)}`);
             if (!data.turns?.length) { this.welcome(); }
@@ -552,6 +590,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
                 for (const group of data.records) this.recordsCard(tt.part('cards'), group);
             }
             this.refreshWaiting();
+            this.otherSketches();
         } catch (e) {
             this.welcome();
             this.setStatus('error', t('harnessDown'));

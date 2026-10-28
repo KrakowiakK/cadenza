@@ -98,6 +98,17 @@ final class ChatController
         return new JsonResponse(['model' => $this->modelLabel, 'apiKey' => '' !== (string) ($_SERVER['CADENZA_LLM_API_KEY'] ?? $_ENV['CADENZA_LLM_API_KEY'] ?? getenv('CADENZA_LLM_API_KEY') ?: '')]);
     }
 
+    /**
+     * Sketches still waiting, from every conversation (the panel offers those of earlier conversations too).
+     */
+    #[Route('/api/sketches', methods: ['GET'])]
+    public function sketches(): JsonResponse
+    {
+        $open = $this->proposals->allOpen();
+
+        return new JsonResponse(['total' => \count($open), 'items' => array_map(static fn ($p): array => $p->toArray() + ['at' => $p->getCreatedAt()->format(\DATE_ATOM)], \array_slice($open, 0, 40))]);
+    }
+
     #[Route('/api/conversations/{id}', methods: ['GET'])]
     public function conversation(string $id): JsonResponse
     {

@@ -473,6 +473,38 @@ final class OperationApplier
     /**
      * @return list<array<string, mixed>>
      */
+    /**
+     * Models give a content block (faq, features, list…) the heading of a section — title, eyebrow, intro,
+     * background — which it does not have: it becomes a section with that heading and the block inside.
+     *
+     * @param array<string, mixed> $spec
+     *
+     * @return array<string, mixed>|null
+     */
+    private function inSection(\Cadenza\Runtime\Catalog\NodeType $type, array $spec): ?array
+    {
+        $props = \is_array($spec['props'] ?? null) ? $spec['props'] : [];
+        $sectionKeys = ['title', 'eyebrow', 'intro', 'subtitle', 'background', 'width', 'padding'];
+        $foreign = array_filter($sectionKeys, static fn (string $k): bool => isset($props[$k]) && !isset($type->props[$k]));
+        if ('content' !== $type->category || [] === $foreign || !$this->catalog->has('section')) {
+            return null;
+        }
+        $section = ['type' => 'section', 'props' => array_intersect_key($props, array_flip(['background', 'width', 'padding'])), 'children' => []];
+        if (\is_string($props['title'] ?? null)) {
+            $section['children'][] = ['type' => 'heading', 'props' => array_filter(['text' => $props['title'], 'eyebrow' => $props['eyebrow'] ?? null, 'align' => $props['align'] ?? null])];
+        }
+        $intro = $props['intro'] ?? $props['subtitle'] ?? null;
+        if (\is_string($intro) && '' !== $intro) {
+            $section['children'][] = ['type' => 'text', 'props' => array_filter(['markdown' => $intro, 'align' => $props['align'] ?? null])];
+        }
+        $section['children'][] = ['type' => $type->name, 'props' => array_diff_key($props, array_flip([...$sectionKeys, ...(isset($type->props['align']) ? [] : ['align'])]))] + array_diff_key($spec, ['type' => 1, 'props' => 1, 'id' => 1]);
+        if (isset($spec['id'])) {
+            $section['id'] = $spec['id'];
+        }
+
+        return $section;
+    }
+
     private function buildNodes(mixed $specs, string $path): array
     {
         if (!\is_array($specs) || !array_is_list($specs)) {
@@ -498,6 +530,9 @@ final class OperationApplier
             throw new OperationException(\sprintf('%s: unknown type "%s"; types: %s.', $path, $spec['type'], implode(', ', array_keys($this->catalog->all()))));
         }
         $type = $this->catalog->get($spec['type']);
+        if (null !== $wrapped = $this->inSection($type, $spec)) {
+            return $this->buildNode($wrapped, $path, $keepId);
+        }
 
         $props = \is_array($spec['props'] ?? null) ? $spec['props'] : [];
         $slotSpecs = \is_array($spec['slots'] ?? null) ? $spec['slots'] : [];
