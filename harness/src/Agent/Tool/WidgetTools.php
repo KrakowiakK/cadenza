@@ -136,14 +136,18 @@ final class WidgetTools
         if (null === $this->turn->conversation) {
             return null;
         }
-        $open = $this->openProposals->open($this->turn->conversation);
+
+        // This conversation's sketches first, then those of earlier conversations (a game placed there and fixed here).
+        $mine = $this->openProposals->open($this->turn->conversation);
+        $ids = array_map(static fn ($p): int => $p->getDraftId(), $mine);
+        $open = \array_slice([...array_reverse($mine), ...array_filter($this->openProposals->allOpen(), static fn ($p): bool => !\in_array($p->getDraftId(), $ids, true))], 0, 40);
         if ([] === $open) {
             return null;
         }
         // Every sketch carries the live site's versions; one that works on this widget shows another version.
         $shown = $this->site->widgetCode($name);
         $live = 'live' === ($shown['source'] ?? null) ? (int) $shown['version'] : null;
-        foreach (array_reverse($open) as $proposal) {
+        foreach ($open as $proposal) {
             $inSketch = $this->site->widgetCode($name, $proposal->getDraftId());
             if ('draft' === ($inSketch['source'] ?? null) && (int) $inSketch['version'] !== $live) {
                 return $proposal->getDraftId();
