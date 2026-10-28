@@ -3,13 +3,14 @@
 {%- set t = pl ? {
     send: 'Wyślij', sent: 'Dziękujemy! Twoja odpowiedź dotarła.', left: 'Wolne miejsca', full: 'Brak wolnych miejsc.', closedDate: 'Zapisy są już zamknięte.',
     required: 'To pole jest wymagane', choose: 'Wybierz…', preview: 'Formularz zacznie zbierać odpowiedzi po zatwierdzeniu szkicu.',
-    answers: 'Odpowiedzi', people: 'osób', excel: 'Pobierz Excel', none: 'Jeszcze nikt nie odpowiedział.', newer: 'nowe', ownerOnly: 'Widzisz to tylko Ty',
+    answers: 'Odpowiedzi', people: 'osób', placesLeft: 'wolne', noPlaces: 'brak miejsc', excel: 'Pobierz Excel', none: 'Jeszcze nikt nie odpowiedział.', newer: 'nowe', ownerOnly: 'Widzisz to tylko Ty',
 } : {
     send: 'Send', sent: 'Thank you! Your answer has arrived.', left: 'Places left', full: 'No places left.', closedDate: 'This form is closed.',
     required: 'This field is required', choose: 'Choose…', preview: 'The form starts collecting answers once the sketch is approved.',
-    answers: 'Answers', people: 'people', excel: 'Download Excel', none: 'No answers yet.', newer: 'new', ownerOnly: 'Only you can see this',
+    answers: 'Answers', people: 'people', placesLeft: 'left', noPlaces: 'full', excel: 'Download Excel', none: 'No answers yet.', newer: 'new', ownerOnly: 'Only you can see this',
 } -%}
 {%- set stats = cadenza_form_stats(node) -%}
+{%- set places = cadenza_option_places(node) -%}
 {%- set sent = app.request.query.get('cz_sent') == node.id -%}
 {%- set input = 'w-full rounded-[calc(var(--radius)*0.8)] border border-current/15 bg-background px-4 py-3 text-base text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 aria-[invalid]:border-rose-500' -%}
 {% include '@CadenzaRuntime/node/_section_open.html.twig' %}
@@ -69,11 +70,13 @@
                             {%- if type == 'textarea' %}
                                 <textarea id="{{ fid }}" name="{{ name }}" rows="4" placeholder="{{ f.placeholder }}" {{ f.required ? 'required' : '' }} class="{{ input }}"></textarea>
                             {%- elseif type == 'select' %}
-                                <select id="{{ fid }}" name="{{ name }}" {{ f.required ? 'required' : '' }} class="{{ input }}"><option value="">{{ f.placeholder ?: t.choose }}</option>{% for o in f.options|default([]) %}<option>{{ o }}</option>{% endfor %}</select>
+                                <select id="{{ fid }}" name="{{ name }}" {{ f.required ? 'required' : '' }} class="{{ input }}"><option value="">{{ f.placeholder ?: t.choose }}</option>{% for o in f.options|default([]) %}{% set p = places[f.label] ?? null %}{% set left = p ? p.limit - (p.taken[o] ?? 0) : null %}<option value="{{ o }}" {{ left is not null and left <= 0 ? 'disabled' : '' }}>{{ o }}{% if left is not null %} — {{ left > 0 ? left ~ ' ' ~ t.placesLeft : t.noPlaces }}{% endif %}</option>{% endfor %}</select>
                             {%- elseif type == 'radio' or type == 'choices' %}
                                 <div id="{{ fid }}" class="flex flex-wrap gap-2">
                                 {%- for o in f.options|default([]) %}
-                                    <label class="cursor-pointer"><input type="{{ type == 'radio' ? 'radio' : 'checkbox' }}" name="{{ name }}{{ type == 'choices' ? '[]' : '' }}" value="{{ o }}" {{ type == 'radio' and f.required ? 'required' : '' }} class="peer sr-only"><span class="inline-block rounded-full border border-current/15 px-4 py-2 text-sm transition peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-primary/30">{{ o }}</span></label>
+                                    {%- set p = type == 'radio' ? (places[f.label] ?? null) : null -%}
+                                    {%- set left = p ? p.limit - (p.taken[o] ?? 0) : null -%}
+                                    <label class="{{ left is not null and left <= 0 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer' }}"><input type="{{ type == 'radio' ? 'radio' : 'checkbox' }}" name="{{ name }}{{ type == 'choices' ? '[]' : '' }}" value="{{ o }}" {{ type == 'radio' and f.required ? 'required' : '' }} {{ left is not null and left <= 0 ? 'disabled' : '' }} class="peer sr-only"><span class="inline-flex flex-col {{ left is not null ? 'rounded-xl' : 'rounded-full' }} border border-current/15 px-4 py-2 text-sm leading-tight transition peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-primary/30">{{ o }}{% if left is not null %}<span class="text-xs opacity-70">{{ left > 0 ? left ~ ' ' ~ t.placesLeft : t.noPlaces }}</span>{% endif %}</span></label>
                                 {%- endfor %}
                                 </div>
                             {%- else %}

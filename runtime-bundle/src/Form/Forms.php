@@ -88,6 +88,57 @@ final class Forms
     }
 
     /**
+     * Places taken per option of the fields that have a per-option limit.
+     *
+     * @param array<string, mixed> $form
+     *
+     * @return array<string, array{limit: int, taken: array<string, int>}> by field label
+     */
+    public function optionPlaces(array $form): array
+    {
+        $limited = array_filter($form['props']['fields'] ?? [], static fn (array $f): bool => \in_array($f['type'] ?? 'text', ['select', 'radio'], true) && (int) ($f['limit'] ?? 0) > 0);
+        if ([] === $limited) {
+            return [];
+        }
+        $places = [];
+        foreach ($limited as $field) {
+            $places[(string) $field['label']] = ['limit' => (int) $field['limit'], 'taken' => array_fill_keys(array_map('strval', $field['options'] ?? []), 0)];
+        }
+        foreach ($this->submissions($form['id'], 100000) as $submission) {
+            foreach ($places as $label => $_) {
+                $chosen = $submission->answer($label);
+                if (\is_string($chosen) && isset($places[$label]['taken'][$chosen])) {
+                    $places[$label]['taken'][$chosen] += $submission->getPeople();
+                }
+            }
+        }
+
+        return $places;
+    }
+
+    /**
+     * Fields whose chosen option has fewer places left than the answer needs.
+     *
+     * @param array<string, mixed> $form
+     * @param list<array{label: string, type: string, value: mixed}> $answers
+     *
+     * @return array<int, string> field index => "option_full"
+     */
+    public function fullOptions(array $form, array $answers, int $people): array
+    {
+        $places = $this->optionPlaces($form);
+        $errors = [];
+        foreach ($answers as $i => $answer) {
+            $p = $places[$answer['label']] ?? null;
+            if (null !== $p && \is_string($answer['value']) && ($p['taken'][$answer['value']] ?? 0) + $people > $p['limit']) {
+                $errors[$i] = 'option_full';
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
      * Checks the visitor's input against the form's fields.
      *
      * @param array<string, mixed> $form

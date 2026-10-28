@@ -154,12 +154,13 @@ final class PatternNodeTypes implements NodeTypeProviderInterface
             ], 'default' => []],
         ]);
 
-        yield new NodeType('form', 'Form', 'Pattern: a form visitors fill in — RSVP to a wedding or party, sign-up for a workshop or class, an order, a booking request, a contact message, a survey. Answers are stored on the site; the owner sees them on the page, downloads them as Excel and can ask you about them. With capacity the form counts places (peopleField = label of a number field like "Number of guests") and closes when full.', 'pattern', $head + [
+        yield new NodeType('form', 'Form', 'Pattern: a form visitors fill in — RSVP to a wedding or party, sign-up for a workshop or class, an order, a booking request, a contact message, a survey. Answers are stored on the site; the owner sees them on the page, downloads them as Excel and can ask you about them. With capacity the form counts places (peopleField = label of a number field like "Number of guests") and closes when full; with "limit" on a select/radio field every option (a date, a class, a slot) has its own places.', 'pattern', $head + [
             'fields' => ['type' => 'list', 'items' => [
                 'label' => ['type' => 'string', 'required' => true],
                 'type' => ['type' => 'enum', 'values' => ['text', 'email', 'phone', 'textarea', 'number', 'date', 'select', 'radio', 'checkbox', 'choices'], 'description' => 'select/radio = one of options, choices = several of options, checkbox = one yes/no (e.g. consent)'],
                 'required' => ['type' => 'bool'],
                 'options' => ['type' => 'list', 'of' => 'string', 'description' => 'for select, radio, choices'],
+                'limit' => ['type' => 'int', 'description' => 'select/radio: places for EACH option (workshop dates, classes, time slots); full options close by themselves'],
                 'placeholder' => ['type' => 'string'],
                 'help' => ['type' => 'string', 'description' => 'small hint under the field'],
             ], 'default' => []],

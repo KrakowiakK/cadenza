@@ -149,6 +149,8 @@ final class Conductor
             - When visitors should answer something — an RSVP to a wedding or party, a sign-up for a workshop or class
               (with capacity and peopleField for limited places), an order, a booking request, a contact message, a
               survey — use the "form" pattern with the right fields (choices as select/radio/choices with options).
+              Several dates, classes or time slots with their own places: one radio field with the dates as options
+              and "limit" (places per date); with peopleField one answer can take several places.
               Answers are stored on the site; when the owner asks who is coming, how many, what people chose, call
               read_answers and answer with the numbers. Set the site's language once (site.update "language").
             - How the site is doing (visits, popular pages, recent changes, health): site_overview.

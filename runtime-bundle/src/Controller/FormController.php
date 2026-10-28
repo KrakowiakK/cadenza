@@ -57,6 +57,9 @@ final class FormController
         if ([] !== $result['errors']) {
             return $json ? new JsonResponse(['ok' => false, 'errors' => $result['errors']], 422) : new Response('Please fill in the form correctly.', 422);
         }
+        if ([] !== $full = $this->forms->fullOptions($form, $result['answers'], $result['people'])) {
+            return $json ? new JsonResponse(['ok' => false, 'errors' => $full], 409) : new Response('This option is full.', 409);
+        }
         $stats = $this->forms->stats($form);
         if (null !== $stats['left'] && $result['people'] > $stats['left']) {
             return $json ? new JsonResponse(['ok' => false, 'error' => 'not_enough', 'left' => $stats['left']], 409) : new RedirectResponse($back.'#'.$id, 303);

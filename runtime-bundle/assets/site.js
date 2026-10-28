@@ -96,8 +96,8 @@ document.addEventListener('click', (e) => {
  * Forms: send without leaving the page, show what is missing next to the field, then the thank-you note.
  */
 const formMessages = {
-    pl: { email: 'Podaj poprawny adres e-mail', phone: 'Podaj poprawny numer telefonu', number: 'Podaj liczbę', date: 'Podaj datę', option: 'Wybierz jedną z opcji', too_many: 'Za dużo prób, spróbuj za kilka minut.', closed: 'Zapisy są już zamknięte.', not_enough: 'Za mało wolnych miejsc — zostało: ', draft: 'Ten formularz nie jest jeszcze opublikowany.', failed: 'Nie udało się wysłać, spróbuj ponownie.' },
-    en: { email: 'Enter a valid e-mail address', phone: 'Enter a valid phone number', number: 'Enter a number', date: 'Enter a date', option: 'Choose one of the options', too_many: 'Too many tries, please wait a few minutes.', closed: 'This form is closed.', not_enough: 'Not enough places left: ', draft: 'This form is not published yet.', failed: 'Could not send, please try again.' },
+    pl: { email: 'Podaj poprawny adres e-mail', phone: 'Podaj poprawny numer telefonu', number: 'Podaj liczbę', date: 'Podaj datę', option: 'Wybierz jedną z opcji', option_full: 'Ten termin właśnie się zapełnił — wybierz inny', too_many: 'Za dużo prób, spróbuj za kilka minut.', closed: 'Zapisy są już zamknięte.', not_enough: 'Za mało wolnych miejsc — zostało: ', draft: 'Ten formularz nie jest jeszcze opublikowany.', failed: 'Nie udało się wysłać, spróbuj ponownie.' },
+    en: { email: 'Enter a valid e-mail address', phone: 'Enter a valid phone number', number: 'Enter a number', date: 'Enter a date', option: 'Choose one of the options', option_full: 'This one has just filled up — choose another', too_many: 'Too many tries, please wait a few minutes.', closed: 'This form is closed.', not_enough: 'Not enough places left: ', draft: 'This form is not published yet.', failed: 'Could not send, please try again.' },
 };
 document.addEventListener('submit', async (e) => {
     const form = e.target.closest('[data-cz-form]');
