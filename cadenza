@@ -101,10 +101,10 @@ stop() {
         (cd "$APP" && symfony server:stop >/dev/null 2>&1 || true)
         (cd "$STUDIO" && symfony server:stop >/dev/null 2>&1 || true)
     fi
+    # PHP's built-in server forks workers (PHP_CLI_SERVER_WORKERS); match all of them by this checkout's router.
+    pkill -f "$ROOT/bin/router.php" 2>/dev/null || true
     for pid in "$RUN"/*.pid; do
         [ -f "$pid" ] || continue
-        # PHP's built-in server forks workers (PHP_CLI_SERVER_WORKERS): stop them too.
-        pkill -P "$(cat "$pid")" 2>/dev/null || true
         kill "$(cat "$pid")" 2>/dev/null || true
         rm -f "$pid"
     done
