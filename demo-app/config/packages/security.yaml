@@ -24,6 +24,12 @@ security:
                 enable_csrf: true
                 default_target_path: /
                 use_referer: true
+            # Members (invited guests) sign in with a personal link, no password.
+            login_link:
+                check_route: cadenza_member_check
+                signature_properties: ['id', 'email']
+                lifetime: 86400
+                default_target_path: /
             logout:
                 path: cadenza_logout
                 target: /

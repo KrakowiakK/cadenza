@@ -30,3 +30,23 @@ account:
         invalid_email: That is not an e-mail address.
         wrong_current: The current password does not match.
     saved: Password changed.
+members:
+    closed: This page is for invited guests only
+    closed_lead: 'Invited? Open the personal link you received — or enter the e-mail from your invitation and we will send a new one.'
+    email: Your e-mail
+    send: Send me my link
+    sent: 'If this address is on the guest list, the link is on its way. Check your inbox (and spam).'
+    title: Guests of the members' area
+    lead: 'Pages marked as "members only" are seen only by these people. They sign in with a personal link — no password. Copy the link and send it any way you like: text message, e-mail, chat.'
+    none_pages: 'No page is members-only yet. Ask the agent e.g.: "make the accommodation page visible only to guests".'
+    pages: Members-only pages
+    name: Name
+    add: Add
+    copy: Copy link
+    copied: Copied — the link is valid for 30 days
+    remove: Remove
+    never: not signed in yet
+    last: last seen
+    added: Added.
+    removed: Removed.
+    hello: Hi

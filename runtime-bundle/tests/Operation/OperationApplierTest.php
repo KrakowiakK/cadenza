@@ -66,6 +66,22 @@ final class OperationApplierTest extends TestCase
         self::assertFalse($this->applier->apply(Document::empty(), [['op' => 'site.update', 'language' => 'Polish']])->isValid());
     }
 
+    public function testPagesCanBeForMembersOnly(): void
+    {
+        $result = $this->applier->apply(Document::empty(), [
+            ['op' => 'page.create', 'path' => '/', 'title' => 'Home'],
+            ['op' => 'page.create', 'path' => '/stay', 'title' => 'Stay', 'access' => 'members'],
+        ]);
+        self::assertTrue($result->isValid());
+        self::assertSame('members', Document::findPage($result->document, '/stay')['access']);
+        self::assertSame([false, true], array_column(Document::navItems($result->document), 'members'));
+
+        $opened = $this->applier->apply($result->document, [['op' => 'page.update', 'page' => '/stay', 'access' => 'public']]);
+        self::assertSame('public', Document::findPage($opened->document, '/stay')['access']);
+
+        self::assertFalse($this->applier->apply($result->document, [['op' => 'page.update', 'page' => '/stay', 'access' => 'secret']])->isValid());
+    }
+
     public function testUpdateMergesPropsAndReplaceKeepsTheId(): void
     {
         $doc = $this->page([['type' => 'heading', 'props' => ['text' => 'Old']]]);

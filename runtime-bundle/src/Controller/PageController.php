@@ -70,8 +70,15 @@ final class PageController
         }
         if (null === $page) {
             $response = new Response($this->twig->render('@CadenzaRuntime/missing.html.twig', ['path' => Document::normalisePath($path)]), [] === $document['pages'] ? 200 : 404);
+        } elseif ('members' === ($page['access'] ?? 'public') && !$this->owner->isMember($request)) {
+            // Only invited people: the page stays closed and tells nobody what is behind it.
+            $response = new Response($this->twig->render('@CadenzaRuntime/members.html.twig', ['page' => null, 'path' => $page['path'], 'title' => $page['title']]), 403);
+            $response->headers->set('X-Robots-Tag', 'noindex');
         } else {
             $response = new Response($this->twig->render('@CadenzaRuntime/page.html.twig', ['page' => $page]));
+        }
+        if ('members' === ($page['access'] ?? 'public')) {
+            $response->headers->set('Cache-Control', 'private, no-store');
         }
         if ($this->state->owner) {
             $response->headers->set('Cache-Control', 'no-store');

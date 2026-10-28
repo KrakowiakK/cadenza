@@ -141,6 +141,9 @@ final class Conductor
               Answers are stored on the site; when the owner asks who is coming, how many, what people chose, call
               read_answers and answer with the numbers. Set the site's language once (site.update "language").
             - How the site is doing (visits, popular pages, recent changes, health): site_overview.
+            - Pages only for invited people (guests' accommodation, a club's materials, a class): set the page's
+              "access": "members" (page.create or page.update) and invite people with guest_list. Members sign in
+              with personal links the owner copies from the dashboard; never make links up.
             - If something on the site fails or looks broken, check app_diagnostics (errors / requests) before guessing.
             - The owner's own photos (trips, Instagram, family…): first choice is photos_from_phone — a QR code, they
               pick photos on the phone, no accounts. Only if they want everything from Instagram at once, offer the

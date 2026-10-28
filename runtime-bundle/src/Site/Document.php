@@ -128,17 +128,21 @@ final class Document
      *
      * @param array<string, mixed> $doc
      *
-     * @return list<array{label: string, href: string}>
+     * @return list<array{label: string, href: string, members: bool}>
      */
     public static function navItems(array $doc): array
     {
-        if (\is_array($doc['nav']['items'] ?? null)) {
-            return $doc['nav']['items'];
+        $members = [];
+        foreach ($doc['pages'] as $page) {
+            $members[$page['path']] = 'members' === ($page['access'] ?? 'public');
         }
+        $items = \is_array($doc['nav']['items'] ?? null)
+            ? $doc['nav']['items']
+            : array_map(
+                static fn (array $page): array => ['label' => $page['navLabel'] ?? $page['title'], 'href' => $page['path']],
+                array_values(array_filter($doc['pages'], static fn (array $p): bool => !($p['hidden'] ?? false))),
+            );
 
-        return array_map(
-            static fn (array $page): array => ['label' => $page['navLabel'] ?? $page['title'], 'href' => $page['path']],
-            array_values(array_filter($doc['pages'], static fn (array $p): bool => !($p['hidden'] ?? false))),
-        );
+        return array_map(static fn (array $item): array => $item + ['members' => $members[parse_url((string) $item['href'], \PHP_URL_PATH) ?: ''] ?? false], $items);
     }
 }

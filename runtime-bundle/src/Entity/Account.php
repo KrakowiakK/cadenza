@@ -64,6 +64,11 @@ class Account implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->name;
     }
 
+    public function rename(?string $name): void
+    {
+        $this->name = $name;
+    }
+
     public function getUserIdentifier(): string
     {
         return $this->email;

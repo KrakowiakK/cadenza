@@ -1,0 +1,19 @@
+{% extends '@CadenzaRuntime/layout.html.twig' %}
+{% block title %}{{ title }} · {{ cadenza_state().document.name }}{% endblock %}
+{% block main %}
+{%- set lang = cadenza_state().document.language|default('pl')|slice(0, 2) -%}
+{%- set field = 'h-11 w-full rounded-[calc(var(--radius)*0.8)] border border-input bg-background px-3.5 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20' -%}
+{% set body %}
+{%- if app.request.query.get('cz_link') == 'sent' %}
+    <p class="text-center text-sm" role="status">{{ 'members.sent'|trans({}, 'cadenza', lang) }}</p>
+{%- else %}
+<form method="post" action="/_cadenza/members/link" data-turbo="false" class="grid gap-4">
+    <div aria-hidden="true" class="absolute -left-[9999px]"><input type="text" name="cz_website" tabindex="-1" autocomplete="off"></div>
+    <input type="hidden" name="target" value="{{ path }}">
+    <label class="grid gap-1.5 text-sm font-medium">{{ 'members.email'|trans({}, 'cadenza', lang) }}<input type="email" name="email" autocomplete="email" required class="{{ field }}"></label>
+    <twig:Button type="submit" class="h-11 w-full text-base">{{ 'members.send'|trans({}, 'cadenza', lang) }}</twig:Button>
+</form>
+{%- endif %}
+{% endset %}
+{% include '@CadenzaRuntime/account/_card.html.twig' with {icon: 'lock', heading: 'members.closed'|trans({}, 'cadenza', lang), lead: 'members.closed_lead'|trans({}, 'cadenza', lang), body: body, foot: null} %}
+{% endblock %}

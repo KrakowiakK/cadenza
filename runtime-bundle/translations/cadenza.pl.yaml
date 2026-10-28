@@ -30,3 +30,23 @@ account:
         invalid_email: To nie jest adres e-mail.
         wrong_current: Obecne hasło się nie zgadza.
     saved: Hasło zmienione.
+members:
+    closed: Ta strona jest tylko dla zaproszonych
+    closed_lead: 'Masz zaproszenie? Otwórz osobisty link, który dostałeś(-aś) — albo podaj e-mail z zaproszenia, a wyślemy nowy.'
+    email: Twój e-mail
+    send: Wyślij mi link
+    sent: 'Jeśli ten adres jest na liście gości, link już jest w drodze. Sprawdź skrzynkę (także spam).'
+    title: Goście ze strefy dla zaproszonych
+    lead: 'Strony oznaczone jako „tylko dla zaproszonych” zobaczą wyłącznie te osoby. Logują się osobistym linkiem — bez hasła. Skopiuj link i wyślij go jak chcesz: SMS-em, mailem, na Messengerze.'
+    none_pages: 'Żadna strona nie jest jeszcze tylko dla zaproszonych. Poproś agenta np.: „zrób stronę z noclegami tylko dla gości”.'
+    pages: Strony tylko dla zaproszonych
+    name: Imię i nazwisko
+    add: Dodaj
+    copy: Kopiuj link
+    copied: Skopiowano — link ważny 30 dni
+    remove: Usuń
+    never: jeszcze nie zalogowany(-a)
+    last: ostatnio
+    added: Dodano.
+    removed: Usunięto.
+    hello: Cześć

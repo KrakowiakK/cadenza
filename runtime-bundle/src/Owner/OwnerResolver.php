@@ -27,6 +27,14 @@ final class OwnerResolver
         return $this->security->isGranted(Account::OWNER);
     }
 
+    /**
+     * May see the members' pages: a signed-in member, or the owner.
+     */
+    public function isMember(Request $request): bool
+    {
+        return $this->isOwner($request) || (!$request->query->getBoolean('cadenza_guest') && $this->security->isGranted(Account::MEMBER));
+    }
+
     public function account(): ?Account
     {
         $user = $this->security->getUser();

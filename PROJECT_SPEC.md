@@ -575,6 +575,7 @@ Zrobione i działające end-to-end (sprawdzone w przeglądarce; testy: `./cadenz
 | Odliczanie z plikiem „Dodaj do kalendarza” (.ics), pasek ogłoszenia znikający po dacie, kotwice do sekcji, język strony | ✅ |
 | Pulpit właściciela: odwiedziny bez ciasteczek (właściciel, boty i prefetch nie liczone), odpowiedzi z formularzy, zmiany, zawartość, stan aplikacji (błędy w logach, puls workera przez `WorkerRunningEvent`, kolejka, importy); narzędzie agenta `site_overview` | ✅ |
 | Logowanie właściciela (Symfony Security: form_login, login_throttling, remember-me, CSRF; encja `Account` z rolami), pierwsze uruchomienie tylko lokalnie lub z tokenem, `cadenza:owner`, zmiana hasła w pulpicie; teksty przez Translation | ✅ |
+| Strefa dla zaproszonych: strony `access: members`, goście bez haseł (Symfony login_link, link osobisty 30 dni do skopiowania w pulpicie, nowy link mailem), zamknięta strona nie zdradza treści, narzędzie agenta `guest_list` (linki nigdy nie trafiają do modelu) | ✅ |
 | Mapa: podróże z GPS zdjęć (trasa w czasie, legenda) i miejsca z adresów (Nominatim z uproszczeniami) | ✅ |
 | Diagnostyka przez Symfony AI Mate, izolacja błędów renderu, model zapasowy, tolerancja błędów modeli (JsonRepair, lenient resolver), polityka narzędzi w kodzie | ✅ |
 | Uruchomienie jednym poleceniem, README EN, licencja MIT, lista zgłoszeń do upstreamu, scenariusz filmu | ✅ |

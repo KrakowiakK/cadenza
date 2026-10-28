@@ -40,7 +40,7 @@
             <nav class="flex items-center gap-1 overflow-x-auto text-sm">
                 {%- set navItems = cadenza_nav(doc) %}
                 {%- for item in navItems|length > 1 ? navItems : [] %}
-                    <a href="{{ item.href }}" class="rounded-md px-3 py-2 whitespace-nowrap transition hover:bg-muted {{ page is defined and page and page.path == item.href ? 'font-semibold text-foreground' : 'text-muted-foreground' }}">{{ item.label }}</a>
+                    <a href="{{ item.href }}" class="rounded-md px-3 py-2 whitespace-nowrap transition hover:bg-muted {{ page is defined and page and page.path == item.href ? 'font-semibold text-foreground' : 'text-muted-foreground' }}">{% if item.members %}{{ cadenza_icon('lock', 'size-3 inline mr-1 opacity-60') }}{% endif %}{{ item.label }}</a>
                 {%- endfor %}
             </nav>
         </div>
@@ -56,7 +56,8 @@
                 {%- if not state.embed %}
                     {%- set lang = doc.language|default('pl')|slice(0, 2) -%}
                     {%- if state.owner %}<a href="/_cadenza/dashboard" class="text-xs opacity-70 hover:opacity-100">{{ cadenza_icon('layout-dashboard', 'size-3.5 inline') }}</a><a href="{{ path('cadenza_logout') }}" data-turbo="false" class="text-xs opacity-70 hover:opacity-100">{{ 'account.logout'|trans({}, 'cadenza', lang) }}</a>
-                    {%- elseif not app.user %}<a href="/_cadenza/login" class="text-xs opacity-40 hover:opacity-100" rel="nofollow">{{ 'account.sign_in_link'|trans({}, 'cadenza', lang) }}</a>{% endif %}
+                    {%- elseif app.user %}<span class="text-xs opacity-70">{{ app.user.name ?: app.user.email }}</span><a href="{{ path('cadenza_logout') }}" data-turbo="false" class="text-xs opacity-70 hover:opacity-100">{{ 'account.logout'|trans({}, 'cadenza', lang) }}</a>
+                    {%- else %}<a href="/_cadenza/login" class="text-xs opacity-40 hover:opacity-100" rel="nofollow">{{ 'account.sign_in_link'|trans({}, 'cadenza', lang) }}</a>{% endif %}
                 {%- endif %}
             </span>
         </div>

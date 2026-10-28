@@ -39,6 +39,10 @@ appears first as a **sketch on the live page**; nothing goes live until you appr
   - *Countdown* to an event with an *Add to calendar* file, and an *announcement bar* that hides itself after a date.
   - *Maps*: “our trips” drawn from the GPS of the owner's phone photos as a route in time order, or pins for addresses
     (venues, shops) located automatically.
+- **Pages for invited people only.** *“Make the accommodation page visible only to our guests”* — the page gets a lock;
+  the owner adds guests (or tells the agent *“invite Kasia and Piotr…”*) and copies each one's personal sign-in link
+  (Symfony login links: signed, expiring, no passwords). Strangers see a closed door that does not reveal what is
+  behind it; a guest who lost the link asks for a new one by e-mail.
 - **A dashboard for the owner** (grid icon in the panel): visits counted without cookies or personal data, answers to
   forms with places taken, recent changes, content, and the application's health — errors in the logs, whether the
   background worker is alive, jobs waiting or failed, imports, connected accounts. The agent reads the same numbers:
@@ -130,7 +134,7 @@ script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in th
 | **MCP Bundle — client** | the studio drives the site only through MCP |
 | **Symfony AI Mate** | the agent reads the app's logs and profiler, even when the app does not boot |
 | **Messenger, Scheduler, Workflow** | imports and events (`MediaImported`, `FormSubmitted`); daily sync of connected accounts; the proposal state machine |
-| **Security, Translation** | the owner's sign-in (form login, login throttling, remember-me, stateless CSRF), first-run setup; texts in the site's language |
+| **Security, Translation** | the owner's sign-in (form login, login throttling, remember-me, stateless CSRF), first-run setup; members' passwordless login links; texts in the site's language |
 | **RateLimiter, Mailer** | visitors' forms: a sliding window per address against bots, an optional note to the owner |
 | **UX Toolkit (shadcn), Twig/Live Components, Turbo, Icons** | patterns, the panel, View Transitions between versions |
 | **Doctrine, Uid, HttpClient, PhpSpreadsheet** | drafts and versions, media, collections; spreadsheets in (collections) and out (form answers) |

@@ -27,6 +27,7 @@ final class DashboardController
         private readonly OwnerResolver $owner,
         private readonly RenderState $state,
         private readonly Environment $twig,
+        private readonly \Cadenza\Runtime\Account\Members $members,
     ) {
     }
 
@@ -46,6 +47,8 @@ final class DashboardController
             'content' => $this->stats->content(),
             'forms' => $this->stats->forms(),
             'health' => $this->stats->health(),
+            'members' => $this->members->all(),
+            'membersPages' => array_values(array_filter($this->state->document['pages'], static fn (array $p): bool => 'members' === ($p['access'] ?? 'public'))),
         ]));
         $response->headers->set('Cache-Control', 'no-store');
 

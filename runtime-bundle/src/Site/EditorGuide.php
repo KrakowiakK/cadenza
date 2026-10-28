@@ -29,7 +29,8 @@ final class EditorGuide
             Slots other than "children" (e.g. hero "actions") are given by name: {"type": "hero", "props": {...}, "actions": [ ... ]}.
 
             - {"op": "page.create", "path": "/about", "title": "About us", "description": "...", "nodes": [node specs]}
-            - {"op": "page.update", "page": "/about", "title": "...", "path": "/new-path", "navLabel": "...", "hidden": false, "position": 0}
+            - {"op": "page.update", "page": "/about", "title": "...", "path": "/new-path", "navLabel": "...", "hidden": false, "position": 0, "access": "public"}
+              "access": "members" makes a page visible only to people the owner invited (members sign in with a personal link; add them with the members tools), "public" to everyone.
             - {"op": "page.delete", "page": "/about"}
             - {"op": "node.insert", "page": "/", "index": 0, "node": {...}}            (index omitted = at the end)
             - {"op": "node.insert", "after": "<node id>", "nodes": [{...}, {...}]}     (or "before": "<node id>")

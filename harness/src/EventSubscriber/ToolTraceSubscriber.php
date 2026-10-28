@@ -32,6 +32,7 @@ final class ToolTraceSubscriber
         'read_spreadsheet' => ['en' => 'Reading the spreadsheet', 'pl' => 'Czytam arkusz'],
         'read_answers' => ['en' => 'Reading the answers', 'pl' => 'Czytam odpowiedzi'],
         'site_overview' => ['en' => 'Looking at the dashboard', 'pl' => 'Zaglądam do pulpitu'],
+        'guest_list' => ['en' => 'Updating the guest list', 'pl' => 'Aktualizuję listę gości'],
         'import_spreadsheet' => ['en' => 'Importing the data', 'pl' => 'Wczytuję dane'],
         'photos_from_phone' => ['en' => 'Preparing a QR code', 'pl' => 'Przygotowuję kod QR'],
         'media_overview' => ['en' => 'Looking at your photos', 'pl' => 'Przeglądam Twoje zdjęcia'],

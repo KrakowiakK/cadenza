@@ -105,6 +105,9 @@ final class OperationApplier
             'description' => $op['description'] ?? null,
             'nodes' => $this->buildNodes($op['nodes'] ?? [], 'nodes'),
         ];
+        if (isset($op['access'])) {
+            $page['access'] = self::access($op['access']);
+        }
         $position = $op['position'] ?? null;
         if (\is_int($position) && $position >= 0 && $position < \count($doc['pages'])) {
             array_splice($doc['pages'], $position, 0, [$page]);
@@ -127,6 +130,9 @@ final class OperationApplier
         if (\array_key_exists('hidden', $op)) {
             $doc['pages'][$index]['hidden'] = (bool) $op['hidden'];
         }
+        if (\array_key_exists('access', $op)) {
+            $doc['pages'][$index]['access'] = self::access($op['access']);
+        }
         if (isset($op['path'])) {
             $path = Document::normalisePath((string) $op['path']);
             $other = Document::pageIndex($doc, $path);
@@ -141,6 +147,18 @@ final class OperationApplier
         }
 
         return $doc;
+    }
+
+    /**
+     * Who may open a page: everyone, or only signed-in members (invited guests, club members…) and the owner.
+     */
+    private static function access(mixed $access): string
+    {
+        return match ($access) {
+            'public', null => 'public',
+            'members' => 'members',
+            default => throw new OperationException('"access" is "public" (everyone) or "members" (only invited people who signed in).'),
+        };
     }
 
     private function pageDelete(array $doc, array $op): array

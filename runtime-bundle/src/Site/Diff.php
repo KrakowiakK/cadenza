@@ -57,7 +57,7 @@ final readonly class Diff
         $draftPages = array_column($draft['pages'], null, 'id');
         $pagesChanged = [];
         foreach ($draftPages as $id => $page) {
-            if (isset($basePages[$id]) && [$page['path'], $page['title'], $page['description'] ?? null] !== [$basePages[$id]['path'], $basePages[$id]['title'], $basePages[$id]['description'] ?? null]) {
+            if (isset($basePages[$id]) && [$page['path'], $page['title'], $page['description'] ?? null, $page['access'] ?? 'public'] !== [$basePages[$id]['path'], $basePages[$id]['title'], $basePages[$id]['description'] ?? null, $basePages[$id]['access'] ?? 'public']) {
                 $pagesChanged[] = $page['path'];
             }
         }

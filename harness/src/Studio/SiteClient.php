@@ -199,6 +199,26 @@ final class SiteClient
         return $this->json($this->mcp->get('site')->callTool('site_stats'));
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function members(): array
+    {
+        $members = $this->json($this->mcp->get('site')->callTool('members_list'));
+
+        return array_is_list($members) ? $members : ($members['result'] ?? []);
+    }
+
+    /**
+     * @param list<array<string, mixed>> $people
+     *
+     * @return array<string, mixed>
+     */
+    public function addMembers(array $people): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('members_add', ['people' => $people]));
+    }
+
     private function text(CallToolResult $result): string
     {
         $text = '';
