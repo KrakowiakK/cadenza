@@ -4,7 +4,8 @@
 #   harness   Cadenza Studio: the agent, proposals, MCP client of the site       http://127.0.0.1:8011
 #
 #   ./cadenza setup     install dependencies, create databases, build assets, generate a shared token
-#   ./cadenza start     start both apps and the background worker (Symfony CLI, or PHP's built-in server)
+#   ./cadenza start     start both apps and the background worker (Symfony CLI, or PHP's built-in server;
+#                       CADENZA_PHP_SERVER=1 forces the built-in one; CADENZA_APP_PORT / CADENZA_STUDIO_PORT)
 #   ./cadenza stop      stop them
 #   ./cadenza test      run all test suites
 #   ./cadenza reset     start the site over from a blank canvas (history deleted)
@@ -79,7 +80,7 @@ setup() {
 
 start() {
     mkdir -p "$RUN"
-    if has symfony; then
+    if has symfony && [ -z "${CADENZA_PHP_SERVER:-}" ]; then
         step "Starting with the Symfony CLI"
         (cd "$APP" && symfony server:start -d --port="$APP_PORT" --no-tls --allow-all-ip >/dev/null)
         (cd "$STUDIO" && symfony server:start -d --port="$STUDIO_PORT" --no-tls >/dev/null)
@@ -96,7 +97,7 @@ start() {
 }
 
 stop() {
-    if has symfony; then
+    if has symfony && [ -z "${CADENZA_PHP_SERVER:-}" ]; then
         (cd "$APP" && symfony server:stop >/dev/null 2>&1 || true)
         (cd "$STUDIO" && symfony server:stop >/dev/null 2>&1 || true)
     fi
