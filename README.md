@@ -195,7 +195,10 @@ Also `CADENZA_LLM_API_KEY`, and optionally a fallback (`CADENZA_LLM_FALLBACK_*`,
 name's query string. Widgets: `CADENZA_CODE_MODEL` (the model that writes their code; default the main one) and
 `CADENZA_REVIEW_MODEL` (a model of the main API that looks at the screenshots of a widget under test, e.g.
 `gemma4:31b` on Ollama Cloud's free plan; default the vision model). Optional: `HUGGINGFACE_API_KEY` (image generation with FLUX), `PEXELS_API_KEY`,
-`UNSPLASH_ACCESS_KEY`, `INSTAGRAM_CLIENT_ID`/`INSTAGRAM_CLIENT_SECRET`.
+`UNSPLASH_ACCESS_KEY`, `INSTAGRAM_CLIENT_ID`/`INSTAGRAM_CLIENT_SECRET`. In a side-by-side run on Ollama Cloud's free models (a
+Breakout with power-ups and a memory game, each written, played in Chrome and reviewed), `beam` wrote both working
+(about 1–3 minutes each); `gpt-oss:120b` was faster but one game crashed on load, and `nemotron-3-ultra` took six
+minutes and left the memory board empty — so the code model defaults to the main one.
 
 Smaller and free models make mistakes in tool arguments (numbers as strings, JSON as strings, extra brackets). The
 studio tolerates them on purpose (`LenientArgumentResolver`, `JsonRepair`) and enforces the important rules in code.
