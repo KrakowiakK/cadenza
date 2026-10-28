@@ -1,7 +1,8 @@
 workers:
     # Background jobs (imports) and the daily sync of connected accounts
     messenger_consume:
-        cmd: ['symfony', 'console', 'messenger:consume', 'async', 'scheduler_cadenza']
+        # --no-debug: in dev, Doctrine keeps a backtrace of every query, which a long-running worker runs out of memory on
+        cmd: ['symfony', 'console', 'messenger:consume', 'async', 'scheduler_cadenza', '--no-debug', '--memory-limit=192M', '--time-limit=3600']
         watch: ['config', 'src', 'templates', 'vendor/cadenza']
     # New classes in templates (also the runtime bundle's) are compiled as you save
     tailwind:

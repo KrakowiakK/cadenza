@@ -289,6 +289,8 @@ final class Conductor
               "access": "members" (page.create or page.update) and invite people with guest_list. Members sign in
               with personal links the owner copies from the dashboard; never make links up.
             - If something on the site fails or looks broken, check app_diagnostics (errors / requests) before guessing.
+              "Does everything work?": app_diagnostics, widget_status (games and animations) and check_on_phone for
+              the home page; answer in plain words what works and what does not (no "health: warning").
             - The owner's own photos (trips, Instagram, family…): first choice is photos_from_phone — a QR code, they
               pick photos on the phone, no accounts. Only if they want everything from Instagram at once, offer the
               export (connect_account "instagram").

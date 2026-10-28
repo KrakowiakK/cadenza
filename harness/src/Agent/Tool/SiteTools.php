@@ -32,6 +32,17 @@ final class SiteTools
     {
         $summary = '' !== trim($summary) ? $summary : self::summaryOf(Proposals::normalise($operations), str_starts_with($this->turn->language, 'pl'));
         $result = $this->proposals->propose($this->turn->conversation, $operations, $summary, $reviseDraftId);
+        // Changes to a page or block that exists only in a sketch of this conversation belong to that sketch.
+        if (null === $result['proposal'] && null === $reviseDraftId && null !== $this->turn->conversation
+            && [] !== preg_grep('/does not exist/', $result['errors'])) {
+            foreach (array_reverse($this->openProposals->open($this->turn->conversation)) as $open) {
+                $retry = $this->proposals->propose($this->turn->conversation, $operations, $summary, $open->getDraftId());
+                if (null !== $retry['proposal']) {
+                    $result = $retry;
+                    break;
+                }
+            }
+        }
         if (null === $result['proposal']) {
             return "The site rejected the batch, nothing was saved. Fix these errors and call propose_changes again with the whole corrected batch:\n- ".implode("\n- ", $result['errors']);
         }
