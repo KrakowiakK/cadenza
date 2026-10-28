@@ -29,6 +29,9 @@ const I18N = {
         exportHelp: 'Instagram → Settings → Accounts Center → Your information and permissions → Download your information → choose JSON format.',
         exportUploaded: 'Here is my export file.', importing: 'Importing', importDone: 'Import finished', imported: 'imported', skipped: 'already there',
         connectedOk: 'Connected', connectFailed: 'Connection failed',
+        fromPhone: 'Photos from your phone', scanQr: 'Scan with your phone camera and pick photos from the gallery.', waitingPhone: 'Waiting for the phone…',
+        phoneOpened: 'Phone connected — pick photos', receiving: 'Receiving', photos: 'photos', phoneDone: 'Photos received',
+        instagramPhone: 'Your Instagram photos are in your phone\'s gallery — the fastest way:', exportAll: 'Everything from Instagram at once (export)', openExport: 'Open Instagram export',
     },
     pl: {
         placeholder: 'Powiedz, co zmienić…',
@@ -55,6 +58,9 @@ const I18N = {
         exportHelp: 'Instagram → Ustawienia → Centrum kont → Twoje informacje i uprawnienia → Pobierz swoje informacje → wybierz format JSON.',
         exportUploaded: 'Oto mój plik eksportu.', importing: 'Importuję', importDone: 'Import zakończony', imported: 'zaimportowano', skipped: 'już było',
         connectedOk: 'Połączono', connectFailed: 'Nie udało się połączyć',
+        fromPhone: 'Zdjęcia z telefonu', scanQr: 'Zeskanuj aparatem telefonu i wybierz zdjęcia z galerii.', waitingPhone: 'Czekam na telefon…',
+        phoneOpened: 'Telefon połączony — wybierz zdjęcia', receiving: 'Odbieram', photos: 'zdjęć', phoneDone: 'Odebrano zdjęcia',
+        instagramPhone: 'Twoje zdjęcia z Instagrama są w galerii telefonu — najszybciej tak:', exportAll: 'Wszystko z Instagrama naraz (eksport)', openExport: 'Otwórz eksport Instagrama',
     },
 };
 const LANG = (navigator.language || 'en').toLowerCase().startsWith('pl') ? 'pl' : 'en';
@@ -103,6 +109,7 @@ const ICONS = {
     tool: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
     chevron: '<path d="m9 18 6-6-6-6"/>',
     alert: '<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>',
+    phone: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>',
     clip: '<path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',
     pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
     clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
@@ -171,6 +178,7 @@ class Studio {
       </div>
       <textarea data-cz="input" rows="1" class="max-h-40 min-h-8 flex-1 resize-none bg-transparent px-1 py-1.5 text-[14px] outline-none placeholder:text-muted-foreground" placeholder="${t('placeholder')}"></textarea>
       <button type="button" data-cz="attach" title="${t('attach')}" class="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-background hover:text-foreground">${icon('clip')}</button>
+      <button type="button" data-cz="phone" title="${t('fromPhone')}" class="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-background hover:text-foreground">${icon('phone')}</button>
       <button type="button" data-cz="draw" title="${t('draw')}" class="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-background hover:text-foreground">${icon('pencil')}</button>
       <button type="submit" class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-foreground text-background disabled:opacity-40">${icon('send')}</button>
     </div>
@@ -202,6 +210,12 @@ class Studio {
         this.el('attach').addEventListener('click', () => this.el('file').click());
         this.el('file').addEventListener('change', (e) => { this.addFiles([...e.target.files]); e.target.value = ''; });
         this.el('draw').addEventListener('click', () => this.openSketchPad());
+        this.el('phone').addEventListener('click', () => {
+            const holder = document.createElement('div');
+            holder.className = 'cz-msg mr-6 flex flex-col gap-2';
+            this.messages.append(holder);
+            this.phoneCard(holder, {});
+        });
         this.el('bar-draw').addEventListener('click', () => { this.setState('open'); this.openSketchPad(); });
         const onPaste = (e) => {
             const files = [...(e.clipboardData?.files ?? [])].filter((f) => f.type.startsWith('image/'));
@@ -583,6 +597,9 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
             case 'import':
                 this.importCard(turn.part('cards'), data);
                 break;
+            case 'phone':
+                this.phoneCard(turn.part('cards'), data);
+                break;
             case 'generated':
                 turn.part('cards').insertAdjacentHTML('beforeend', `<img src="${escapeHtml(data.url)}" alt="" title="${escapeHtml(data.prompt)}" class="cz-msg w-full rounded-xl">`);
                 this.scrollDown();
@@ -796,11 +813,13 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
 <div class="flex items-center gap-2"><span class="flex size-8 items-center justify-center rounded-lg ${brand} text-white">${icon('sparkle')}</span><div class="font-semibold">${escapeHtml(c.label)}</div></div>
 ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-300">${t('connectedAs')} ${escapeHtml(c.connection.account)}</div>` : ''}
 <div class="mt-3 flex flex-col gap-2">
+  ${c.connector === 'instagram' ? `<p class="text-xs text-muted-foreground">${t('instagramPhone')}</p><button type="button" data-do="phone" class="flex items-center justify-center gap-2 rounded-lg bg-foreground px-3 py-2 text-sm font-semibold text-background">${icon('phone')}${t('fromPhone')}</button><div class="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">${t('exportAll')}</div><a href="https://accountscenter.instagram.com/info_and_permissions/dyi/" target="_blank" rel="noopener" class="rounded-lg border border-border px-3 py-2 text-center text-sm hover:bg-muted">${t('openExport')} ↗</a>` : ''}
   ${c.signInUrl ? `<button type="button" data-do="signin" class="rounded-lg ${brand} px-3 py-2 text-sm font-semibold text-white">${t('signIn')} ${escapeHtml(c.label)}</button>` : ''}
   ${c.methods.includes('file') ? `${c.signInUrl ? `<div class="text-center text-[11px] text-muted-foreground">${t('or')}</div>` : ''}<button type="button" data-do="upload" class="rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted">${icon('clip', 'size-4 inline -mt-0.5 mr-1')}${t('uploadExport')}</button>
   <p class="text-[11px] leading-snug text-muted-foreground">${t('exportHelp')}</p>` : ''}
 </div>
 <input type="file" accept=".zip,application/zip" class="hidden">`;
+        card.querySelector('[data-do="phone"]')?.addEventListener('click', (e) => { e.currentTarget.disabled = true; this.phoneCard(container, {}); });
         card.querySelector('[data-do="signin"]')?.addEventListener('click', () => {
             const w = 520, h = 720;
             window.open(c.signInUrl, 'cadenza-connect', `width=${w},height=${h},left=${screenX + (outerWidth - w) / 2},top=${screenY + 60}`);
@@ -814,6 +833,52 @@ ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-30
         });
         container.append(card);
         this.scrollDown();
+    }
+
+    async phoneCard(container, data) {
+        const card = document.createElement('div');
+        card.className = 'cz-msg rounded-xl border border-border p-3';
+        card.innerHTML = `<div class="flex items-center gap-2 font-semibold">${icon('phone')}${t('fromPhone')}</div>
+${data.purpose ? `<div class="mt-0.5 text-xs text-muted-foreground">${escapeHtml(data.purpose)}</div>` : ''}
+<div data-part="qr" class="mx-auto mt-3 flex size-52 items-center justify-center rounded-xl bg-white p-2"><span class="size-5 animate-spin rounded-full border-2 border-violet-500 border-t-transparent"></span></div>
+<p class="mt-2 text-center text-xs text-muted-foreground">${t('scanQr')}</p>
+<p data-part="url" class="mt-1 select-all break-all text-center text-[10px] text-muted-foreground/70"></p>
+<div class="mt-3 flex items-center gap-2 text-xs"><span data-part="dot" class="size-2 animate-pulse rounded-full bg-amber-500"></span><span data-part="status">${t('waitingPhone')}</span></div>
+<div data-part="thumbs" class="mt-2 grid grid-cols-6 gap-1"></div>`;
+        container.append(card);
+        this.scrollDown();
+        let session;
+        try {
+            const res = await fetch('/_cadenza/phone', { method: 'POST', headers: { 'Accept-Language': navigator.language } });
+            session = await res.json();
+            if (!res.ok) throw new Error(session.error ?? res.status);
+        } catch (e) {
+            card.querySelector('[data-part="status"]').textContent = t('error') + ': ' + e.message;
+            return;
+        }
+        card.querySelector('[data-part="qr"]').innerHTML = session.qr;
+        card.querySelector('[data-part="qr"] svg')?.setAttribute('class', 'h-full w-full');
+        card.querySelector('[data-part="url"]').textContent = session.url;
+        const poll = async () => {
+            let st;
+            try { st = await fetch(`/_cadenza/phone/${session.token}/status`).then((r) => r.json()); } catch { setTimeout(poll, 2500); return; }
+            const status = card.querySelector('[data-part="status"]');
+            const dot = card.querySelector('[data-part="dot"]');
+            if (st.status === 'open') status.textContent = t('phoneOpened');
+            if (st.status === 'receiving') { status.textContent = `${t('receiving')}: ${st.count} ${t('photos')}`; dot.className = 'size-2 animate-pulse rounded-full bg-violet-500'; }
+            card.querySelector('[data-part="thumbs"]').innerHTML = (st.thumbs ?? []).map((src) => `<img src="${escapeHtml(src)}" alt="" class="aspect-square w-full rounded object-cover">`).join('');
+            if (st.status === 'done') {
+                dot.className = 'size-2 rounded-full bg-emerald-500';
+                const albums = Object.entries(st.albums ?? {});
+                status.textContent = `${t('phoneDone')}: ${st.count}`;
+                card.querySelector('[data-part="qr"]').classList.add('hidden');
+                const summary = `${t('phoneDone')}: ${st.count} ${t('photos')}` + (albums.length ? ` — ${albums.map(([a, n]) => `${a} (${n})`).join(', ')}` : '');
+                this.send(summary, { event: { type: 'photos_received', source: 'phone', count: st.count, albums: st.albums } });
+                return;
+            }
+            if (st.status !== 'expired') setTimeout(poll, 1500);
+        };
+        poll();
     }
 
     importCard(container, data) {

@@ -38,6 +38,16 @@ class Media
     #[ORM\Column(type: Types::JSON)]
     private array $tags = [];
 
+    #[ORM\Column(nullable: true)]
+    private ?float $latitude = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $longitude = null;
+
+    /** Human title of the album the photo belongs to, e.g. "Zakopane, lipiec 2024". */
+    #[ORM\Column(length: 160, nullable: true)]
+    private ?string $album = null;
+
     public function __construct(
         #[ORM\Column(length: 255, unique: true)]
         private string $path,
@@ -102,6 +112,32 @@ class Media
         return $this->tags;
     }
 
+    public function getLatitude(): ?float
+    {
+        return $this->latitude;
+    }
+
+    public function getLongitude(): ?float
+    {
+        return $this->longitude;
+    }
+
+    public function getAlbum(): ?string
+    {
+        return $this->album;
+    }
+
+    public function locate(?float $latitude, ?float $longitude): void
+    {
+        $this->latitude = $latitude;
+        $this->longitude = $longitude;
+    }
+
+    public function setAlbum(?string $album): void
+    {
+        $this->album = $album;
+    }
+
     /**
      * @param list<string> $tags
      */
@@ -129,6 +165,8 @@ class Media
             'caption' => null !== $this->caption ? mb_substr($this->caption, 0, 200) : null,
             'takenAt' => $this->takenAt?->format('Y-m-d'),
             'tags' => $this->tags ?: null,
+            'album' => $this->album,
+            'gps' => null !== $this->latitude ? round($this->latitude, 4).','.round((float) $this->longitude, 4) : null,
             'author' => $this->author,
             'license' => $this->license,
             'licenseUrl' => $this->licenseUrl,

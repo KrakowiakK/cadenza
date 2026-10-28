@@ -61,6 +61,16 @@ final class MediaLibrary
         [$width, $height] = $info;
         $mime = $info['mime'];
         $ext = self::TYPES[$mime];
+        $exif = 'image/jpeg' === $mime ? Exif::read($bytes) : null;
+
+        // Phones store rotation as an EXIF flag; resizing drops EXIF, so turn the pixels upright first.
+        if (null !== $exif && \in_array($exif['orientation'], [3, 6, 8], true) && false !== $upright = imagecreatefromstring($bytes)) {
+            $upright = imagerotate($upright, match ($exif['orientation']) { 3 => 180, 6 => -90, 8 => 90 }, 0);
+            ob_start();
+            imagejpeg($upright, null, 88);
+            $bytes = (string) ob_get_clean();
+            [$width, $height] = [imagesx($upright), imagesy($upright)];
+        }
 
         if (max($width, $height) > self::MAX_SIDE && 'image/gif' !== $mime && \function_exists('imagecreatefromstring')) {
             $image = imagecreatefromstring($bytes);
@@ -98,6 +108,12 @@ final class MediaLibrary
             $meta['license'] ?? null,
             $meta['licenseUrl'] ?? null,
         );
+        if (null !== $exif) {
+            $media->locate($exif['latitude'], $exif['longitude']);
+            if (null !== $exif['takenAt']) {
+                $media->describe(null, null, $exif['takenAt'], []);
+            }
+        }
         if (null !== $describe) {
             $describe($media);
         }
@@ -125,11 +141,14 @@ final class MediaLibrary
      *
      * @return list<Media>
      */
-    public function query(?string $source = null, ?string $tag = null, ?int $year = null, string $sort = 'newest', int $limit = 60): array
+    public function query(?string $source = null, ?string $tag = null, ?int $year = null, string $sort = 'newest', int $limit = 60, ?string $album = null): array
     {
         $qb = $this->em->getRepository(Media::class)->createQueryBuilder('m')->setMaxResults(max(1, min(500, $limit)));
         if (null !== $source && '' !== $source && 'all' !== $source) {
             $qb->andWhere('m.source = :source')->setParameter('source', $source);
+        }
+        if (null !== $album && '' !== $album) {
+            $qb->andWhere('m.album = :album')->setParameter('album', $album);
         }
         if (null !== $year) {
             $qb->andWhere('m.takenAt >= :from AND m.takenAt < :to')
@@ -147,16 +166,19 @@ final class MediaLibrary
     }
 
     /**
-     * @return array{total: int, sources: array<string, int>, tags: array<string, int>, years: array<int, int>}
+     * @return array{total: int, sources: array<string, int>, albums: array<string, int>, tags: array<string, int>, years: array<int, int>}
      */
     public function stats(): array
     {
         $all = $this->em->getRepository(Media::class)->findAll();
-        $sources = $tags = $years = [];
+        $sources = $tags = $years = $albums = [];
         foreach ($all as $m) {
             $sources[$m->getSource()] = ($sources[$m->getSource()] ?? 0) + 1;
             foreach ($m->getTags() as $tag) {
                 $tags[$tag] = ($tags[$tag] ?? 0) + 1;
+            }
+            if (null !== $m->getAlbum()) {
+                $albums[$m->getAlbum()] = ($albums[$m->getAlbum()] ?? 0) + 1;
             }
             if (null !== $m->getTakenAt()) {
                 $y = (int) $m->getTakenAt()->format('Y');
@@ -166,6 +188,6 @@ final class MediaLibrary
         arsort($tags);
         krsort($years);
 
-        return ['total' => \count($all), 'sources' => $sources, 'tags' => \array_slice($tags, 0, 30, true), 'years' => $years];
+        return ['total' => \count($all), 'sources' => $sources, 'albums' => $albums, 'tags' => \array_slice($tags, 0, 30, true), 'years' => $years];
     }
 }

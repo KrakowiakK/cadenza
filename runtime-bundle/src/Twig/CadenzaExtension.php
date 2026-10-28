@@ -45,7 +45,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
             new TwigFunction('cadenza_fonts_url', static fn (array $theme): string => Theme::googleFontsUrl($theme)),
             new TwigFunction('cadenza_nav', static fn (array $doc): array => Document::navItems($doc)),
             new TwigFunction('cadenza_state', fn (): RenderState => $this->state),
-            new TwigFunction('cadenza_media', fn (array $p): array => $this->media->query($p['source'] ?? null, $p['tag'] ?? null, $p['year'] ?? null, $p['sort'] ?? 'newest', (int) ($p['limit'] ?? 60))),
+            new TwigFunction('cadenza_media', fn (array $p): array => $this->media->query($p['source'] ?? null, $p['tag'] ?? null, $p['year'] ?? null, $p['sort'] ?? 'newest', (int) ($p['limit'] ?? 60), $p['album'] ?? null)),
             new TwigFunction('cadenza_icon', $this->icon(...), ['is_safe' => ['html']]),
         ];
     }

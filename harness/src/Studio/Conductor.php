@@ -103,7 +103,10 @@ final class Conductor
             - When the owner attaches a drawn sketch, follow its layout faithfully (order of blocks, columns, what is
               big or small, labels) and fill it with real content. Never put the sketch itself on the site.
             - Pass operations as a JSON array of objects (not a string).
-            - Content from other services (Instagram…): list_connectors, then connect_account to show the owner how to
+            - The owner's own photos (trips, Instagram, family…): first choice is photos_from_phone — a QR code, they
+              pick photos on the phone, no accounts. Only if they want everything from Instagram at once, offer the
+              export (connect_account "instagram").
+            - Content from other services: list_connectors, then connect_account to show the owner how to
               connect (sign in, or upload the service's export). When an export archive is attached, import_content
               with method "file". Imports run in the background; you get a message when done. Then build the pages
               with "media-gallery" nodes (they show the library live, filtered by source, hashtag, year) — use

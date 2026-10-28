@@ -28,6 +28,7 @@ final class ToolTraceSubscriber
         'list_connectors' => ['en' => 'Checking connections', 'pl' => 'Sprawdzam połączenia'],
         'connect_account' => ['en' => 'Preparing the connection', 'pl' => 'Przygotowuję połączenie'],
         'import_content' => ['en' => 'Starting the import', 'pl' => 'Uruchamiam import'],
+        'photos_from_phone' => ['en' => 'Preparing a QR code', 'pl' => 'Przygotowuję kod QR'],
         'media_overview' => ['en' => 'Looking at your photos', 'pl' => 'Przeglądam Twoje zdjęcia'],
     ];
 

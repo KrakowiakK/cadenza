@@ -19,7 +19,11 @@ final class ToolPolicyListener
     private const IMAGE_TOOLS = ['find_images', 'offer_images', 'generate_image'];
     private const IMAGE_BUDGET = 3;
 
+    private const PROPOSAL_ATTEMPTS = 4;
+
     private int $imageCalls = 0;
+    private int $proposalAttempts = 0;
+    private bool $waitingForOwner = false;
     private ?string $turnKey = null;
 
     public function __construct(
@@ -34,13 +38,33 @@ final class ToolPolicyListener
     public function __invoke(ToolCallRequested $event): void
     {
         $name = $event->getToolCall()->getName();
-        if (!\in_array($name, self::IMAGE_TOOLS, true)) {
-            return;
-        }
         $key = spl_object_hash($this->turn).($this->turn->conversation?->getId() ?? '');
         if ($key !== $this->turnKey) {
             $this->turnKey = $key;
-            $this->imageCalls = 0;
+            $this->imageCalls = $this->proposalAttempts = 0;
+            $this->waitingForOwner = false;
+        }
+
+        if (\in_array($name, ['photos_from_phone', 'connect_account', 'import_content'], true)) {
+            $this->waitingForOwner = true;
+
+            return;
+        }
+        if ('propose_changes' === $name) {
+            $reason = match (true) {
+                $this->waitingForOwner => 'Wait: the owner is sending photos / importing content. Do not build anything this turn; you will get a message when it is done. Reply briefly now.',
+                ++$this->proposalAttempts > self::PROPOSAL_ATTEMPTS => 'Too many attempts this turn. Stop, and tell the owner in one sentence what you could not do.',
+                default => null,
+            };
+            if (null !== $reason) {
+                $event->deny($reason);
+                $this->trace->finish($name, false);
+            }
+
+            return;
+        }
+        if (!\in_array($name, self::IMAGE_TOOLS, true)) {
+            return;
         }
 
         $reason = null;

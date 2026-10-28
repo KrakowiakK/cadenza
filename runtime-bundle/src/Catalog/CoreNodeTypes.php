@@ -65,9 +65,10 @@ final class CoreNodeTypes implements NodeTypeProviderInterface
             'style' => ['type' => 'enum', 'values' => ['grid', 'masonry'], 'default' => 'grid'],
         ]);
 
-        yield new NodeType('media-gallery', 'Live gallery', 'Gallery that shows images straight from the media library, filtered by source (e.g. "instagram"), hashtag/tag and year. It updates by itself when new images arrive (imports, syncs). Use it instead of listing images by hand.', 'media', [
+        yield new NodeType('media-gallery', 'Live gallery', 'Gallery that shows images straight from the media library, filtered by source (e.g. "instagram", "phone"), album, hashtag/tag and year. It updates by itself when new images arrive (imports, syncs). Use it instead of listing images by hand.', 'media', [
             'source' => ['type' => 'string', 'default' => 'all', 'description' => '"all", "instagram", "upload", "wikimedia"…'],
             'tag' => ['type' => 'string', 'default' => null, 'description' => 'only images with this hashtag/tag, without #'],
+            'album' => ['type' => 'string', 'default' => null, 'description' => 'only images of this album (exact title from the media overview)'],
             'year' => ['type' => 'int', 'default' => null],
             'sort' => ['type' => 'enum', 'values' => ['newest', 'oldest'], 'default' => 'newest'],
             'limit' => ['type' => 'int', 'default' => 60],

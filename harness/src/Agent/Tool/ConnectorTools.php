@@ -13,6 +13,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 #[AsTool('list_connectors', 'Services the owner can bring content from (Instagram…), how to connect each and whether an account is already connected.', method: 'list')]
 #[AsTool('connect_account', 'Show the owner a card to connect a service: sign in (when available) or upload its export file. The owner acts in the panel.', method: 'connect')]
 #[AsTool('import_content', 'Start importing the owner\'s content: method "account" (connected account) or "file" (an export archive the owner attached, give its uploadId). Runs in the background; the panel shows progress and tells you when it is done.', method: 'import')]
+#[AsTool('photos_from_phone', 'Show the owner a QR code: they scan it with their phone and send photos straight from the camera roll (no account, no app). Photos get dates/places from EXIF and are grouped into trip albums. Best way to get the owner\'s own photos, including those they posted on Instagram.', method: 'phone')]
 #[AsTool('media_overview', 'What is in the media library: totals per source, top hashtags/tags, years — to plan galleries and albums after an import.', method: 'overview')]
 final class ConnectorTools
 {
@@ -79,6 +80,16 @@ final class ConnectorTools
         $this->turn->emit('import', ['jobId' => $result['jobId'], 'connector' => $connector]);
 
         return \sprintf('Import job %d started in the background; the panel shows progress and you will get a message when it is done. Tell the owner it is importing; do not build pages yet.', $result['jobId']);
+    }
+
+    /**
+     * @param string $purpose One short line for the owner in their language, e.g. "Zdjęcia do galerii z podróży"
+     */
+    public function phone(string $purpose = ''): string
+    {
+        $this->turn->emit('phone', ['purpose' => $purpose]);
+
+        return 'Showed the QR code. Tell the owner in one sentence to scan it and pick photos; you will get a message with the albums when they finish. Do not build anything yet.';
     }
 
     public function overview(): string
