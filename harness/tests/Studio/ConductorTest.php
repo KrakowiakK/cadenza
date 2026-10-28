@@ -9,6 +9,15 @@ use PHPUnit\Framework\TestCase;
 
 final class ConductorTest extends TestCase
 {
+    public function testRecognisesARepliesClaimOfASketch(): void
+    {
+        self::assertTrue(Conductor::claimsSketch('Wszystko jest już w szkicu — możesz go przejrzeć i zatwierdzić w panelu.'));
+        self::assertTrue(Conductor::claimsSketch('Szkic gotowy: nowa strona.'));
+        self::assertTrue(Conductor::claimsSketch('The sketch is ready.'));
+        self::assertFalse(Conductor::claimsSketch('Jeszcze nikt się nie zapisał na warsztaty.'));
+        self::assertFalse(Conductor::claimsSketch('Którą sekcję mam zmienić?'));
+    }
+
     public function testFindsForeignWordsInPolishReplies(): void
     {
         self::assertSame(['weitere'], Conductor::foreignWords('Możesz poprosić o weitere zmiany.', 'pl'));

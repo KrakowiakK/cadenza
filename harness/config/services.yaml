@@ -12,6 +12,9 @@ parameters:
     # A model of the main API that looks at screenshots of widgets under test; empty = the vision model.
     env(CADENZA_REVIEW_MODEL): ''
     cadenza.review_model: '%env(CADENZA_REVIEW_MODEL)%'
+    cadenza.vision_model: '%env(CADENZA_LLM_VISION_MODEL)%'
+    # A model of the main API that sees pictures the owner attaches (e.g. "gemma4:31b?max_tokens=12000"); empty = the vision API.
+    env(CADENZA_SEEING_MODEL): ''
 
 services:
     # default configuration for services in *this* file

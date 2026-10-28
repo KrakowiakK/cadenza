@@ -20,6 +20,7 @@ final class Turn
     public int $toolCalls = 0;
     /** Widgets actually written in this turn (each takes a minute and a model call of its own). */
     public int $widgetBuilds = 0;
+    public bool $madeOtherThanSketch = false;
 
     /** @var list<array<string, string>> */
     public array $selection = [];
@@ -40,6 +41,7 @@ final class Turn
         $this->proposals = [];
         $this->toolCalls = 0;
         $this->widgetBuilds = 0;
+        $this->madeOtherThanSketch = false;
     }
 
     /**
@@ -47,6 +49,10 @@ final class Turn
      */
     public function emit(string $event, array $data): void
     {
+        // Entries, sign-up links, phone uploads: things a reply may call "ready" without a sketch.
+        if (\in_array($event, ['records', 'variants', 'phone', 'connect'], true)) {
+            $this->madeOtherThanSketch = true;
+        }
         if (null !== $this->emitter) {
             ($this->emitter)($event, $data);
         }

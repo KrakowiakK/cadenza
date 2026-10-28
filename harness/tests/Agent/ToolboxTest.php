@@ -13,7 +13,7 @@ final class ToolboxTest extends KernelTestCase
 {
     public function testEveryAgentHasAllItsTools(): void
     {
-        foreach (['studio', 'studio_fallback', 'studio_vision'] as $agent) {
+        foreach (['studio', 'studio_fallback', 'studio_vision', 'studio_seeing'] as $agent) {
             $tools = static::getContainer()->get('ai.fault_tolerant_toolbox.'.$agent)->getTools();
             $names = array_map(static fn ($tool): string => $tool->getName(), $tools);
 

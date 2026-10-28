@@ -34,6 +34,8 @@ final class Conductor
         private readonly AgentInterface $fallbackAgent,
         #[Autowire(service: 'ai.agent.studio_vision')]
         private readonly AgentInterface $visionAgent,
+        #[Autowire(service: 'ai.agent.studio_seeing')]
+        private readonly AgentInterface $seeingAgent,
         #[Autowire('%env(CADENZA_LLM_VISION_MODEL)%')]
         private readonly string $visionModel,
         #[Autowire('%env(CADENZA_LLM_FALLBACK_MODEL)%')]
@@ -51,6 +53,9 @@ final class Conductor
         // A model of the main API with good Polish that proofreads replies (default: the widget review model).
         #[Autowire('%env(default:cadenza.review_model:CADENZA_PROOFREAD_MODEL)%')]
         private readonly string $proofreadModel = '',
+        #[Autowire('%env(CADENZA_SEEING_MODEL)%')]
+        private readonly string $seeingModel = '',
+        private readonly ?\Psr\Log\LoggerInterface $logger = null,
     ) {
     }
 
@@ -84,6 +89,40 @@ final class Conductor
         preg_match_all('~\p{L}*[áéíúýěščřďťňůäüßñàèìò]\p{L}*|(?-i:(?<=\p{Ll})[A-Z][a-z]{2,})|`[a-z0-9_-]+`|[\p{Cyrillic}\p{Greek}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}\p{Arabic}]+|(?<![\p{L}/_.-])(?:weitere|und|oder|nicht|ajout\p{L}*|the|owners?|site|drafts?|sketch|widgets?|live|preview|layout|feedback|changes?|approve[ds]?|ready|done|page|section|update[ds]?|skic\p{L}*|create_\w+|propose_\w+)(?![\p{L}/_-]|\.\p{L})~iu', $text, $m);
 
         return array_values(array_unique($m[0]));
+    }
+
+    /**
+     * What the owner's pictures show, in words the main model can build from; null when no model can see them.
+     *
+     * @param list<Image>                       $images
+     * @param list<array<string, mixed>>        $attachments
+     */
+    private function describe(array $images, string $message, array $attachments): ?string
+    {
+        if ('' === $this->seeingModel) {
+            return null;
+        }
+        $this->turn->emit('status', ['text' => 'pl' === substr($this->turn->language, 0, 2) ? 'Oglądam załączone obrazy' : 'Looking at the pictures']);
+        $kinds = implode(', ', array_map(static fn (array $a, int $i): string => \sprintf('picture %d: %s', $i + 1, 'sketch' === ($a['kind'] ?? '') ? 'a layout the owner DREW' : 'a photo or image'), $attachments, array_keys($attachments)));
+        try {
+            $text = trim($this->platform->invoke($this->seeingModel, new MessageBag(Message::ofUser(new Text(\sprintf(
+                "The owner of a website attached these pictures (%s) to the message: \"%s\".\nDescribe each one precisely for a web designer who cannot see it. A drawn layout: every box from top to bottom, side by side or stacked, relative sizes, and every handwritten word exactly. A photo: what it shows, mood, colours, whether it suits a page header (landscape or portrait). Plain text, no advice.",
+                $kinds, $message)), ...$images)), str_contains($this->seeingModel, '/') ? ['reasoning' => ['enabled' => false]] : [])->asText());
+        } catch (\Throwable $e) {
+            $this->logger?->warning('Describing the pictures failed: {message}', ['message' => $e->getMessage()]);
+
+            return null;
+        }
+
+        return '' !== $text ? $text : null;
+    }
+
+    /**
+     * Whether a reply says a sketch (a change waiting for approval) is ready.
+     */
+    public static function claimsSketch(string $text): bool
+    {
+        return (bool) preg_match('/\bw\s+szkicu\b|\bszkic\w*\s+(?:jest\s+)?gotow|\bgotow\w*\s+(?:w\s+)?szkic|zatwierd\w*\s+(?:go|szkic|w\s+panelu)|\bthe sketch is ready|\bin the sketch\b|approve it in the panel/iu', $text);
     }
 
     /**
@@ -146,17 +185,25 @@ final class Conductor
             ...$this->history($conversation),
         );
         $parts = [new Text($this->userMessage($message, $context, $attachments))];
+        $images = [];
         foreach (\array_slice($attachments, 0, 4) as $attachment) {
             $dataUrl = $this->uploads->forModel($attachment['id']);
             if (null !== $dataUrl) {
-                $parts[] = Image::fromDataUrl($dataUrl);
+                $images[] = Image::fromDataUrl($dataUrl);
             }
         }
+        // Eyes and hands: a model that sees describes the pictures, the main model (better with tools) builds from
+        // the description. Without such a model, the vision agent gets the pictures themselves.
+        if ([] !== $images && null !== $seen = $this->describe($images, $message, $attachments)) {
+            $parts[0] = new Text($parts[0]->getText()."\n[What the attached pictures show, described by a model that can see them]\n".$seen);
+            $images = [];
+        }
+        $parts = [...$parts, ...$images];
         $bag = $bag->with(Message::ofUser(...$parts));
         // Images in the message: answer with the model that can see them.
         $this->useVision = \count($parts) > 1;
         if ($this->useVision) {
-            $this->turn->emit('model', ['label' => strtok($this->visionModel, '?').' (vision)', 'quiet' => true]);
+            $this->turn->emit('model', ['label' => strtok('' !== $this->seeingModel ? $this->seeingModel : $this->visionModel, '?').' (vision)', 'quiet' => true]);
         }
 
         $conversation->addUserTurn($message, $this->turn->selection, $this->turn->path, array_map(fn (array $a): array => ['id' => $a['id'], 'kind' => $a['kind'] ?? 'photo', 'name' => $a['name'] ?? null, 'url' => $this->uploads->url($a['id'])], $attachments), \is_array($context['event'] ?? null));
@@ -177,7 +224,9 @@ final class Conductor
         // fallback model; the owner should never be left looking at nothing.
         for ($try = 0; '' === $text && 0 === $this->turn->toolCalls && $try < 2; ++$try) {
             $this->turn->emit('status', ['text' => 'pl' === ($context['language'] ?? 'en') ? 'Próbuję jeszcze raz' : 'Trying again']);
-            $this->useFallback = $this->useFallback || 1 === $try;
+            $this->logger?->notice('Empty reply from the model (try {try}, vision: {vision})', ['try' => $try, 'vision' => $this->useVision]);
+            // The text-only fallback cannot see the owner's pictures: with pictures, the models that see try again.
+            $this->useFallback = $this->useFallback || (1 === $try && !$this->useVision);
             $text = trim($this->callAgent($bag->with(Message::ofUser('Your previous reply was empty. Act on my last message now: call the tools you need, then answer me in 1–3 sentences.')), $context));
             $text = preg_replace('~<think>.*?</think>~s', '', $text) ?? $text;
         }
@@ -201,6 +250,14 @@ final class Conductor
             $text = [] !== $this->turn->proposals
                 ? ($pl ? 'Szkic jest gotowy — zobacz go na stronie i zatwierdź albo napisz, co zmienić.' : 'The sketch is ready — have a look on the page and approve it, or tell me what to change.')
                 : ($pl ? 'Gotowe. Napisz, jeśli mam coś jeszcze zrobić.' : 'Done. Tell me if there is anything else.');
+        }
+        // "It is in the sketch" with no sketch made: free models claim work they did not do. Once more, then honesty.
+        if ([] === $this->turn->proposals && !$this->turn->madeOtherThanSketch && self::claimsSketch($text) && [] === $this->proposals->open($conversation)) {
+            $this->logger?->notice('The reply claims a sketch that was not made: {text}', ['text' => mb_substr($text, 0, 300)]);
+            $again = trim((string) preg_replace('~<think>.*?</think>~s', '', $this->callAgent($bag->with(Message::ofAssistant($text))->with(Message::ofUser('You wrote that the change is in a sketch, but you did not call propose_changes — nothing was made. Call propose_changes now with the whole change, then answer me in 1–2 sentences.')), $context)));
+            $text = [] !== $this->turn->proposals ? ('' !== $again ? $again : $text) : ('pl' === substr($this->turn->language, 0, 2)
+                ? 'Nie udało mi się jeszcze przygotować tej zmiany — nic nie zostało zapisane. Spróbuj proszę napisać jeszcze raz, może prościej, albo w dwóch krokach.'
+                : 'I could not prepare that change yet — nothing was saved. Please ask once more, perhaps more simply or in two steps.');
         }
         $text = self::withoutModelTokens($text);
         $text = $this->polish($text, $this->turn->language);
@@ -430,6 +487,16 @@ final class Conductor
             return $this->fallbackAgent->call($bag, self::options($this->fallbackModel))->asText();
         }
         try {
+            if ($this->useVision && '' !== $this->seeingModel) {
+                // A model of the main API that sees (Gemma on Ollama Cloud) first: the vision API's free models are
+                // rate-limited; that one stays the fallback.
+                try {
+                    return $this->seeingAgent->call($bag, self::options($this->seeingModel))->asText();
+                } catch (\Throwable $e) {
+                    $this->logger?->warning('The seeing model failed, trying the vision API: {message}', ['message' => $e->getMessage(), 'exception' => $e]);
+                }
+            }
+
             return $this->useVision
                 ? $this->visionAgent->call($bag, self::options($this->visionModel))->asText()
                 : $this->agent->call($bag, self::options($this->model))->asText();

@@ -61,3 +61,25 @@ ai:
                 - 'App\Agent\Tool\BlockTools'
                 - 'App\Agent\Tool\WidgetTools'
                 - 'App\Agent\Tool\SketchTools'
+
+        # Pictures on the main API (e.g. Gemma on Ollama Cloud): the vision API's free models are rate-limited.
+        studio_seeing:
+            platform: 'ai.platform.generic.default'
+            model: '%env(default:cadenza.vision_model:CADENZA_SEEING_MODEL)%'
+            max_tool_calls: 24
+            tools:
+                - 'App\Agent\Tool\SiteTools'
+                - 'App\Agent\Tool\UiTools'
+                - 'App\Agent\Tool\ImageTools'
+                - 'App\Agent\Tool\ConnectorTools'
+                - 'App\Agent\Tool\DiagnosticsTools'
+                - 'App\Agent\Tool\CollectionTools'
+                - 'App\Agent\Tool\FormTools'
+                - 'App\Agent\Tool\StatsTools'
+                - 'App\Agent\Tool\MemberTools'
+                - 'App\Agent\Tool\RecordTools'
+                - 'App\Agent\Tool\TranslateTools'
+                - 'App\Agent\Tool\DocumentTools'
+                - 'App\Agent\Tool\BlockTools'
+                - 'App\Agent\Tool\WidgetTools'
+                - 'App\Agent\Tool\SketchTools'
