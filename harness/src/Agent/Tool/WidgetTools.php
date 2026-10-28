@@ -12,7 +12,7 @@ use App\Studio\WidgetProgrammer;
 use App\Studio\WidgetWorkshop;
 use Symfony\AI\Agent\Toolbox\Attribute\AsTool;
 
-#[AsTool('create_widget', 'Make something ALIVE with real code, when blocks are not enough: a game (snake, tetris, frogger, memory, a quiz against the clock), a 3D scene with three.js (a turning product, floating shapes, a 3D logo), an SVG or canvas animation, a living background for the opening, an interactive calculator or chart. Describe it in "brief" in English, precisely: what it shows, rules and controls, mood; mention /media/… photos to use (find_images or the outline tell you which exist; if the owner\'s photo of something is not there, ask for it rather than taking another). A programmer writes the code, it is tried in a browser and fixed; it runs sandboxed. To change one, call again with the same name and describe only the change (or what is broken). Then place it with propose_changes: {"type": "widget", "props": {"widget": name, "title": …, "caption": …}}, or as a hero\'s "widget" (a living background behind the title, shape "background").', method: 'create')]
+#[AsTool('create_widget', 'Make something ALIVE with real code, when blocks are not enough: a game (snake, tetris, frogger, memory, a quiz against the clock), a 3D scene with three.js (a turning product, floating shapes, a 3D logo), an SVG or canvas animation, a living background for the opening, an interactive calculator or chart. Describe it in "brief" in English, precisely: what it shows, rules and controls, mood; mention /media/… photos to use (find_images or the outline tell you which exist; if the owner\'s photo of something is not there, ask for it rather than taking another). A programmer writes the code, it is tried in a browser and fixed; it runs sandboxed, WITHOUT internet: no live data (weather, rates, news feeds, other sites) — say so instead of trying. To change one, call again with the same name and describe only the change (or what is broken). Then place it with propose_changes: {"type": "widget", "props": {"widget": name, "title": …, "caption": …}}, or as a hero\'s "widget" (a living background behind the title, shape "background").', method: 'create')]
 #[AsTool('leaderboard', 'The shared leaderboard of a game widget (who has the best scores); clear: true empties it, e.g. for a new season. A game gets a leaderboard when its brief asks for one.', method: 'leaderboard')]
 #[AsTool('widget_status', 'The widgets of this site and the last error a browser reported for each — read it when the owner says a game or animation does not work.', method: 'status')]
 final class WidgetTools
@@ -38,7 +38,7 @@ final class WidgetTools
         if ('' === trim($name) && '' === trim($label)) {
             return 'Give the widget a "name" (e.g. "tatra-flyover"; the same name again changes an existing one).';
         }
-        $name = trim(strtolower('' !== trim($name) ? $name : (string) preg_replace('/[^a-z0-9]+/', '-', strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $label) ?: 'widget'))), '-');
+        $name = self::slug('' !== trim($name) ? $name : $label);
         $pl = 'pl' === substr($this->turn->language, 0, 2);
         $label = '' !== trim($label) ? trim($label) : ucfirst(str_replace('-', ' ', $name));
         $steps = [
@@ -108,6 +108,19 @@ final class WidgetTools
         return null !== $revise
             ? \sprintf('The sketch (draft %d) now shows this version.', $proposal->getDraftId())
             : \sprintf('The live site keeps showing version %d until the owner approves the sketch (draft %d) with the new one.', $live, $proposal->getDraftId());
+    }
+
+    /**
+     * Models give names like "Pogoda w Krakowie": the site takes "pogoda-w-krakowie".
+     */
+    public static function slug(string $name): string
+    {
+        $ascii = strtr(mb_strtolower(trim($name)), ['ł' => 'l']);
+        $ascii = iconv('UTF-8', 'ASCII//TRANSLIT', $ascii) ?: $ascii;
+        $slug = trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower($ascii)), '-');
+        $slug = rtrim(substr($slug, 0, 38), '-');
+
+        return preg_match('/^[a-z]/', $slug) ? $slug : 'w-'.$slug;
     }
 
     public function leaderboard(string $name, bool $clear = false): string

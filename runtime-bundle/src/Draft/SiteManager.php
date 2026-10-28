@@ -52,6 +52,12 @@ final class SiteManager
             $baseOperations = [];
         }
 
+        // Undo: an earlier published version, as a sketch like any other change.
+        foreach ($operations as $i => $op) {
+            if (\is_array($op) && 'site.restore' === ($op['op'] ?? null) && null !== ($old = $this->versions->byNumber((int) ($op['version'] ?? 0)))) {
+                $operations[$i] = ['op' => 'site.replace', 'version' => $old->getNumber(), 'document' => $old->getDocument()];
+            }
+        }
         $base = $this->document();
         $usedIds = Document::ids($draft?->getDocument() ?? $base);
         $allOperations = [...$baseOperations, ...$this->applier->assignIds(array_merge($usedIds, Document::ids($base)), array_values($operations))];

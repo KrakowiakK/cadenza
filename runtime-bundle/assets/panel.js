@@ -8,7 +8,7 @@ const I18N = {
         placeholder: 'Tell me what to change…',
         placeholderPicked: 'What should happen to the selection?',
         send: 'Send', open: 'Open panel', pick: 'Point at an element', picking: 'Click elements on the page, Esc to finish',
-        newChat: 'New conversation', collapse: 'Collapse to bar', hide: 'Hide', show: 'Show Cadenza',
+        newChat: 'New conversation', phoneView: 'On a phone', collapse: 'Collapse to bar', hide: 'Hide', show: 'Show Cadenza',
         idle: 'Ready', thinking: 'Thinking', working: 'Working', waiting: 'Waiting for you',
         hello: 'Hi! I am Cadenza. Tell me what your site should be — or point at anything on the page and tell me what to change.',
         suggestions: ['A website for my café with a menu and opening hours', 'A portfolio for my travel photos', 'A page that explains photosynthesis for high school'],
@@ -39,7 +39,7 @@ const I18N = {
         placeholder: 'Powiedz, co zmienić…',
         placeholderPicked: 'Co zrobić z zaznaczeniem?',
         send: 'Wyślij', open: 'Otwórz panel', pick: 'Wskaż element', picking: 'Klikaj elementy na stronie, Esc kończy',
-        newChat: 'Nowa rozmowa', collapse: 'Zwiń do paska', hide: 'Schowaj', show: 'Pokaż Cadenzę',
+        newChat: 'Nowa rozmowa', phoneView: 'Na telefonie', collapse: 'Zwiń do paska', hide: 'Schowaj', show: 'Pokaż Cadenzę',
         idle: 'Gotowa', thinking: 'Myślę', working: 'Pracuję', waiting: 'Czekam na Ciebie',
         hello: 'Cześć! Jestem Cadenza. Opowiedz, jaka ma być Twoja strona — albo wskaż coś na stronie i powiedz, co zmienić.',
         suggestions: ['Strona mojej kawiarni z menu i godzinami otwarcia', 'Portfolio moich zdjęć z podróży', 'Strona, która wytłumaczy fotosyntezę na poziomie matury'],
@@ -168,6 +168,7 @@ class Studio {
     </div>
     <a href="/_cadenza/dashboard" data-cz="dashboard" title="${t('dashboard')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('dashboard')}</a>
     <button type="button" data-cz="tab-history" title="${t('history')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('clock')}</button>
+    <button type="button" data-cz="phone-view" title="${t('phoneView')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('phone')}</button>
     <button type="button" data-cz="new" title="${t('newChat')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('plus')}</button>
     <button type="button" data-cz="collapse" title="${t('collapse')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('minimize')}</button>
     <button type="button" data-cz="hide" title="${t('hide')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('x')}</button>
@@ -212,6 +213,9 @@ class Studio {
         this.el('hide').addEventListener('click', () => this.setState('hidden'));
         this.el('show').addEventListener('click', () => this.setState('open'));
         this.el('new').addEventListener('click', () => this.newConversation());
+        this.el('phone-view').addEventListener('click', () => this.phoneView());
+        // The phone follows the page (and the sketch) the owner moves to.
+        document.addEventListener('turbo:load', () => { if (this.phoneOpen) this.phoneView(true); });
         this.el('tab-history').addEventListener('click', () => this.toggleHistory());
         this.el('attach').addEventListener('click', () => this.el('file').click());
         this.el('file').addEventListener('change', (e) => { this.addFiles([...e.target.files]); e.target.value = ''; });
@@ -733,7 +737,29 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
             case 'toast':
                 this.toast(cmd.text);
                 break;
+            case 'phoneView':
+                if (cmd.path) await this.uiCommand({ command: 'navigate', path: cmd.path });
+                this.phoneView(true);
+                break;
         }
+    }
+
+    /** The page being looked at (with its sketch), as a phone shows it: a frame of phone size beside the panel. */
+    phoneView(open = null) {
+        let box = document.querySelector('[data-cz-phone-view]');
+        box?.remove();
+        this.phoneOpen = open ?? !this.phoneOpen;
+        if (!this.phoneOpen) return;
+        const url = new URL(location.href);
+        url.searchParams.set('cz_embed', '1');
+        box = document.createElement('div');
+        box.dataset.czPhoneView = '';
+        box.className = 'cz-ui fixed bottom-4 left-4 z-[60] flex flex-col items-center gap-2';
+        box.innerHTML = `<div class="rounded-[2.2rem] border-[10px] border-neutral-900 bg-neutral-900 shadow-2xl"><iframe title="${escapeHtml(t('phoneView'))}" class="block rounded-[1.5rem] bg-white" style="width:390px;height:min(760px,calc(100vh - 6rem))"></iframe></div>`
+            + `<button type="button" class="flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs shadow">${icon('x', 'size-3.5')}${escapeHtml(t('hide'))}</button>`;
+        box.querySelector('iframe').src = url.pathname + url.search;
+        box.querySelector('button').addEventListener('click', () => this.phoneView(false));
+        document.body.append(box);
     }
 
     async showSketch(draftId, path) {

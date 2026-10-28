@@ -84,7 +84,7 @@ final class WidgetsTest extends WebTestCase
         $crawler = $client->request('GET', '/');
         self::assertCount(2, $crawler->filter('iframe[data-cz-widget="cube"]'));
         $frame = $crawler->filter('[data-node-type="widget"] iframe');
-        self::assertSame('allow-scripts allow-pointer-lock', $frame->attr('sandbox'));
+        self::assertSame('allow-scripts allow-pointer-lock allow-downloads', $frame->attr('sandbox'));
         self::assertSame('/_cadenza/widget/cube?v=1', $frame->attr('data-src'));
         self::assertSame('true', $crawler->filter('[data-node-type="hero"] iframe')->attr('aria-hidden'), 'a background is decoration');
         self::assertSelectorTextContains('[data-node-type="widget"] figcaption', 'Drag to turn it');
@@ -125,5 +125,15 @@ final class WidgetsTest extends WebTestCase
         $site->publish((int) $sketch->draft->getId());
         $client->request('GET', '/');
         self::assertSame('/_cadenza/widget/cube?v=2', $client->getCrawler()->filter('[data-node-type="widget"] iframe')->attr('data-src'));
+
+        // Undo is a sketch too, and it brings back the widget's version of that time.
+        $undo = $site->propose([['op' => 'site.restore', 'version' => $site->currentNumber() - 1]], 'Undo');
+        self::assertTrue($undo->isValid(), implode("\n", $undo->errors));
+        $client->request('GET', '/');
+        self::assertSame('/_cadenza/widget/cube?v=2', $client->getCrawler()->filter('[data-node-type="widget"] iframe')->attr('data-src'), 'not before approval');
+        $site->publish((int) $undo->draft->getId());
+        $client->request('GET', '/');
+        self::assertSame('/_cadenza/widget/cube?v=1', $client->getCrawler()->filter('[data-node-type="widget"] iframe')->attr('data-src'));
+        self::assertFalse($site->propose([['op' => 'site.restore', 'version' => 99]], 'Nope')->isValid());
     }
 }

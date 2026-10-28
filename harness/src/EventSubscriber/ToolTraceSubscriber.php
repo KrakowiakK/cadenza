@@ -40,6 +40,7 @@ final class ToolTraceSubscriber
         'create_widget' => ['en' => 'Programming', 'pl' => 'Programuję'],
         'leaderboard' => ['en' => 'Reading the leaderboard', 'pl' => 'Sprawdzam tablicę wyników'],
         'widget_status' => ['en' => 'Checking the widgets', 'pl' => 'Sprawdzam elementy'],
+        'check_on_phone' => ['en' => 'Looking at it on a phone', 'pl' => 'Sprawdzam na telefonie'],
         'pending_sketches' => ['en' => 'Looking at waiting sketches', 'pl' => 'Przeglądam szkice'],
         'discard_sketches' => ['en' => 'Throwing sketches away', 'pl' => 'Usuwam szkice'],
         'add_document' => ['en' => 'Putting the document on the site', 'pl' => 'Dodaję dokument do strony'],

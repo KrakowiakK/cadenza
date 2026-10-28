@@ -71,7 +71,7 @@ final class WidgetController
         return new Response($html, 200, [
             'Content-Type' => 'text/html; charset=utf-8',
             'Content-Security-Policy' => implode('; ', [
-                'sandbox allow-scripts allow-pointer-lock',
+                'sandbox allow-scripts allow-pointer-lock allow-downloads',
                 'default-src \'none\'',
                 'script-src \'unsafe-inline\' '.$origin.'/_cadenza/widget-lib/',
                 'style-src \'unsafe-inline\' https://fonts.googleapis.com',

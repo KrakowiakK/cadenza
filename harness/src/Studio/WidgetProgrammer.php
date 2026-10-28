@@ -72,6 +72,8 @@ final class WidgetProgrammer
         own canvas drawing in the site's colours.
         Charts (Chart.js): responsive with maintainAspectRatio false, the site's colours, tooltips, numbers in the
         site's language format.
+        A download the visitor asked for (their drawing, a mandala as a picture): an <a download="name.png"> with a
+        canvas.toDataURL() / blob URL, clicked by the visitor's own button.
         No alert(), confirm() or prompt() (they are blocked): use your own overlays. Robust code: no undefined variables, every function you call exists, no placeholders or TODOs. Aim for a
         complete result in at most ~500 lines.
         TXT;

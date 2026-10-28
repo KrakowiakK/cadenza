@@ -17,7 +17,7 @@ final class ToolboxTest extends KernelTestCase
             $tools = static::getContainer()->get('ai.fault_tolerant_toolbox.'.$agent)->getTools();
             $names = array_map(static fn ($tool): string => $tool->getName(), $tools);
 
-            foreach (['propose_changes', 'create_widget', 'leaderboard', 'widget_status', 'translate_page', 'pending_sketches', 'discard_sketches'] as $name) {
+            foreach (['propose_changes', 'create_widget', 'leaderboard', 'widget_status', 'translate_page', 'pending_sketches', 'discard_sketches', 'check_on_phone'] as $name) {
                 self::assertContains($name, $names, $agent);
             }
             foreach ($tools as $tool) {

@@ -17,7 +17,7 @@ use Cadenza\Runtime\Theme\Theme;
  */
 final class OperationApplier
 {
-    public const OPERATIONS = ['page.create', 'page.update', 'page.delete', 'node.insert', 'node.replace', 'node.update', 'node.move', 'node.remove', 'theme.update', 'site.update', 'widget.use'];
+    public const OPERATIONS = ['page.create', 'page.update', 'page.delete', 'node.insert', 'node.replace', 'node.update', 'node.move', 'node.remove', 'theme.update', 'site.update', 'site.restore', 'widget.use'];
 
     /** @var array<string, true> */
     private array $usedIds = [];
@@ -131,6 +131,8 @@ final class OperationApplier
             'theme.update' => $this->themeUpdate($doc, $op),
             'site.update' => $this->siteUpdate($doc, $op),
             'widget.use' => $this->widgetUse($doc, $op),
+            'site.restore' => throw new OperationException('the version to restore does not exist (see the history in site_overview).'),
+            'site.replace' => $this->siteReplace($op),
             default => throw new OperationException(\sprintf('unknown operation, use one of %s.', implode(', ', self::OPERATIONS))),
         };
     }
@@ -376,6 +378,19 @@ final class OperationApplier
         $doc['theme'] = $theme;
 
         return $doc;
+    }
+
+    /**
+     * The whole site as it was in an earlier version (SiteManager turns "site.restore" into this).
+     */
+    private function siteReplace(array $op): array
+    {
+        $document = $op['document'] ?? null;
+        if (!\is_array($document) || !\is_array($document['pages'] ?? null) || !\is_array($document['theme'] ?? null)) {
+            throw new OperationException('use "site.restore" with the number of a published version.');
+        }
+
+        return $document;
     }
 
     /**
