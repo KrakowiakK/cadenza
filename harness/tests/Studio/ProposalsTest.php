@@ -30,6 +30,10 @@ final class ProposalsTest extends TestCase
         self::assertSame('Nowa podstrona „Nasze podróże”.', Proposals::cleanSummary("Nowa podstrona „Nasze podróże”.</"));
         self::assertSame('Ceny < 50 zł bez zmian', Proposals::cleanSummary('<b>Ceny < 50 zł</b> bez  zmian'));
         self::assertSame('Changes', Proposals::cleanSummary(' </p> '));
+        self::assertSame('"EN" version of /gry', Proposals::cleanSummary('"EN" version of /gry'));
+        self::assertSame('Wersja "EN"', Proposals::cleanSummary('Wersja "EN"'));
+        self::assertSame('Formularz zapisów, do 12 osób', Proposals::cleanSummary('Formularz zapisów, do 12 osób">'));
+        self::assertSame('Cały cytat', Proposals::cleanSummary('"Cały cytat"'));
         self::assertSame('Zapisy na trzy warsztaty listopadowe', Proposals::cleanSummary('Zapisy na trzy warsztaty listopadowe]]'));
     }
 }

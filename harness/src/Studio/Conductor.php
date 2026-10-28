@@ -62,9 +62,17 @@ final class Conductor
         if ('pl' !== substr($language, 0, 2)) {
             return [];
         }
-        preg_match_all('~[\p{Cyrillic}\p{Greek}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}\p{Arabic}]+|(?<![\p{L}/_.-])(?:weitere|und|oder|nicht|ajout\p{L}*|the|owners?|site|drafts?|sketch|widgets?|live|preview|layout|feedback|create_\w+|propose_\w+)(?![\p{L}/_-]|\.\p{L})~iu', $text, $m);
+        preg_match_all('~`[a-z0-9_-]+`|[\p{Cyrillic}\p{Greek}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}\p{Arabic}]+|(?<![\p{L}/_.-])(?:weitere|und|oder|nicht|ajout\p{L}*|the|owners?|site|drafts?|sketch|widgets?|live|preview|layout|feedback|create_\w+|propose_\w+)(?![\p{L}/_-]|\.\p{L})~iu', $text, $m);
 
         return array_values(array_unique($m[0]));
+    }
+
+    /**
+     * Leftovers of a model's chat template that sometimes end up in the text ("<|im_end|>", "tool_calls_section_end").
+     */
+    public static function withoutModelTokens(string $text): string
+    {
+        return trim((string) preg_replace(['~<\|[a-z_]+\|>~i', '~\|?\b(?:tool_calls?_(?:section_)?(?:begin|end)|tool_call_(?:begin|end)|im_(?:start|end))\b\|?~i'], '', $text));
     }
 
     /**
@@ -78,7 +86,7 @@ final class Conductor
         }
         try {
             $fixed = trim($this->platform->invoke($this->model, new MessageBag(Message::forSystem('You correct texts. Answer with the corrected text only.'), Message::ofUser(\sprintf(
-                "This Polish message has words in another language (%s). Replace them with natural Polish words (\"szkic\" for draft/sketch, \"strona\" for site, \"widżet\" for widget, drop tool names), fix obvious typos, change nothing else, keep the formatting:\n\n%s",
+                "This Polish message has words in another language (%s). Replace them with natural Polish words (\"szkic\" for draft/sketch, \"strona\" for site, \"widżet\" for widget; a `code-name` becomes the thing's plain name, e.g. `tetris-game` → Tetris; drop tool names), fix obvious typos, change nothing else, keep the formatting:\n\n%s",
                 implode(', ', $words), $text))), str_contains($this->model, '/') ? ['reasoning' => ['enabled' => false]] : [])->asText());
         } catch (\Throwable) {
             return $text;
@@ -161,6 +169,7 @@ final class Conductor
                 ? ($pl ? 'Szkic jest gotowy — zobacz go na stronie i zatwierdź albo napisz, co zmienić.' : 'The sketch is ready — have a look on the page and approve it, or tell me what to change.')
                 : ($pl ? 'Gotowe. Napisz, jeśli mam coś jeszcze zrobić.' : 'Done. Tell me if there is anything else.');
         }
+        $text = self::withoutModelTokens($text);
         $text = $this->polish($text, $this->turn->language);
 
         $conversation->addAssistantTurn(trim($text), array_map(static fn ($p) => $p->getId(), $this->turn->proposals));
@@ -179,7 +188,7 @@ final class Conductor
      */
     private function systemPrompt(Conversation $conversation, array $context): string
     {
-        $language = 'the language the owner writes in (their interface is in '.('pl' === ($context['language'] ?? 'en') ? 'Polish' : 'English').')';
+        $language = 'pl' === substr($this->turn->language, 0, 2) ? 'Polish' : ('en' === substr($this->turn->language, 0, 2) ? 'English (the owner writes in English now)' : 'the language the owner writes in');
         $open = $this->proposals->open($conversation);
         $openLines = array_map(static fn ($p): string => \sprintf('- draft %d: "%s" (page %s)', $p->getDraftId(), $p->getSummary(), $p->getFocusPath()), $open);
         $outline = $this->site->outline();
