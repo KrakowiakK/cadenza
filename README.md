@@ -199,8 +199,8 @@ name's query string. Widgets: `CADENZA_CODE_MODEL` (the model that writes their 
 Breakout with power-ups and a memory game, each written, played in Chrome and reviewed), `beam` wrote both working
 (about 1–3 minutes each); `gpt-oss:120b` was faster but one game crashed on load, and `nemotron-3-ultra` took six
 minutes and left the memory board empty — so the code model defaults to the main one. Replies in Polish are proofread by
-`CADENZA_PROOFREAD_MODEL` (default: the review model; Gemma's Polish is cleaner than the main model's), a pass that
-fixes words and forms and changes nothing else.
+`CADENZA_PROOFREAD_MODEL` (default: the review model; `bin/serve-with-1password` uses `gpt-oss:120b`, which fixed
+spelling and forms best of the free models we tried), a pass that fixes words and forms and changes nothing else.
 
 Smaller and free models make mistakes in tool arguments (numbers as strings, JSON as strings, extra brackets). The
 studio tolerates them on purpose (`LenientArgumentResolver`, `JsonRepair`) and enforces the important rules in code.

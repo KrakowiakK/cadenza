@@ -110,8 +110,8 @@ final class Conductor
             return $text;
         }
         try {
-            $fixed = trim($this->platform->invoke($model, new MessageBag(Message::forSystem('Jesteś korektorką. Odpowiadasz wyłącznie poprawionym tekstem, bez komentarzy.'), Message::ofUser(\sprintf(
-                "Popraw ten tekst do właścicielki strony: literówki, błędy gramatyczne, dziwne lub nieistniejące słowa i wtrącenia z innych języków%s zamień na naturalną polszczyznę (\"szkic\" zamiast draft/sketch, \"strona\" zamiast site; nazwę w `backtickach` zamień na zwykłą nazwę rzeczy, np. `tetris-game` → Tetris). Do właścicielki zwracaj się bez zgadywania płci (\"możesz\", nie \"powinieneś\"); o sobie autorka pisze w rodzaju żeńskim. Nie zmieniaj treści, faktów, liczb, nazw, adresów ani formatowania (Markdown zostaje). Odpowiedz samym poprawionym tekstem.\n\n%s",
+            $fixed = trim($this->platform->invoke($model, new MessageBag(Message::forSystem('Jesteś korektorem języka polskiego. Zwracasz wyłącznie poprawiony tekst.'), Message::ofUser(\sprintf(
+                "Tekst poniżej napisała asystentka do właściciela strony; model czasem wstawia literówki, błędne lub nieistniejące słowa i wtrącenia z innych języków%s. Przepisz go poprawną, naturalną polszczyzną, nie zmieniając treści, liczb, nazw, adresów ani formatowania Markdown. Do właściciela zwracaj się bez zgadywania płci (\"możesz\", nie \"powinieneś\"); asystentka pisze o sobie w rodzaju żeńskim. \"Szkic\" zamiast draft/sketch; nazwę w `backtickach` zamień na zwykłą nazwę rzeczy (np. `tetris-game` → Tetris). Zwróć tylko tekst.\n\n%s",
                 [] !== $words ? ' (np. '.implode(', ', $words).')' : '', $text))), ['max_tokens' => 2000] + (str_contains($model, '/') ? ['reasoning' => ['enabled' => false]] : []))->asText());
         } catch (\Throwable) {
             return $text;
