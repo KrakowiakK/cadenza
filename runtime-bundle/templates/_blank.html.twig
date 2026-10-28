@@ -1,17 +1,18 @@
+{%- set lang = cadenza_state().language -%}
 <section class="relative flex min-h-[70vh] items-center overflow-hidden">
     <div class="cz-canvas-grid absolute inset-0"></div>
     <div class="relative mx-auto max-w-2xl px-6 text-center">
         {%- if missing|default(false) %}
             <p class="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">404</p>
             <h1 class="cz-heading mt-3 text-4xl font-bold tracking-tight">{{ headline }}</h1>
-            <p class="mt-4 text-lg text-muted-foreground">This page does not exist yet.</p>
+            <p class="mt-4 text-lg text-muted-foreground">{{ 'blank.missing'|trans({}, 'cadenza', lang) }}</p>
         {%- else %}
             <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Cadenza</p>
-            <h1 class="cz-heading mt-3 text-4xl font-bold tracking-tight md:text-5xl">{{ headline|default('A blank canvas') }}</h1>
-            <p class="mt-4 text-lg text-muted-foreground">Nothing here yet.</p>
+            <h1 class="cz-heading mt-3 text-4xl font-bold tracking-tight md:text-5xl">{{ headline|default('blank.title'|trans({}, 'cadenza', lang)) }}</h1>
+            <p class="mt-4 text-lg text-muted-foreground">{{ 'blank.empty'|trans({}, 'cadenza', lang) }}</p>
         {%- endif %}
         {%- if cadenza_state().owner %}
-            <p class="mt-8 text-muted-foreground" data-cz-blank-hint>Describe what you want in the bar below — or drop your photos, a spreadsheet or a document.</p>
+            <p class="mt-8 text-muted-foreground" data-cz-blank-hint>{{ 'blank.hint'|trans({}, 'cadenza', lang) }}</p>
         {%- endif %}
     </div>
 </section>

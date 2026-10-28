@@ -50,3 +50,8 @@ members:
     added: Dodano.
     removed: Usunięto.
     hello: Cześć
+blank:
+    title: Czysta karta
+    empty: Jeszcze nic tu nie ma.
+    missing: Tej strony jeszcze nie ma.
+    hint: 'Opisz w pasku na dole, czego potrzebujesz — albo wrzuć zdjęcia, arkusz lub dokument. Np. „strona mojej kawiarni z menu i godzinami otwarcia”.'

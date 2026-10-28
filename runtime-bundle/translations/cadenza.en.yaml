@@ -50,3 +50,8 @@ members:
     added: Added.
     removed: Removed.
     hello: Hi
+blank:
+    title: A blank canvas
+    empty: Nothing here yet.
+    missing: This page does not exist yet.
+    hint: 'Describe what you want in the bar below — or drop your photos, a spreadsheet or a document. E.g. "a website for my café with the menu and opening hours".'
