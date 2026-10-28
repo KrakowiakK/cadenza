@@ -175,7 +175,7 @@ class Studio {
   <form data-cz="form" class="border-t border-border p-3">
     <div data-cz="chips" class="mb-2 hidden flex-wrap gap-1.5"></div>
     <div data-cz="attachments" class="mb-2 hidden flex-wrap gap-2"></div>
-    <input type="file" data-cz="file" accept="image/*,.zip,application/zip" multiple class="hidden">
+    <input type="file" data-cz="file" accept="image/*,.zip,application/zip,.xlsx,.xls,.ods,.csv" multiple class="hidden">
     <div class="flex items-end gap-2 rounded-xl border border-border bg-muted/40 p-1.5 focus-within:border-foreground/30">
       <div class="flex shrink-0 flex-col">
         <button type="button" data-cz="pick" title="${t('pick')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-background hover:text-foreground">${icon('target')}</button>
@@ -343,7 +343,7 @@ class Studio {
     addUser(text, selection = [], attachments = []) {
         const el = document.createElement('div');
         el.className = 'cz-msg ml-10 self-end rounded-2xl rounded-br-md bg-foreground px-3.5 py-2 text-background';
-        el.innerHTML = (attachments.length ? `<div class="mb-1.5 flex flex-wrap gap-1.5">${attachments.map((a) => a.url && !/\.zip$/.test(a.id ?? '') ? `<img src="${escapeHtml(a.url)}" alt="" class="h-16 max-w-28 rounded-lg bg-white object-cover">` : `<span class="flex items-center gap-1 rounded-lg bg-background/15 px-2 py-1 text-xs">${icon('clip', 'size-3.5')}${escapeHtml(a.name ?? a.id)}</span>`).join('')}</div>` : '') + (selection.length ? `<div class="mb-1 flex flex-wrap gap-1">${selection.map((s) => `<span class="rounded-md bg-background/15 px-1.5 py-0.5 text-[11px]">◎ ${escapeHtml(s.label)}</span>`).join('')}</div>` : '') + `<div class="whitespace-pre-wrap">${escapeHtml(text)}</div>`;
+        el.innerHTML = (attachments.length ? `<div class="mb-1.5 flex flex-wrap gap-1.5">${attachments.map((a) => a.url && !/\.(zip|xlsx|xls|ods|csv)$/.test(a.id ?? '') ? `<img src="${escapeHtml(a.url)}" alt="" class="h-16 max-w-28 rounded-lg bg-white object-cover">` : `<span class="flex items-center gap-1 rounded-lg bg-background/15 px-2 py-1 text-xs">${icon('clip', 'size-3.5')}${escapeHtml(a.name ?? a.id)}</span>`).join('')}</div>` : '') + (selection.length ? `<div class="mb-1 flex flex-wrap gap-1">${selection.map((s) => `<span class="rounded-md bg-background/15 px-1.5 py-0.5 text-[11px]">◎ ${escapeHtml(s.label)}</span>`).join('')}</div>` : '') + `<div class="whitespace-pre-wrap">${escapeHtml(text)}</div>`;
         this.messages.append(el);
         this.scrollDown();
     }
@@ -994,7 +994,7 @@ ${data.purpose ? `<div class="mt-0.5 text-xs text-muted-foreground">${escapeHtml
 
     async addFiles(files) {
         for (const file of files.slice(0, 6)) {
-            const isZip = /\.zip$/i.test(file.name) || file.type === 'application/zip';
+            const isZip = /\.(zip|xlsx|xls|ods|csv)$/i.test(file.name) || file.type === 'application/zip';
             const item = { id: null, kind: isZip ? 'file' : 'photo', name: file.name, url: isZip ? null : URL.createObjectURL(file), uploading: true };
             this.attachments.push(item);
             this.renderAttachments();

@@ -35,7 +35,7 @@ final class MediaController
         try {
             $file = $request->files->get('file');
             if (null !== $file) {
-                $isZip = str_ends_with(strtolower($file->getClientOriginalName()), '.zip') || 'application/zip' === $file->getMimeType();
+                $isZip = (bool) preg_match('/\.(zip|xlsx|xls|ods|csv)$/i', $file->getClientOriginalName()) || 'application/zip' === $file->getMimeType();
                 if ($file->getSize() > ($isZip ? 500 : 25) * 1024 * 1024) {
                     return new JsonResponse(['error' => 'The file is too large.'], 413);
                 }

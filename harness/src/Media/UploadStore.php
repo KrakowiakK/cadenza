@@ -49,21 +49,26 @@ final class UploadStore
      */
     public function saveFile(string $sourcePath, string $name): array
     {
-        if (!str_starts_with((string) file_get_contents($sourcePath, false, null, 0, 4), "PK\x03\x04")) {
-            throw new \InvalidArgumentException('Only images and ZIP archives are supported.');
-        }
+        $ext = strtolower(pathinfo($name, \PATHINFO_EXTENSION));
+        $zip = str_starts_with((string) file_get_contents($sourcePath, false, null, 0, 4), "PK\x03\x04");
+        $ext = match (true) {
+            \in_array($ext, ['xlsx', 'ods'], true) && $zip => $ext,
+            \in_array($ext, ['xls', 'csv'], true) => $ext,
+            $zip => 'zip',
+            default => throw new \InvalidArgumentException('Supported files: images, ZIP archives and spreadsheets (XLSX, XLS, ODS, CSV).'),
+        };
         if (!is_dir($this->directory)) {
             mkdir($this->directory, 0o775, true);
         }
-        $id = strtolower((string) new Ulid()).'.zip';
+        $id = strtolower((string) new Ulid()).'.'.$ext;
         copy($sourcePath, $this->directory.'/'.$id);
 
-        return ['id' => $id, 'url' => $this->url($id), 'name' => $name, 'mime' => 'application/zip', 'size' => (int) filesize($this->directory.'/'.$id)];
+        return ['id' => $id, 'url' => $this->url($id), 'name' => $name, 'mime' => 'zip' === $ext ? 'application/zip' : 'spreadsheet', 'size' => (int) filesize($this->directory.'/'.$id)];
     }
 
     public function path(string $id): ?string
     {
-        if (!preg_match('/^[a-z0-9]{26}\.(jpg|png|webp|gif|zip)$/', $id)) {
+        if (!preg_match('/^[a-z0-9]{26}\.(jpg|png|webp|gif|zip|xlsx|xls|ods|csv)$/', $id)) {
             return null;
         }
         $path = $this->directory.'/'.$id;
@@ -82,7 +87,7 @@ final class UploadStore
     public function forModel(string $id): ?string
     {
         $path = $this->path($id);
-        if (null === $path || str_ends_with($id, '.zip')) {
+        if (null === $path || !preg_match('/\.(jpg|png|webp|gif)$/', $id)) {
             return null;
         }
         $bytes = (string) file_get_contents($path);

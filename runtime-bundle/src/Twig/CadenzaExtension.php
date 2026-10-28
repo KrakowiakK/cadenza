@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cadenza\Runtime\Twig;
 
 use Cadenza\Runtime\Catalog\Catalog;
+use Cadenza\Runtime\Collection\Collections;
 use Cadenza\Runtime\Media\MediaLibrary;
 use Cadenza\Runtime\Site\Document;
 use Cadenza\Runtime\Theme\Theme;
@@ -26,6 +27,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         #[Autowire('%cadenza.token%')]
         private readonly string $token,
         private readonly MediaLibrary $media,
+        private readonly Collections $collections,
         private readonly ?IconRendererInterface $icons = null,
         private readonly ?\Psr\Log\LoggerInterface $logger = null,
     ) {
@@ -46,6 +48,10 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
             new TwigFunction('cadenza_nav', static fn (array $doc): array => Document::navItems($doc)),
             new TwigFunction('cadenza_state', fn (): RenderState => $this->state),
             new TwigFunction('cadenza_media', fn (array $p): array => $this->media->query($p['source'] ?? null, $p['tag'] ?? null, $p['year'] ?? null, $p['sort'] ?? 'newest', (int) ($p['limit'] ?? 60), $p['album'] ?? null)),
+            new TwigFunction('cadenza_collection', fn (string $slug): ?\Cadenza\Runtime\Entity\Collection => $this->collections->get($slug)),
+            new TwigFunction('cadenza_records', fn (\Cadenza\Runtime\Entity\Collection $c, int $limit = 500): array => $this->collections->records($c, $limit)),
+            new TwigFunction('cadenza_categories', fn (\Cadenza\Runtime\Entity\Collection $c, string $field): array => $this->collections->categories($c, $field)),
+            new TwigFunction('cadenza_format', static fn (string $type, mixed $value): string => Collections::format($type, $value)),
             new TwigFunction('cadenza_icon', $this->icon(...), ['is_safe' => ['html']]),
         ];
     }
@@ -96,14 +102,22 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
      */
     public function icon(?string $name, string $class = 'size-4'): string
     {
-        if (null === $this->icons || null === $name || !preg_match('/^[a-z0-9-]+(:[a-z0-9-]+)?$/', $name)) {
+        if (null === $this->icons || null === $name || '' === trim($name)) {
             return '';
         }
-        try {
-            return $this->icons->renderIcon(str_contains($name, ':') ? $name : 'lucide:'.$name, ['class' => $class, 'aria-hidden' => 'true']);
-        } catch (\Throwable) {
+        // Models often use React-style names ("MapPin", "lucide-coffee"): make them Iconify names ("map-pin").
+        $name = strtolower((string) preg_replace(['/^lucide[-:]/i', '/([a-z0-9])([A-Z])/', '/[\s_]+/'], ['', '$1-$2', '-'], trim($name)));
+        if (!preg_match('/^[a-z0-9-]+(:[a-z0-9-]+)?$/', $name)) {
             return '';
         }
+        foreach ([str_contains($name, ':') ? $name : 'lucide:'.$name, 'lucide:sparkles'] as $candidate) {
+            try {
+                return $this->icons->renderIcon($candidate, ['class' => $class, 'aria-hidden' => 'true']);
+            } catch (\Throwable) {
+            }
+        }
+
+        return '';
     }
 
     /**

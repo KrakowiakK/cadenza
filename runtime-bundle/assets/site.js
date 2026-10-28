@@ -53,3 +53,41 @@ document.addEventListener('click', (e) => {
         quiz.querySelector('[data-cz-score]').hidden = false;
     }
 });
+
+/*
+ * Collections: search, filter chips and sortable table columns, all in the browser.
+ */
+const applyCollection = (box) => {
+    const term = (box.querySelector('[data-search]')?.value ?? '').trim().toLowerCase();
+    const active = box.querySelector('[data-filter][data-active]')?.dataset.filter ?? '';
+    box.querySelectorAll('[data-item]').forEach((item) => {
+        item.hidden = (term && !item.dataset.text.includes(term)) || (active && item.dataset.category !== active);
+    });
+};
+document.addEventListener('input', (e) => {
+    if (e.target.matches('[data-cz-collection] [data-search]')) applyCollection(e.target.closest('[data-cz-collection]'));
+});
+document.addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-cz-collection] [data-filter]');
+    if (chip) {
+        chip.parentElement.querySelectorAll('[data-filter]').forEach((c) => c.toggleAttribute('data-active', c === chip));
+        applyCollection(chip.closest('[data-cz-collection]'));
+        return;
+    }
+    const th = e.target.closest('[data-cz-sortable] th[data-sort]');
+    if (!th) return;
+    const table = th.closest('table');
+    const index = Number(th.dataset.sort);
+    const numeric = th.dataset.numeric === '1';
+    const dir = th.dataset.dir === 'asc' ? 'desc' : 'asc';
+    table.querySelectorAll('th[data-sort]').forEach((h) => delete h.dataset.dir);
+    th.dataset.dir = dir;
+    const rows = [...table.tBodies[0].rows];
+    rows.sort((a, b) => {
+        const x = a.cells[index]?.dataset.value ?? '';
+        const y = b.cells[index]?.dataset.value ?? '';
+        const r = numeric ? (parseFloat(x) || 0) - (parseFloat(y) || 0) : x.localeCompare(y, document.documentElement.lang || 'pl');
+        return dir === 'asc' ? r : -r;
+    });
+    table.tBodies[0].append(...rows);
+});

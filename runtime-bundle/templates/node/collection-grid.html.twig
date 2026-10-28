@@ -1,0 +1,41 @@
+{%- set c = cadenza_collection(props.collection) -%}
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+{%- if c is null %}
+    <div class="cz-empty-slot">Collection “{{ props.collection }}” does not exist (yet).</div>
+{%- else %}
+    {%- set cols = {2: 'sm:grid-cols-2', 3: 'sm:grid-cols-2 lg:grid-cols-3', 4: 'sm:grid-cols-2 lg:grid-cols-4'} -%}
+    {%- set filter = props.filterBy and c.field(props.filterBy) ? props.filterBy : null -%}
+    <div data-cz-collection>
+        {%- if props.search or filter %}
+        <div class="mb-8 flex flex-wrap items-center gap-2">
+            {%- if filter %}
+                <button type="button" data-filter="" class="rounded-full border border-current/15 px-4 py-1.5 text-sm data-[active]:border-primary data-[active]:bg-primary data-[active]:text-primary-foreground" data-active>✱</button>
+                {%- for value in cadenza_categories(c, filter) %}<button type="button" data-filter="{{ value }}" class="rounded-full border border-current/15 px-4 py-1.5 text-sm transition hover:border-primary data-[active]:border-primary data-[active]:bg-primary data-[active]:text-primary-foreground">{{ value }}</button>{% endfor %}
+            {%- endif %}
+            {%- if props.search %}<input type="search" data-search placeholder="⌕" class="ml-auto h-10 w-full rounded-full border border-current/15 bg-background px-4 text-sm outline-none focus:border-primary sm:w-64">{% endif %}
+        </div>
+        {%- endif %}
+        <div class="grid grid-cols-1 gap-6 {{ cols[props.columns] }}">
+            {%- for r in cadenza_records(c, props.limit) %}
+                {%- set tag = props.links ? 'a' : 'div' -%}
+                <{{ tag }}{% if props.links %} href="/{{ c.slug }}/{{ r.slug }}"{% endif %} class="cz-card group flex flex-col overflow-hidden" data-item data-category="{{ filter ? r.get(filter) : '' }}" data-text="{{ r.data|map(v => v is iterable ? '' : v)|join(' ')|lower }}">
+                    {%- if r.image %}<div class="aspect-[4/3] overflow-hidden"><img src="{{ r.image }}" alt="{{ r.title }}" loading="lazy" class="h-full w-full object-cover transition duration-500 group-hover:scale-105"></div>{% endif %}
+                    <div class="flex flex-1 flex-col p-5">
+                        <h3 class="cz-heading text-lg font-semibold">{{ r.title }}</h3>
+                        {%- for key in props.fields %}
+                            {%- set f = c.field(key) -%}
+                            {%- if f and r.get(key) is not null and key != c.titleField %}
+                                {%- if f.type == 'price' %}<p class="cz-price mt-auto pt-3 text-lg font-semibold text-primary">{{ cadenza_format(f.type, r.get(key)) }}</p>
+                                {%- elseif f.type == 'bool' %}{% if r.get(key) %}<p class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">{{ cadenza_icon('check', 'size-3.5') }}{{ f.label }}</p>{% endif %}
+                                {%- elseif f.type == 'category' %}<p class="mt-2"><span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{{ r.get(key) }}</span></p>
+                                {%- else %}<p class="mt-2 text-sm opacity-70">{{ cadenza_format(f.type, r.get(key))|length > 140 ? cadenza_format(f.type, r.get(key))|slice(0, 140) ~ '…' : cadenza_format(f.type, r.get(key)) }}</p>{% endif %}
+                            {%- endif %}
+                        {%- endfor %}
+                    </div>
+                </{{ tag }}>
+            {%- endfor %}
+        </div>
+    </div>
+{%- endif %}
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

@@ -132,6 +132,9 @@ final class Conductor
             - When the owner attaches a drawn sketch, follow its layout faithfully (order of blocks, columns, what is
               big or small, labels) and fill it with real content. Never put the sketch itself on the site.
             - Pass operations as a JSON array of objects (not a string).
+            - The owner's data (products, menu, courses, events…) usually comes as a spreadsheet: read_spreadsheet,
+              import_spreadsheet, then a page with collection-grid (cards with filter chips by a category field and
+              search) or collection-table. Never copy rows into props by hand.
             - If something on the site fails or looks broken, check app_diagnostics (errors / requests) before guessing.
             - The owner's own photos (trips, Instagram, family…): first choice is photos_from_phone — a QR code, they
               pick photos on the phone, no accounts. Only if they want everything from Instagram at once, offer the
@@ -177,6 +180,10 @@ final class Conductor
             $lines[] = '[Event from the studio: '.json_encode($context['event'], \JSON_UNESCAPED_UNICODE).']';
         }
         foreach ($attachments as $i => $attachment) {
+            if (preg_match('/\.(xlsx|xls|ods|csv)$/', $attachment['id'])) {
+                $lines[] = \sprintf('[Attached spreadsheet, uploadId %s, name "%s" — read it with read_spreadsheet, import it with import_spreadsheet, then build a page with collection-grid/collection-table]', $attachment['id'], $attachment['name'] ?? '');
+                continue;
+            }
             if (str_ends_with($attachment['id'], '.zip')) {
                 $lines[] = \sprintf('[Attached archive, uploadId %s, name "%s" — an export file; import it with import_content]', $attachment['id'], $attachment['name'] ?? '');
                 continue;

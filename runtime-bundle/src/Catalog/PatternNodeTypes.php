@@ -126,6 +126,22 @@ final class PatternNodeTypes implements NodeTypeProviderInterface
             'image' => ['type' => 'image', 'default' => null],
         ]);
 
+        yield new NodeType('collection-grid', 'Collection grid', 'Pattern: records of a collection (from the owner\'s spreadsheet) as cards — products, dishes, events, courses — with optional search and filter chips; each card can open the record\'s own page.', 'pattern', $head + [
+            'collection' => ['type' => 'string', 'required' => true, 'description' => 'collection slug'],
+            'fields' => ['type' => 'list', 'of' => 'string', 'default' => [], 'description' => 'field keys shown on cards under the title (e.g. price, category)'],
+            'filterBy' => ['type' => 'string', 'default' => null, 'description' => 'category field for filter chips'],
+            'search' => ['type' => 'bool', 'default' => false],
+            'columns' => ['type' => 'enum', 'values' => [2, 3, 4], 'default' => 3],
+            'links' => ['type' => 'bool', 'default' => true, 'description' => 'cards open the record page'],
+            'limit' => ['type' => 'int', 'default' => 60],
+        ]);
+
+        yield new NodeType('collection-table', 'Collection table', 'Pattern: records of a collection as a sortable table with search (price lists, timetables, results, inventories).', 'pattern', $head + [
+            'collection' => ['type' => 'string', 'required' => true],
+            'fields' => ['type' => 'list', 'of' => 'string', 'default' => [], 'description' => 'columns in order; empty = all'],
+            'search' => ['type' => 'bool', 'default' => true],
+        ]);
+
         yield new NodeType('quiz', 'Quiz', 'Pattern: questions with answers to click; the visitor sees at once whether they were right, with an explanation, and a score at the end. For learning pages, trivia, "which product suits you".', 'pattern', $head + [
             'questions' => ['type' => 'list', 'items' => [
                 'question' => ['type' => 'string', 'required' => true],

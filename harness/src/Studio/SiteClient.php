@@ -150,6 +150,24 @@ final class SiteClient
     /**
      * @return array<string, mixed>
      */
+    public function analyzeSpreadsheet(string $fileUrl): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('spreadsheet_analyze', ['fileUrl' => $fileUrl]));
+    }
+
+    /**
+     * @param array<string, mixed> $options slug, name, fields, titleField, imageField, sheet
+     *
+     * @return array<string, mixed>
+     */
+    public function importCollection(string $fileUrl, array $options): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('collection_import', array_filter(['fileUrl' => $fileUrl] + $options, static fn (mixed $v): bool => null !== $v && '' !== $v && [] !== $v)));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function mediaStats(): array
     {
         return $this->json($this->mcp->get('site')->callTool('media_stats'));

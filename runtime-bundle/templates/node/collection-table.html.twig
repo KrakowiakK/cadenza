@@ -1,0 +1,33 @@
+{%- set c = cadenza_collection(props.collection) -%}
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+{% include '@CadenzaRuntime/node/_head.html.twig' %}
+{%- if c is null %}
+    <div class="cz-empty-slot">Collection “{{ props.collection }}” does not exist (yet).</div>
+{%- else %}
+    {%- set keys = props.fields is not empty ? props.fields : c.fields|map(f => f.key) -%}
+    <div data-cz-collection>
+        {%- if props.search %}<input type="search" data-search placeholder="⌕" class="mb-5 h-10 w-full rounded-full border border-current/15 bg-background px-4 text-sm outline-none focus:border-primary sm:w-72">{% endif %}
+        <div class="cz-card overflow-x-auto">
+            <table class="w-full text-left text-sm" data-cz-sortable>
+                <thead class="border-b border-current/10 text-xs uppercase tracking-wide opacity-70">
+                    <tr>{% for key in keys %}{% set f = c.field(key) %}{% if f %}<th class="cursor-pointer select-none px-4 py-3 font-semibold {{ f.type in ['price', 'number'] ? 'text-right' : '' }}" data-sort="{{ loop.index0 }}" data-numeric="{{ f.type in ['price', 'number'] ? 1 : 0 }}">{{ f.label }} <span class="opacity-40">↕</span></th>{% endif %}{% endfor %}</tr>
+                </thead>
+                <tbody class="divide-y divide-current/10">
+                    {%- for r in cadenza_records(c) %}
+                        <tr data-item data-text="{{ r.data|map(v => v is iterable ? '' : v)|join(' ')|lower }}" class="transition hover:bg-current/[.03]">
+                            {%- for key in keys %}{% set f = c.field(key) %}{% if f %}
+                                <td class="px-4 py-3 {{ f.type in ['price', 'number'] ? 'cz-price text-right' : '' }}" data-value="{{ r.get(key) is iterable ? '' : r.get(key) }}">
+                                    {%- if key == c.titleField %}<a href="/{{ c.slug }}/{{ r.slug }}" class="font-medium hover:underline">{{ r.title }}</a>
+                                    {%- elseif f.type == 'image' and r.get(key) %}<img src="{{ r.get(key) }}" alt="" class="size-10 rounded object-cover">
+                                    {%- elseif f.type == 'url' and r.get(key) %}<a href="{{ r.get(key) }}" class="text-primary hover:underline" target="_blank" rel="noopener">↗</a>
+                                    {%- else %}{{ cadenza_format(f.type, r.get(key)) }}{% endif -%}
+                                </td>
+                            {%- endif %}{% endfor %}
+                        </tr>
+                    {%- endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{%- endif %}
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}
