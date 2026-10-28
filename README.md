@@ -40,6 +40,12 @@ appears first as a **sketch on the live page**; nothing goes live until you appr
   - *Countdown* to an event with an *Add to calendar* file, and an *announcement bar* that hides itself after a date.
   - *Maps*: “our trips” drawn from the GPS of the owner's phone photos as a route in time order, or pins for addresses
     (venues, shops) located automatically.
+- **No ceiling: the agent writes new blocks.** When none of the patterns fits (*“a 4-week course plan with difficulty
+  shown as dots”*), the agent defines a new block type — a prop schema and a Twig template — and uses it in the sketch.
+  Its templates live in the database and run behind three walls: a separate Twig environment with no globals or
+  services, the **Twig sandbox** (allow-listed tags, filters and functions), and Symfony's **HtmlSanitizer** on the
+  output (no scripts, event handlers, styles, forms or foreign images). Tailwind picks up the new classes in the
+  background.
 - **Content that grows, by chat.** *“Add a post: the bus for guests leaves at 11:00”*, *“change the price of the vase
   to 140 zł”* — news, events, menus and products are collections the agent writes entry by entry. Every entry is a
   draft the owner sees marked on the page and publishes from a card in the panel; visitors keep the live version.
@@ -149,6 +155,7 @@ script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in th
 | **Symfony AI Mate** | the agent reads the app's logs and profiler, even when the app does not boot |
 | **Messenger, Scheduler, Workflow** | imports and events (`MediaImported`, `FormSubmitted`); daily sync of connected accounts; the proposal state machine |
 | **Security, Translation** | the owner's sign-in (form login, login throttling, remember-me, stateless CSRF), first-run setup; members' passwordless login links; texts in the site's language |
+| **Twig Sandbox, HtmlSanitizer** | blocks the agent writes itself: allow-listed Twig in an isolated environment, sanitised output |
 | **RateLimiter, Mailer** | visitors' forms: a sliding window per address against bots, an optional note to the owner |
 | **UX Toolkit (shadcn), Twig/Live Components, Turbo, Icons** | patterns, the panel, View Transitions between versions |
 | **Doctrine, Uid, HttpClient, PhpSpreadsheet** | drafts and versions, media, collections; spreadsheets in (collections) and out (form answers) |
@@ -187,7 +194,8 @@ examples/                sample files to try
 ## Known limitations
 
 - A full page from a free cloud model takes 1–4 minutes; local or paid models are much faster.
-- Generating new code blocks with the agent (spec §6.4) and Panther-based visual review are designed but not built.
+- Blocks the agent writes are templates, not PHP: they cannot run code or scripts (by design). Panther-based visual
+  review is designed but not built.
 - One owner account per site (Symfony Security: form login with CSRF, throttling, remember-me); run behind HTTPS
   before exposing it. The studio talks to the site with a shared token kept in `.env.local`.
 - Instagram Login needs a Meta app and a Business/Creator account; the export ZIP works for everyone.

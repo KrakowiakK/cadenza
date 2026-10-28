@@ -31,6 +31,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         private readonly \Cadenza\Runtime\Form\Forms $forms,
         private readonly \Cadenza\Runtime\Media\MapPoints $mapPoints,
         private readonly \Cadenza\Runtime\Media\FileLibrary $files,
+        private readonly \Cadenza\Runtime\Block\CustomBlocks $customBlocks,
         private readonly ?IconRendererInterface $icons = null,
         private readonly ?\Psr\Log\LoggerInterface $logger = null,
     ) {
@@ -187,7 +188,9 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
             $state = null;
         }
         try {
-            $inner = $twig->render($type->template(), ['node' => $node, 'props' => $props, 'type' => $type]);
+            $inner = 'custom' === $type->source
+                ? $this->customBlocks->render($type->name, $props, fn (string $name, string $class): string => $this->icon($name, $class))
+                : $twig->render($type->template(), ['node' => $node, 'props' => $props, 'type' => $type]);
         } catch (\Throwable $e) {
             // One broken block must not take the page down; the owner sees what failed, visitors see nothing.
             $this->logger?->error('Cadenza node {id} ({type}) failed to render: {message}', ['id' => $node['id'], 'type' => $node['type'], 'message' => $e->getMessage(), 'exception' => $e]);

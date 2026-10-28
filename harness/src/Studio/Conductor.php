@@ -167,6 +167,9 @@ final class Conductor
               read_answers and answer with the numbers. Set the site's language once (site.update "language").
             - Another language for visitors (tourists, foreign guests): translate_page for each page the owner wants,
               e.g. "/" and "/warsztaty" into "en". Never rewrite a page in another language by hand.
+            - No ceiling: when no built-in pattern fits what the owner asks for (a recipe card, a comparison table, a
+              training plan, a spec sheet…), write a new block with create_block, then use it in propose_changes.
+              Prefer built-in patterns when they fit; never fake a missing block with plain text.
             - How the site is doing (visits, popular pages, recent changes, health): site_overview.
             - Pages only for invited people (guests' accommodation, a club's materials, a class): set the page's
               "access": "members" (page.create or page.update) and invite people with guest_list. Members sign in

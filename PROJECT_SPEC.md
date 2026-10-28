@@ -580,6 +580,7 @@ Zrobione i działające end-to-end (sprawdzone w przeglądarce; testy: `./cadenz
 | Formularze: miejsca na każdy termin / zajęcia / slot (`limit` na polu wyboru) | ✅ |
 | Wersje językowe: `translate_page` (model tłumaczy tylko listę tekstów, drzewo odtwarzane), przełącznik języka, menu na język, teksty strony w języku podstrony; walidacja kotwic do sekcji | ✅ |
 | Dokumenty do pobrania (PDF/DOCX/ODT/PPTX): `add_document`, blok `downloads`, typ propsa `file`; menu na telefonie (`<details>`, bez JS) | ✅ |
+| Nowe bloki pisane przez agenta (§6.4 w wersji bezpiecznej): schemat propsów + szablon Twig w bazie, osobne środowisko Twig bez globali, Twig Sandbox, HtmlSanitizer, ikony po sanityzacji, test na przykładowych danych przed zapisem, Tailwind przebudowywany w tle (`BlockDefined`) | ✅ |
 | Mapa: podróże z GPS zdjęć (trasa w czasie, legenda) i miejsca z adresów (Nominatim z uproszczeniami) | ✅ |
 | Diagnostyka przez Symfony AI Mate, izolacja błędów renderu, model zapasowy, tolerancja błędów modeli (JsonRepair, lenient resolver), polityka narzędzi w kodzie | ✅ |
 | Uruchomienie jednym poleceniem, README EN, licencja MIT, lista zgłoszeń do upstreamu, scenariusz filmu | ✅ |

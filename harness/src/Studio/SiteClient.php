@@ -174,6 +174,16 @@ final class SiteClient
     }
 
     /**
+     * @param array<string, mixed> $props
+     *
+     * @return array<string, mixed>
+     */
+    public function defineBlock(string $name, string $label, string $description, array $props, string $template): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('block_define', ['name' => $name, 'label' => $label, 'description' => $description, 'props' => (object) $props, 'template' => $template]));
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function importFile(string $url, string $name): array

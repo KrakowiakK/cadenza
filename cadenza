@@ -63,6 +63,7 @@ setup() {
         (cd "$dir" && php bin/console doctrine:migrations:migrate --no-interaction --quiet --allow-no-migration)
     done
     step "demo-app: assets"
+    mkdir -p "$APP/var/cadenza/blocks" # templates of blocks the agent writes; a @source of the stylesheet
     (cd "$APP" && php bin/console importmap:install --quiet && php bin/console tailwind:build --quiet)
     (cd "$APP" && php bin/console cadenza:init "My site" --quiet || true)
 

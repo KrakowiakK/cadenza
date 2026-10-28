@@ -69,6 +69,7 @@ final class CadenzaRuntimeBundle extends AbstractBundle
                     'Cadenza\\Runtime\\Message\\RunImport' => 'async',
                     'Cadenza\\Runtime\\Message\\SyncConnections' => 'async',
                     'Cadenza\\Runtime\\Message\\FormSubmitted' => 'async',
+                    'Cadenza\\Runtime\\Message\\BlockDefined' => 'async',
                 ],
             ],
             // Visitors' forms: a few answers per address in a while is plenty for a person, too few for a bot.

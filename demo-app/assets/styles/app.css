@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @source "../../vendor/cadenza/runtime-bundle/templates";
 @source "../../vendor/cadenza/runtime-bundle/assets";
+@source "../../var/cadenza/blocks";
 
 @import '../vendor/tw-animate-css/dist/tw-animate.css';
 @import '../vendor/shadcn/dist/tailwind.css';

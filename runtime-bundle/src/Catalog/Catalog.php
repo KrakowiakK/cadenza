@@ -20,6 +20,14 @@ final class Catalog
     ) {
     }
 
+    /**
+     * Forget the known types (a block type was created or changed during this request).
+     */
+    public function reset(): void
+    {
+        $this->types = null;
+    }
+
     public function has(string $name): bool
     {
         return isset($this->all()[$name]);
