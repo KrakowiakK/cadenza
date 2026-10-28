@@ -32,13 +32,20 @@ appears first as a **sketch on the live page**; nothing goes live until you appr
   - *Free photos*: the agent offers a grid of Wikimedia Commons photos (Pexels/Unsplash with a key) with author and
     licence; one click puts the chosen one into the sketch. Images are always stored by the site, never hot-linked.
 - **A site that answers back.**
-  - *Forms* for RSVPs, sign-ups with limited places, orders, bookings, messages, surveys. Answers are validated against
+  - *Forms* for RSVPs, sign-ups with limited places (per form, or per date / class / time slot), orders, bookings,
+    messages, surveys. Answers are validated against
     the form's own fields, stored, and announced as a `FormSubmitted` event (optional e-mail to the owner). The owner sees
     them on the page — only they do — downloads them as Excel, or simply asks: *“How many guests are coming, how many
     vegetarian meals, who has allergies?”*
   - *Countdown* to an event with an *Add to calendar* file, and an *announcement bar* that hides itself after a date.
   - *Maps*: “our trips” drawn from the GPS of the owner's phone photos as a route in time order, or pins for addresses
     (venues, shops) located automatically.
+- **Content that grows, by chat.** *“Add a post: the bus for guests leaves at 11:00”*, *“change the price of the vase
+  to 140 zł”* — news, events, menus and products are collections the agent writes entry by entry. Every entry is a
+  draft the owner sees marked on the page and publishes from a card in the panel; visitors keep the live version.
+- **Other languages.** *“Lots of tourists come to Gdynia — make an English version.”* The page's texts are taken out
+  of its tree, the model translates only that list, and the same page is rebuilt at `/en/…` with a language switcher,
+  its own menu, and forms that speak English. Names of people, places and the business stay as they are.
 - **Pages for invited people only.** *“Make the accommodation page visible only to our guests”* — the page gets a lock;
   the owner adds guests (or tells the agent *“invite Kasia and Piotr…”*) and copies each one's personal sign-in link
   (Symfony login links: signed, expiring, no passwords). Strangers see a closed door that does not reveal what is
@@ -89,6 +96,9 @@ and ask for a shop, or click the phone icon and send photos from your phone (sam
 | “How many vegetarian meals do we need?” | reads the answers and replies with the numbers |
 | *(attaches a price list)* “Make a shop out of this.” | a collection with a page per product, cards with filter chips and search, three looks to choose from |
 | *(sends photos from the phone)* “Our trips on a map.” | albums per trip, a map with the route and the photos |
+| “A yoga studio in Gdynia… sign-ups for three November workshops, 10 places each.” | three looks to choose from; a form where each date shows its places left and closes when full |
+| “Lots of tourists come here — make an English version.” | `/en` with the same layout, an English menu and a PL/EN switcher |
+| “Add a news page for the guests: the bus from Warsaw leaves at 11:00…” | a news list sorted by date, posts as drafts to publish from the panel |
 | “A page that explains photosynthesis, with a quiz at the end.” | sections, steps, a quiz with explanations and a score |
 
 `./cadenza test` runs all test suites; `./cadenza reset` starts the site over; `./cadenza stop`.
