@@ -29,12 +29,16 @@ final class RenderState
     /** Language of the page being rendered (a translated page has its own), when known. */
     public ?string $pageLanguage = null;
 
+    /** The visitor's browser language (pl or en): used while the site has not chosen one. */
+    public string $visitorLanguage = 'en';
+
     /**
-     * Two-letter language for texts of the site itself (forms, countdowns, sign-in): the page's, else the site's.
+     * Two-letter language for texts of the site itself (forms, countdowns, sign-in): the page's, else the site's,
+     * else the visitor's.
      */
     public function language(): string
     {
-        return substr($this->pageLanguage ?? $this->document['language'] ?? 'pl', 0, 2);
+        return substr($this->pageLanguage ?? $this->document['language'] ?? $this->visitorLanguage, 0, 2);
     }
 
     public function isSketch(): bool

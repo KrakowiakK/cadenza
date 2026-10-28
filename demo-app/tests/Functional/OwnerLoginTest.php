@@ -18,7 +18,7 @@ final class OwnerLoginTest extends WebTestCase
 {
     public function testFirstRunSignOutAndSignIn(): void
     {
-        $client = static::createClient();
+        $client = static::createClient([], ['HTTP_ACCEPT_LANGUAGE' => 'pl-PL,pl;q=0.9,en;q=0.8']);
         $container = static::getContainer();
         $em = $container->get(EntityManagerInterface::class);
         $tool = new SchemaTool($em);
@@ -35,7 +35,10 @@ final class OwnerLoginTest extends WebTestCase
         // From the site's own computer, the login page leads to the setup screen.
         $client->request('GET', '/_cadenza/login');
         self::assertResponseRedirects('/_cadenza/setup');
-        $client->followRedirect();
+        $client->request('GET', '/_cadenza/setup', [], [], ['HTTP_ACCEPT_LANGUAGE' => 'en-GB,en;q=0.9']);
+        self::assertSelectorTextContains('h1', 'Create the owner account');
+        $client->request('GET', '/_cadenza/setup');
+        self::assertSelectorTextContains('h1', 'Utwórz konto właściciela');
         $client->submitForm('Utwórz konto i wejdź', ['email' => 'ania@example.com', 'password' => 'short', 'repeat' => 'short']);
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('[role=alert]', '10 znaków');
