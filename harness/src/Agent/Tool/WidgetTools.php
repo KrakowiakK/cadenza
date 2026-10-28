@@ -45,6 +45,10 @@ final class WidgetTools
         if ('' === trim($brief)) {
             return 'Nothing was built: describe in "brief" what it should be (or, for an existing one, what to change).';
         }
+        // A new widget much like one the site has (a second tic-tac-toe): the owner probably wants the existing one.
+        if (null !== $twin = $this->twinOf($name, $label)) {
+            return \sprintf('Nothing was built: the site already has "%s" (%s). Place it with propose_changes ({"type": "widget", "props": {"widget": "%s"}}); to change it, call create_widget with that name. Only if the owner wants a second, different one, call again with this label.', $twin['label'], $twin['name'], $twin['name']);
+        }
         // A widget takes a minute and a model call of its own: at most two per reply.
         if (++$this->turn->widgetBuilds > self::BUILDS_PER_REPLY) {
             return 'Nothing was built: no more widget builds in this reply. Place what is ready (propose_changes) or tell the owner plainly what is not done yet and offer to continue — never say it is done.';
@@ -92,6 +96,38 @@ final class WidgetTools
      * A new version of a widget the site already shows waits in a sketch, like every other change: the live site keeps
      * the approved one. When a sketch of this conversation is placing the widget, that sketch gets the new version.
      */
+    /** @var array<string, true> labels already warned about in this process (a second call means "yes, a new one") */
+    private array $warned = [];
+
+    /**
+     * An existing widget with nearly the same label as a new one.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function twinOf(string $name, string $label): ?array
+    {
+        $key = self::slug($label ?: $name);
+        if (isset($this->warned[$key])) {
+            return null;
+        }
+        foreach ($this->site->widgets() as $widget) {
+            if (($widget['name'] ?? null) === $name) {
+                return null; // a change of an existing one
+            }
+        }
+        foreach ($this->site->widgets() as $widget) {
+            $other = self::slug((string) ($widget['label'] ?? ''));
+            similar_text($key, $other, $percent);
+            if (\strlen($other) >= 5 && \strlen($key) >= 5 && ($percent >= 75 || str_starts_with($other, $key) || str_starts_with($key, $other)) && !preg_match('/-(?:[a-z]{2})$/', (string) $widget['name'])) {
+                $this->warned[$key] = true;
+
+                return $widget;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * The newest open sketch of this conversation that shows this widget (it is being worked on there).
      */
