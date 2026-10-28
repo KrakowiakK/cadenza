@@ -39,6 +39,10 @@ appears first as a **sketch on the live page**; nothing goes live until you appr
   - *Countdown* to an event with an *Add to calendar* file, and an *announcement bar* that hides itself after a date.
   - *Maps*: “our trips” drawn from the GPS of the owner's phone photos as a route in time order, or pins for addresses
     (venues, shops) located automatically.
+- **A dashboard for the owner** (grid icon in the panel): visits counted without cookies or personal data, answers to
+  forms with places taken, recent changes, content, and the application's health — errors in the logs, whether the
+  background worker is alive, jobs waiting or failed, imports, connected accounts. The agent reads the same numbers:
+  *“How is the site doing?”*
 - **Self-aware.** The agent reads the app's logs and profiler through **Symfony AI Mate**; one broken block never takes
   a page down; a busy model hands over to a fallback model.
 

@@ -573,6 +573,7 @@ Zrobione i działające end-to-end (sprawdzone w przeglądarce; testy: `./cadenz
 | Strona ucząca: interaktywny quiz | ✅ (LearningPath/Flashcards/AskThisPage — nie) |
 | Formularze odwiedzających (RSVP, zapisy z limitem miejsc, zamówienia, kontakt): walidacja względem pól, honeypot + RateLimiter, `FormSubmitted`, odpowiedzi widoczne tylko właścicielowi na stronie, eksport do Excela, agent odpowiada na pytania o odpowiedzi | ✅ |
 | Odliczanie z plikiem „Dodaj do kalendarza” (.ics), pasek ogłoszenia znikający po dacie, kotwice do sekcji, język strony | ✅ |
+| Pulpit właściciela: odwiedziny bez ciasteczek (właściciel, boty i prefetch nie liczone), odpowiedzi z formularzy, zmiany, zawartość, stan aplikacji (błędy w logach, puls workera przez `WorkerRunningEvent`, kolejka, importy); narzędzie agenta `site_overview` | ✅ |
 | Mapa: podróże z GPS zdjęć (trasa w czasie, legenda) i miejsca z adresów (Nominatim z uproszczeniami) | ✅ |
 | Diagnostyka przez Symfony AI Mate, izolacja błędów renderu, model zapasowy, tolerancja błędów modeli (JsonRepair, lenient resolver), polityka narzędzi w kodzie | ✅ |
 | Uruchomienie jednym poleceniem, README EN, licencja MIT, lista zgłoszeń do upstreamu, scenariusz filmu | ✅ |
