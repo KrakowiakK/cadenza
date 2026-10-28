@@ -10,10 +10,10 @@
         {%- if props.search or filter %}
         <div class="mb-8 flex flex-wrap items-center gap-2">
             {%- if filter %}
-                <button type="button" data-filter="" class="rounded-full border border-current/15 px-4 py-1.5 text-sm data-[active]:border-primary data-[active]:bg-primary data-[active]:text-primary-foreground" data-active>✱</button>
+                <button type="button" data-filter="" class="rounded-full border border-current/15 px-4 py-1.5 text-sm data-[active]:border-primary data-[active]:bg-primary data-[active]:text-primary-foreground" data-active>{{ cadenza_state().language == 'pl' ? 'Wszystkie' : 'All' }}</button>
                 {%- for value in cadenza_categories(c, filter) %}<button type="button" data-filter="{{ value }}" class="rounded-full border border-current/15 px-4 py-1.5 text-sm transition hover:border-primary data-[active]:border-primary data-[active]:bg-primary data-[active]:text-primary-foreground">{{ value }}</button>{% endfor %}
             {%- endif %}
-            {%- if props.search %}<input type="search" data-search placeholder="⌕" class="ml-auto h-10 w-full rounded-full border border-current/15 bg-background px-4 text-sm outline-none focus:border-primary sm:w-64">{% endif %}
+            {%- if props.search %}<input type="search" data-search placeholder="{{ cadenza_state().language == 'pl' ? 'Szukaj…' : 'Search…' }}" aria-label="{{ cadenza_state().language == 'pl' ? 'Szukaj' : 'Search' }}" class="ml-auto h-10 w-full rounded-full border border-current/15 bg-background px-4 text-sm outline-none focus:border-primary sm:w-64">{% endif %}
         </div>
         {%- endif %}
         {%- set pl = cadenza_state().language == 'pl' -%}
