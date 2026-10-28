@@ -36,6 +36,7 @@ final class ToolTraceSubscriber
         'save_record' => ['en' => 'Writing an entry', 'pl' => 'Zapisuję wpis'],
         'delete_record' => ['en' => 'Removing an entry', 'pl' => 'Usuwam wpis'],
         'find_records' => ['en' => 'Looking through the entries', 'pl' => 'Przeglądam wpisy'],
+        'translate_page' => ['en' => 'Translating the page', 'pl' => 'Tłumaczę stronę'],
         'guest_list' => ['en' => 'Updating the guest list', 'pl' => 'Aktualizuję listę gości'],
         'import_spreadsheet' => ['en' => 'Importing the data', 'pl' => 'Wczytuję dane'],
         'photos_from_phone' => ['en' => 'Preparing a QR code', 'pl' => 'Przygotowuję kod QR'],

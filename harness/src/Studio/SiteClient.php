@@ -33,6 +33,14 @@ final class SiteClient
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function settings(): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('site_settings'));
+    }
+
+    /**
      * The site's own editing instructions, served by the application as the MCP prompt "site-editor".
      */
     public function editorGuide(): string

@@ -1,7 +1,7 @@
 {% extends '@CadenzaRuntime/layout.html.twig' %}
 {% block title %}Setup · {{ cadenza_state().document.name }}{% endblock %}
 {% block main %}
-{%- set lang = cadenza_state().document.language|default('pl')|slice(0, 2) -%}
+{%- set lang = cadenza_state().language -%}
 {%- set field = 'h-11 w-full rounded-[calc(var(--radius)*0.8)] border border-input bg-background px-3.5 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20' -%}
 {% set body %}
 <form method="post" data-turbo="false" class="grid gap-4">

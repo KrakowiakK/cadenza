@@ -1,5 +1,5 @@
 {%- set state = cadenza_state() -%}
-{%- set pl = state.document.language|default('en')|slice(0, 2) == 'pl' -%}
+{%- set pl = state.language == 'pl' -%}
 {%- set t = pl ? {
     send: 'Wyślij', sent: 'Dziękujemy! Twoja odpowiedź dotarła.', left: 'Wolne miejsca', full: 'Brak wolnych miejsc.', closedDate: 'Zapisy są już zamknięte.',
     required: 'To pole jest wymagane', choose: 'Wybierz…', preview: 'Formularz zacznie zbierać odpowiedzi po zatwierdzeniu szkicu.',

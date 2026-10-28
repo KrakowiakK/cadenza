@@ -16,7 +16,7 @@
             {%- if props.search %}<input type="search" data-search placeholder="⌕" class="ml-auto h-10 w-full rounded-full border border-current/15 bg-background px-4 text-sm outline-none focus:border-primary sm:w-64">{% endif %}
         </div>
         {%- endif %}
-        {%- set pl = cadenza_state().document.language|default('en')|slice(0, 2) == 'pl' -%}
+        {%- set pl = cadenza_state().language == 'pl' -%}
         {%- set badges = {new: pl ? 'Szkic · nowy' : 'Draft · new', changed: pl ? 'Szkic · zmiany' : 'Draft · changed', removed: pl ? 'Do usunięcia' : 'To be removed'} -%}
         {%- set records = cadenza_records(c, props.limit, props.sort, props.order) -%}
         {%- if props.style == 'list' %}

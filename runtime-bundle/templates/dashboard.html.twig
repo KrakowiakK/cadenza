@@ -1,5 +1,5 @@
 {% extends '@CadenzaRuntime/layout.html.twig' %}
-{%- set pl = cadenza_state().document.language|default('en')|slice(0, 2) == 'pl' -%}
+{%- set pl = cadenza_state().language == 'pl' -%}
 {%- set t = pl ? {
     title: 'Pulpit', subtitle: 'Wszystko o Twojej stronie w jednym miejscu. Widzisz to tylko Ty.', visits: 'Odwiedziny', last30: 'ostatnie 30 dni', today: 'dziś',
     week: 'w tym tygodniu', vsPrev: 'niż tydzień wcześniej', same: 'tyle samo co tydzień wcześniej', noVisits: 'Jeszcze nikt nie odwiedził strony. Liczymy wejścia gości — bez ciasteczek i bez danych osobowych; Twoje wejścia się nie liczą.',

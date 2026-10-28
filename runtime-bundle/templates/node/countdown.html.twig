@@ -1,5 +1,5 @@
 {%- set state = cadenza_state() -%}
-{%- set pl = state.document.language|default('en')|slice(0, 2) == 'pl' -%}
+{%- set pl = state.language == 'pl' -%}
 {%- set units = pl ? ['dni', 'godz.', 'min', 'sek'] : ['days', 'hours', 'min', 'sec'] -%}
 {%- set at = (props.date ~ ' ' ~ (props.time ?: '00:00'))|date('Y-m-d\\TH:i:s') -%}
 {% include '@CadenzaRuntime/node/_section_open.html.twig' %}

@@ -153,6 +153,8 @@ final class Conductor
               and "limit" (places per date); with peopleField one answer can take several places.
               Answers are stored on the site; when the owner asks who is coming, how many, what people chose, call
               read_answers and answer with the numbers. Set the site's language once (site.update "language").
+            - Another language for visitors (tourists, foreign guests): translate_page for each page the owner wants,
+              e.g. "/" and "/warsztaty" into "en". Never rewrite a page in another language by hand.
             - How the site is doing (visits, popular pages, recent changes, health): site_overview.
             - Pages only for invited people (guests' accommodation, a club's materials, a class): set the page's
               "access": "members" (page.create or page.update) and invite people with guest_list. Members sign in

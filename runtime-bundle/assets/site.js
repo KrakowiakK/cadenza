@@ -103,7 +103,7 @@ document.addEventListener('submit', async (e) => {
     const form = e.target.closest('[data-cz-form]');
     if (!form) return;
     e.preventDefault();
-    const t = formMessages[(document.documentElement.lang || 'en').slice(0, 2)] ?? formMessages.en;
+    const t = formMessages[(document.body.lang || document.documentElement.lang || 'en').slice(0, 2)] ?? formMessages.en;
     const message = form.querySelector('[data-cz-form-message]');
     const button = form.querySelector('[type=submit]');
     form.querySelectorAll('[data-error]').forEach((p) => { p.hidden = true; });
@@ -205,7 +205,7 @@ const maps = async () => {
             const body = [
                 p.image ? `<img src="${encodeURI(p.image)}" alt="" class="cz-pop-img">` : '',
                 `<strong>${escapeText(p.title)}</strong>`,
-                p.date ? `<span class="cz-pop-meta">${escapeText(new Date(p.date).toLocaleDateString(document.documentElement.lang || undefined, { day: 'numeric', month: 'long', year: 'numeric' }))}</span>` : '',
+                p.date ? `<span class="cz-pop-meta">${escapeText(new Date(p.date).toLocaleDateString(document.body.lang || document.documentElement.lang || undefined, { day: 'numeric', month: 'long', year: 'numeric' }))}</span>` : '',
                 p.text ? `<span class="cz-pop-meta">${escapeText(p.text)}</span>` : '',
                 p.href ? `<a href="${encodeURI(p.href)}">→</a>` : '',
             ].join('');

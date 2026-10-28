@@ -1,7 +1,7 @@
 {% extends '@CadenzaRuntime/layout.html.twig' %}
 {% block title %}{{ record.title }} · {{ collection.name }} · {{ cadenza_state().document.name }}{% endblock %}
 {% block main %}
-{%- set pl = cadenza_state().document.language|default('en')|slice(0, 2) == 'pl' -%}
+{%- set pl = cadenza_state().language == 'pl' -%}
 {%- set types = collection.fields|map(f => f.type) -%}
 {#- A post (news, a story, an event): long text and no price. Otherwise a product / item page. -#}
 {%- set article = 'longtext' in types and 'price' not in types -%}

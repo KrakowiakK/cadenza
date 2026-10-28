@@ -1,6 +1,6 @@
 {%- set state = cadenza_state() -%}
 {%- set points = cadenza_map_points(props) -%}
-{%- set pl = state.document.language|default('en')|slice(0, 2) == 'pl' -%}
+{%- set pl = state.language == 'pl' -%}
 {% include '@CadenzaRuntime/node/_section_open.html.twig' %}
 {% include '@CadenzaRuntime/node/_head.html.twig' %}
 {%- if points is empty %}

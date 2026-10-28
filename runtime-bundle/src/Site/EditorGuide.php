@@ -30,6 +30,7 @@ final class EditorGuide
 
             - {"op": "page.create", "path": "/about", "title": "About us", "description": "...", "nodes": [node specs]}
             - {"op": "page.update", "page": "/about", "title": "...", "path": "/new-path", "navLabel": "...", "hidden": false, "position": 0, "access": "public"}
+              Pages in another language: "lang": "en" and "translationOf": "/original-path" (use the translate_page tool instead of writing them by hand).
               "access": "members" makes a page visible only to people the owner invited (members sign in with a personal link; add them with the members tools), "public" to everyone.
             - {"op": "page.delete", "page": "/about"}
             - {"op": "node.insert", "page": "/", "index": 0, "node": {...}}            (index omitted = at the end)

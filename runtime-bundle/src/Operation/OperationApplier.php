@@ -57,7 +57,58 @@ final class OperationApplier
             }
         }
 
+        if ([] === $errors) {
+            $errors = $this->brokenAnchors($doc, $operations);
+        }
+
         return new ApplyResult($doc, $errors, $this->created);
+    }
+
+    /**
+     * Links to a section ("#id", "/page#id") must name a real node: the menu set in this batch and the nodes created in
+     * it are checked (what was already on the site does not block new changes).
+     *
+     * @param array<string, mixed>       $doc
+     * @param list<array<string, mixed>> $operations
+     *
+     * @return list<string>
+     */
+    private function brokenAnchors(array $doc, array $operations): array
+    {
+        $links = [];
+        foreach ($operations as $op) {
+            if ('site.update' === ($op['op'] ?? null) && \is_array($op['nav'] ?? null)) {
+                foreach ((isset($op['nav']['items']) ? $op['nav']['items'] : $op['nav']) as $item) {
+                    $links[] = ['menu item "'.($item['label'] ?? '?').'"', (string) ($item['href'] ?? ''), $op['lang'] ?? null];
+                }
+            }
+        }
+        $created = array_fill_keys($this->created, true);
+        $pageOf = [];
+        foreach (Document::walk($doc) as $entry) {
+            $pageOf[$entry['node']['id']] = $entry['page'];
+            if (isset($created[$entry['node']['id']])) {
+                array_walk_recursive($entry['node']['props'], static function (mixed $v, int|string $k) use (&$links, $entry): void {
+                    if (\is_string($v) && \in_array($k, ['href', 'buttonHref', 'secondaryHref'], true)) {
+                        $links[] = [$entry['node']['type'].' '.$entry['node']['id'].' '.$k, $v, null];
+                    }
+                });
+            }
+        }
+        $errors = [];
+        foreach ($links as [$where, $href, $lang]) {
+            if (!preg_match('~^(/[^#]*)?#([^#\s]+)$~', $href, $m)) {
+                continue;
+            }
+            $target = '' !== ($m[1] ?? '') ? Document::findPage($doc, $m[1]) : null;
+            if (!isset($pageOf[$m[2]]) || (null !== $target && $pageOf[$m[2]] !== $target['id'])) {
+                $page = $target ?? $doc['pages'][0] ?? null;
+                $sections = null !== $page ? implode(', ', array_map(static fn (array $n): string => $n['id'].' ('.$n['type'].')', $page['nodes'])) : '';
+                $errors[] = \sprintf('%s links to "%s", but there is no section with that id%s. Link to a node id%s.', $where, $href, null !== $page ? ' on '.$page['path'] : '', '' !== $sections ? ', e.g. '.$sections : '');
+            }
+        }
+
+        return $errors;
     }
 
     /**
@@ -108,6 +159,13 @@ final class OperationApplier
         if (isset($op['access'])) {
             $page['access'] = self::access($op['access']);
         }
+        if (isset($op['lang'])) {
+            $page['lang'] = self::language($op['lang']);
+        }
+        if (isset($op['translationOf'])) {
+            $original = Document::findPage($doc, (string) $op['translationOf']) ?? throw new OperationException(\sprintf('"translationOf": no page "%s".', $op['translationOf']));
+            $page['translationOf'] = $original['translationOf'] ?? $original['id'];
+        }
         $position = $op['position'] ?? null;
         if (\is_int($position) && $position >= 0 && $position < \count($doc['pages'])) {
             array_splice($doc['pages'], $position, 0, [$page]);
@@ -133,6 +191,9 @@ final class OperationApplier
         if (\array_key_exists('access', $op)) {
             $doc['pages'][$index]['access'] = self::access($op['access']);
         }
+        if (\array_key_exists('lang', $op)) {
+            $doc['pages'][$index]['lang'] = self::language($op['lang']);
+        }
         if (isset($op['path'])) {
             $path = Document::normalisePath((string) $op['path']);
             $other = Document::pageIndex($doc, $path);
@@ -147,6 +208,15 @@ final class OperationApplier
         }
 
         return $doc;
+    }
+
+    private static function language(mixed $code): string
+    {
+        if (!\is_string($code) || !preg_match('/^[a-z]{2}(-[A-Za-z]{2})?$/', $code)) {
+            throw new OperationException('a language is a code like "pl" or "en".');
+        }
+
+        return $code;
     }
 
     /**
@@ -315,10 +385,7 @@ final class OperationApplier
             }
         }
         if (\array_key_exists('language', $op)) {
-            if (!\is_string($op['language']) || !preg_match('/^[a-z]{2}(-[A-Za-z]{2})?$/', $op['language'])) {
-                throw new OperationException('"language" is the site\'s language code, e.g. "pl" or "en".');
-            }
-            $doc['language'] = $op['language'];
+            $doc['language'] = self::language($op['language']);
         }
         if (\array_key_exists('announcement', $op)) {
             $a = \is_string($op['announcement']) ? ['text' => $op['announcement']] : $op['announcement'];
@@ -335,6 +402,8 @@ final class OperationApplier
         }
         if (\array_key_exists('nav', $op)) {
             $items = \is_array($op['nav']) && isset($op['nav']['items']) ? $op['nav']['items'] : $op['nav'];
+            // The menu of pages in another language: {"op": "site.update", "nav": [...], "lang": "en"}.
+            $navLanguage = isset($op['lang']) && self::language($op['lang']) !== ($doc['language'] ?? null) ? self::language($op['lang']) : null;
             if (null !== $items) {
                 if (!\is_array($items) || !array_is_list($items)) {
                     throw new OperationException('"nav" must be a list of {label, href} or null for automatic navigation.');
@@ -345,7 +414,11 @@ final class OperationApplier
                     }
                 }
             }
-            $doc['nav']['items'] = $items;
+            if (null !== $navLanguage) {
+                $doc['nav']['byLanguage'][$navLanguage] = $items;
+            } else {
+                $doc['nav']['items'] = $items;
+            }
         }
 
         return $doc;

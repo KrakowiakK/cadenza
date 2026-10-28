@@ -82,6 +82,38 @@ final class OperationApplierTest extends TestCase
         self::assertFalse($this->applier->apply($result->document, [['op' => 'page.update', 'page' => '/stay', 'access' => 'secret']])->isValid());
     }
 
+    public function testEachLanguageHasItsOwnMenu(): void
+    {
+        $result = $this->applier->apply(Document::empty(), [
+            ['op' => 'page.create', 'path' => '/', 'title' => 'Start', 'nodes' => [['id' => 'about', 'type' => 'heading', 'props' => ['text' => 'O mnie']]]],
+            ['op' => 'site.update', 'language' => 'pl', 'nav' => [['label' => 'O mnie', 'href' => '#about']]],
+            ['op' => 'page.create', 'path' => '/en', 'title' => 'Home', 'lang' => 'en', 'translationOf' => '/', 'nodes' => [['id' => 'about-en', 'type' => 'heading', 'props' => ['text' => 'About me']]]],
+            ['op' => 'page.create', 'path' => '/de', 'title' => 'Start', 'lang' => 'de', 'translationOf' => '/'],
+            ['op' => 'site.update', 'lang' => 'en', 'nav' => [['label' => 'About me', 'href' => '/en#about-en']]],
+        ]);
+        self::assertTrue($result->isValid(), implode(' ', $result->errors));
+        $doc = $result->document;
+
+        self::assertSame('O mnie', Document::navItems($doc, Document::findPage($doc, '/'))[0]['label']);
+        self::assertSame('About me', Document::navItems($doc, Document::findPage($doc, '/en'))[0]['label']);
+        self::assertSame([['label' => 'Start', 'href' => '/de', 'members' => false]], Document::navItems($doc, Document::findPage($doc, '/de')), 'no menu of its own: the pages of that language');
+        self::assertSame(['pl' => '/', 'en' => '/en', 'de' => '/de'], array_column(Document::translations($doc, Document::findPage($doc, '/en')), 'href', 'lang'));
+    }
+
+    public function testLinksToSectionsMustNameARealSection(): void
+    {
+        $doc = $this->applier->apply(Document::empty(), [
+            ['op' => 'page.create', 'path' => '/', 'title' => 'Home', 'nodes' => [['id' => 'nabout', 'type' => 'heading', 'props' => ['text' => 'About']]]],
+        ])->document;
+
+        $wrong = $this->applier->apply($doc, [['op' => 'site.update', 'nav' => [['label' => 'O mnie', 'href' => '/#o-mnie']]]]);
+        self::assertFalse($wrong->isValid());
+        self::assertStringContainsString('nabout (heading)', $wrong->errors[0]);
+
+        self::assertTrue($this->applier->apply($doc, [['op' => 'site.update', 'nav' => [['label' => 'O mnie', 'href' => '/#nabout'], ['label' => 'Blog', 'href' => '/blog']]]])->isValid());
+        self::assertFalse($this->applier->apply($doc, [['op' => 'node.insert', 'page' => '/', 'node' => ['type' => 'button', 'props' => ['label' => 'Go', 'href' => '#nowhere']]]])->isValid());
+    }
+
     public function testUpdateMergesPropsAndReplaceKeepsTheId(): void
     {
         $doc = $this->page([['type' => 'heading', 'props' => ['text' => 'Old']]]);

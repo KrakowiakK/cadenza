@@ -26,6 +26,17 @@ final class RenderState
     /** @var array<string, mixed> */
     public array $document = [];
 
+    /** Language of the page being rendered (a translated page has its own), when known. */
+    public ?string $pageLanguage = null;
+
+    /**
+     * Two-letter language for texts of the site itself (forms, countdowns, sign-in): the page's, else the site's.
+     */
+    public function language(): string
+    {
+        return substr($this->pageLanguage ?? $this->document['language'] ?? 'pl', 0, 2);
+    }
+
     public function isSketch(): bool
     {
         return null !== $this->diff;
