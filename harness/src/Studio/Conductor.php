@@ -62,6 +62,20 @@ final class Conductor
     private const POLISH = '/[ąćęłńśźż]|\b(jest|się|sie|mój|moj|moja|strona|stron[eę]|chc[eę]|zr[oó]b|zrub|dodaj|zmie[nń]|gr[eę]|[zż]eby|dla|czy|prosz[eę]|nie|tak|dobrze|wszystko|dzi[eę]ki|super|jeszcze|teraz|ile|jak|mnie|mi|tej|tego|strony|stronie|moje|moich|zdj[eę]cia|kt[oó]ry|kt[oó]ra|gdzie|kiedy|dlaczego|mo[zż]esz|poka[zż])\b/iu';
 
     /**
+     * The language the site is written in (a short "hide the prices" is most likely in it).
+     */
+    private function siteLanguage(): ?string
+    {
+        try {
+            $language = $this->site->settings()['language'] ?? null;
+        } catch (\Throwable) {
+            return null;
+        }
+
+        return \is_string($language) && '' !== $language ? substr($language, 0, 2) : null;
+    }
+
+    /**
      * The language of the owner's earlier messages in this conversation, when one of them was clearly Polish.
      */
     private static function languageOf(Conversation $conversation): ?string
@@ -150,7 +164,7 @@ final class Conductor
         }
         try {
             $fixed = trim($this->platform->invoke($model, new MessageBag(Message::forSystem('Jesteś korektorem języka polskiego. Zwracasz wyłącznie poprawiony tekst.'), Message::ofUser(\sprintf(
-                "Tekst poniżej napisała asystentka do właściciela strony; model czasem wstawia literówki, błędne lub nieistniejące słowa i wtrącenia z innych języków%s. Przepisz go poprawną, naturalną polszczyzną, nie zmieniając treści, liczb, nazw, adresów ani formatowania Markdown. Do właściciela zwracaj się bez zgadywania płci (\"możesz\", nie \"powinieneś\"); asystentka pisze o sobie w rodzaju żeńskim. \"Szkic\" zamiast draft/sketch; nazwę w `backtickach` zamień na zwykłą nazwę rzeczy (np. `tetris-game` → Tetris). Zwróć tylko tekst.\n\n%s",
+                "Tekst poniżej napisała asystentka do właściciela strony; model czasem wstawia literówki, błędne lub nieistniejące słowa i wtrącenia z innych języków%s. Przepisz go poprawną, naturalną polszczyzną, nie zmieniając treści, liczb, nazw, adresów ani formatowania Markdown. Do właściciela zwracaj się bezpośrednio, na \"Ty\" i bez zgadywania płci (\"możesz\", nie \"powinieneś\"; \"pokażę Ci\", nie \"pokażę właścicielowi\"); asystentka pisze o sobie w rodzaju żeńskim. \"Szkic\" zamiast draft/sketch; nazwę w `backtickach` zamień na zwykłą nazwę rzeczy (np. `tetris-game` → Tetris). Zwróć tylko tekst.\n\n%s",
                 [] !== $words ? ' (np. '.implode(', ', $words).')' : '', $text))), ['max_tokens' => 2000] + (str_contains($model, '/') ? ['reasoning' => ['enabled' => false]] : []))->asText());
         } catch (\Throwable) {
             return $text;
@@ -175,7 +189,7 @@ final class Conductor
             (bool) preg_match(self::POLISH, $message) => 'pl',
             (bool) preg_match('/\b(the|please|would|could|add|make|my|our|is|are)\b/i', $message) => 'en',
             // A short "ok, thanks" keeps the language of the conversation so far.
-            default => self::languageOf($conversation) ?? $context['language'] ?? 'en',
+            default => self::languageOf($conversation) ?? $this->siteLanguage() ?? $context['language'] ?? 'en',
         };
         $context['language'] = $this->turn->language;
 

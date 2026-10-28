@@ -83,7 +83,7 @@ final class SiteTools
         } catch (\Throwable) {
             return $summary;
         }
-        $text = trim((string) preg_replace('~<think>.*?</think>~s', '', $text), " \n\"„”");
+        $text = trim((string) preg_replace(['~<think>.*?</think>~s', '~^"(.*)"$~s'], ['', '$1'], trim($text)));
 
         return '' !== $text && mb_strlen($text) < 2 * mb_strlen($summary) + 40 ? $text : $summary;
     }
