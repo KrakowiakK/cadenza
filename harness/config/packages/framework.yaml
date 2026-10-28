@@ -1,5 +1,9 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
+    # Local models can take minutes on long prompts; do not give up after the default 60 s of silence.
+    http_client:
+        default_options:
+            timeout: 300
     secret: '%env(APP_SECRET)%'
 
     # Note that the session will be started ONLY if you read or write from it.
