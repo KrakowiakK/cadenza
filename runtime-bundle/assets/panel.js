@@ -166,7 +166,7 @@ class Studio {
     <span class="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white">${icon('sparkle')}</span>
     <div class="min-w-0 flex-1">
       <div class="text-sm font-semibold leading-tight">Cadenza</div>
-      <div class="flex items-center gap-2 text-xs text-muted-foreground"><span data-cz="status" class="flex items-center gap-1.5"></span><span data-cz="model" class="truncate opacity-70"></span></div>
+      <div class="flex min-w-0 items-center gap-2 text-xs text-muted-foreground"><span data-cz="status" class="flex shrink-0 items-center gap-1.5 whitespace-nowrap"></span><span data-cz="model" class="min-w-0 truncate opacity-70"></span></div>
     </div>
     <a href="/_cadenza/dashboard" data-cz="dashboard" title="${t('dashboard')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('dashboard')}</a>
     <button type="button" data-cz="tab-history" title="${t('history')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('clock')}</button>

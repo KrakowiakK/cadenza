@@ -8,6 +8,8 @@ use App\Studio\Proposals;
 use App\Studio\SiteClient;
 use App\Studio\Turn;
 use Symfony\AI\Agent\Toolbox\Attribute\AsTool;
+use Symfony\AI\Platform\Message\Message;
+use Symfony\AI\Platform\Message\MessageBag;
 
 #[AsTool('propose_changes', 'Propose a change to the site as a batch of operations. It becomes a sketch the owner sees on the page immediately and approves or rejects. Returns the result, or errors to fix and retry.', method: 'propose')]
 #[AsTool('propose_variants', 'Show 2–3 looks side by side (when the owner asks how the site could look, wants options, or starts from scratch). Give the page content once in "operations" (omit it to restyle the existing site) and 2–3 design directions, e.g. ["warm", "elegant", "minimal"]. The owner sees live thumbnails and keeps one.', method: 'variants')]
@@ -20,6 +22,10 @@ final class SiteTools
         private readonly Turn $turn,
         private readonly Proposals $proposals,
         private readonly \App\Repository\ProposalRepository $openProposals,
+        #[\Symfony\Component\DependencyInjection\Attribute\Autowire(service: 'ai.platform.generic.default')]
+        private readonly \Symfony\AI\Platform\PlatformInterface $platform,
+        #[\Symfony\Component\DependencyInjection\Attribute\Autowire('%env(default:cadenza.review_model:CADENZA_PROOFREAD_MODEL)%')]
+        private readonly string $proofreadModel = '',
     ) {
     }
 
@@ -30,7 +36,7 @@ final class SiteTools
      */
     public function propose(array $operations, string $summary = '', ?int $reviseDraftId = null): string
     {
-        $summary = '' !== trim($summary) ? $summary : self::summaryOf(Proposals::normalise($operations), str_starts_with($this->turn->language, 'pl'));
+        $summary = '' !== trim($summary) ? $this->asChange($summary) : self::summaryOf(Proposals::normalise($operations), str_starts_with($this->turn->language, 'pl'));
         $result = $this->proposals->propose($this->turn->conversation, $operations, $summary, $reviseDraftId);
         // Changes to a page or block that exists only in a sketch of this conversation belong to that sketch.
         if (null === $result['proposal'] && null === $reviseDraftId && null !== $this->turn->conversation
@@ -59,6 +65,27 @@ final class SiteTools
             json_encode($proposal->toArray()['changes']),
             implode('; ', \array_slice($result['created'], 0, 40)) ?: 'nothing new',
         );
+    }
+
+    /**
+     * "Zmieniłem tytuł…" → "Nowy tytuł…": the summary names the change, it is not the agent speaking (and has no
+     * gender to get wrong). Only summaries that start with a first-person verb go to the proofreading model.
+     */
+    private function asChange(string $summary): string
+    {
+        if (!preg_match('/^\s*\p{Lu}\p{Ll}+ł(?:em|am)\b/u', $summary) || '' === $this->proofreadModel) {
+            return $summary;
+        }
+        try {
+            $text = trim($this->platform->invoke($this->proofreadModel, new MessageBag(Message::ofUser(\sprintf(
+                "Przepisz to podsumowanie zmiany na stronie jako krótki opis samej zmiany, bez czasownika w pierwszej osobie (np. \"Zmieniłam tytuł na X\" → \"Nowy tytuł: X\", \"Dodałem sekcję FAQ\" → \"Sekcja FAQ z pytaniami o…\"). Zachowaj fakty i liczby. Zwróć tylko tekst, jedno zdanie.\n\n%s",
+                $summary))), str_contains($this->proofreadModel, '/') ? ['reasoning' => ['enabled' => false]] : [])->asText());
+        } catch (\Throwable) {
+            return $summary;
+        }
+        $text = trim((string) preg_replace('~<think>.*?</think>~s', '', $text), " \n\"„”");
+
+        return '' !== $text && mb_strlen($text) < 2 * mb_strlen($summary) + 40 ? $text : $summary;
     }
 
     /**
