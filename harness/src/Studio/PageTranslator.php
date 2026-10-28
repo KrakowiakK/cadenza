@@ -20,7 +20,7 @@ final class PageTranslator
     private const KEEP = ['id', 'type', 'image', 'images', 'photo', 'avatar', 'href', 'buttonHref', 'secondaryHref', 'icon', 'collection', 'filterBy',
         'sort', 'order', 'style', 'variant', 'align', 'background', 'height', 'imagePosition', 'columns', 'source', 'tag', 'album', 'layout',
         'size', 'date', 'time', 'endTime', 'closesAt', 'level', 'correct', 'capacity', 'limit', 'required', 'highlighted', 'search', 'links', 'route',
-        'captions', 'lat', 'lng', 'email', 'phone', 'url', 'side', 'imageSide'];
+        'captions', 'lat', 'lng', 'email', 'phone', 'url', 'side', 'imageSide', 'widget', 'aspect', 'width'];
 
     private const CHUNK = 60;
 

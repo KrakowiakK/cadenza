@@ -100,7 +100,7 @@ final class WidgetProgrammer
         $messages = new MessageBag(Message::forSystem($system), Message::ofUser($task));
         $code = self::extract($this->complete($messages));
         $progress?->__invoke('checking');
-        for ($round = 0; $round < 2 && [] !== ($errors = self::syntaxErrors($code)); ++$round) {
+        for ($round = 0; $round < 2 && [] !== ($errors = [...self::syntaxErrors($code), ...self::languageSlips($code, $language)]); ++$round) {
             $progress?->__invoke('fixing');
             $messages = $messages
                 ->with(Message::ofAssistant("```html\n".$code."\n```"))
@@ -124,6 +124,32 @@ final class WidgetProgrammer
         }
 
         return trim($answer);
+    }
+
+    /**
+     * English words a visitor would read in a widget for a site in another language — models slip into them for
+     * short labels ("Score", "Game Over") even when told the language.
+     *
+     * @return list<string>
+     */
+    public static function languageSlips(string $code, string $language): array
+    {
+        if ('en' === substr($language, 0, 2)) {
+            return [];
+        }
+        $words = 'Score|Best|High ?score|Level|Lives|Game ?Over|Pause[ds]?|Resume|Restart|Play again|Play|Next|Player|Computer|Controls|Moves|Time|New game|You win|You lose|You won|Try again|Reset|Clear|Undo|Hint|Easy|Medium|Hard|Lines|Tap to start|Press|Loading';
+        // Only where a visitor reads it: text between tags, and string literals.
+        preg_match_all('~>([^<>{}]*)<|(["\'`])((?:(?!\2)[^\\\\\n]|\\\\.){1,80})\2~', $code, $m, \PREG_SET_ORDER);
+        $found = [];
+        foreach ($m as $match) {
+            $text = '' !== ($match[1] ?? '') ? $match[1] : ($match[3] ?? '');
+            if (preg_match_all('~(?<![\w-])('.$words.')(?![\w-])~', $text, $w)) {
+                array_push($found, ...$w[1]);
+            }
+        }
+        $found = array_values(array_unique($found));
+
+        return [] === $found ? [] : [\sprintf('Texts a visitor reads are in English (%s): write every visible text in the language "%s".', implode(', ', \array_slice($found, 0, 8)), $language)];
     }
 
     /**

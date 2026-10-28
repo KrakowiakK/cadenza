@@ -51,4 +51,16 @@ final class WidgetProgrammerTest extends TestCase
         self::assertSame(2, $calls);
         self::assertContains('fixing', $steps);
     }
+
+    public function testEnglishLabelsOnAPolishSiteAreCaught(): void
+    {
+        $code = '<div class="score">Score: <b id="s">0</b></div><script type="module">const best = localStorage.getItem("best"); show("Game Over"); el.className = "level";</script>';
+        $slips = WidgetProgrammer::languageSlips($code, 'pl');
+        self::assertCount(1, $slips);
+        self::assertStringContainsString('Score', $slips[0]);
+        self::assertStringContainsString('Game Over', $slips[0]);
+        self::assertStringNotContainsString('best', $slips[0], 'identifiers and keys are not texts');
+        self::assertSame([], WidgetProgrammer::languageSlips('<p>Wynik: 0</p><script>show("Koniec gry")</script>', 'pl'));
+        self::assertSame([], WidgetProgrammer::languageSlips($code, 'en'));
+    }
 }

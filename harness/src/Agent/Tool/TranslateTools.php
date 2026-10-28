@@ -18,6 +18,7 @@ final class TranslateTools
         private readonly PageTranslator $translator,
         private readonly Proposals $proposals,
         private readonly Turn $turn,
+        private readonly \App\Studio\WidgetProgrammer $programmer,
     ) {
     }
 
@@ -40,6 +41,7 @@ final class TranslateTools
         }
         $this->turn->emit('status', ['text' => 'pl' === substr($this->turn->language, 0, 2) ? 'Tłumaczę stronę' : 'Translating the page']);
         $operation = $this->translator->translate($tree, $language);
+        $operation['nodes'] = $this->translateWidgets($operation['nodes'], $language);
         $operations = [$operation];
         // An explicit menu needs its own version in the new language (an automatic one follows the pages by itself).
         $settings = $this->site->settings();
@@ -64,5 +66,58 @@ final class TranslateTools
         $this->turn->emit('ui', ['command' => 'showSketch', 'draftId' => $proposal->getDraftId(), 'path' => $operation['path']]);
 
         return \sprintf('Sketch ready: %s is the %s version of %s (draft %d), with a language switcher in the header. Translate other pages the same way if the owner wants the whole site.', $operation['path'], $language, $tree['path'], $proposal->getDraftId());
+    }
+
+    /**
+     * Games and animations speak too: each widget on the page gets a version in the new language ("tetris" →
+     * "tetris-en"), made once and reused by other pages.
+     *
+     * @param list<array<string, mixed>> $nodes
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function translateWidgets(array $nodes, string $language): array
+    {
+        $made = [];
+        $walk = function (array $nodes) use (&$walk, &$made, $language): array {
+            foreach ($nodes as $i => $node) {
+                $widget = $node['props']['widget'] ?? null;
+                if (\is_string($widget) && '' !== $widget && !str_ends_with($widget, '-'.$language)) {
+                    $made[$widget] ??= $this->widgetIn($widget, $language);
+                    $nodes[$i]['props']['widget'] = $made[$widget];
+                }
+                foreach ($node as $key => $value) {
+                    if (\is_array($value) && array_is_list($value) && 'props' !== $key && [] !== $value && \is_array($value[0] ?? null) && isset($value[0]['type'])) {
+                        $nodes[$i][$key] = $walk($value);
+                    }
+                }
+            }
+
+            return $nodes;
+        };
+
+        return $walk($nodes);
+    }
+
+    private function widgetIn(string $name, string $language): string
+    {
+        $target = substr($name, 0, 35).'-'.$language;
+        if (\is_string($this->site->widgetCode($target)['code'] ?? null)) {
+            return $target;
+        }
+        $source = $this->site->widgetCode($name);
+        if (!\is_string($source['code'] ?? null)) {
+            return $name;
+        }
+        $this->turn->emit('status', ['text' => ('pl' === substr($this->turn->language, 0, 2) ? 'Tłumaczę element: ' : 'Translating: ').$name]);
+        try {
+            $code = $this->programmer->write('Translate every text a visitor reads (labels, buttons, messages, aria-labels, titles) into the language "'.$language.'". Change nothing else: same code, same look, same behaviour.',
+                $language, $this->site->widgetLibraries(), (string) ($source['shape'] ?? 'wide'), $source['code']);
+            $saved = $this->site->defineWidget($target, $name.' ('.strtoupper($language).')', (string) ($source['description'] ?? $name), $code, (string) ($source['shape'] ?? 'wide'));
+        } catch (\Throwable) {
+            return $name;
+        }
+
+        return ($saved['ok'] ?? false) ? $target : $name;
     }
 }
