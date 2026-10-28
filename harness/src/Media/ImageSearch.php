@@ -41,11 +41,23 @@ final class ImageSearch
         } catch (\Throwable $e) {
             $this->logger->warning('Image search provider failed: {message}', ['message' => $e->getMessage()]);
         }
-        if (\count($results) < $count) {
+        // Commons wants every word to match: models ask for "Tatras mountain peaks alpine ridge beautiful weather".
+        // Fewer words until there are enough photos: all of them, the first four, the first two.
+        $words = preg_split('/\s+/', trim($query)) ?: [$query];
+        foreach (array_unique([implode(' ', $words), implode(' ', \array_slice($words, 0, 4)), implode(' ', \array_slice($words, 0, 2))]) as $terms) {
+            if (\count($results) >= $count) {
+                break;
+            }
             try {
-                $results = [...$results, ...$this->wikimedia($query, $count - \count($results), $orientation)];
+                $seen = array_column($results, 'id');
+                foreach ($this->wikimedia($terms, $count - \count($results), $orientation) as $found) {
+                    if (!\in_array($found['id'], $seen, true)) {
+                        $results[] = $found;
+                    }
+                }
             } catch (\Throwable $e) {
                 $this->logger->warning('Wikimedia search failed: {message}', ['message' => $e->getMessage()]);
+                break;
             }
         }
 

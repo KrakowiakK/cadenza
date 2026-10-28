@@ -35,7 +35,15 @@ final class MediaLibrary
         if (!preg_match('~^https?://~i', $url)) {
             throw new \InvalidArgumentException('Only http(s) URLs can be imported.');
         }
-        $response = $this->http->request('GET', $url, ['timeout' => 30, 'max_redirects' => 5, 'headers' => ['User-Agent' => 'Cadenza/0.1 (Symfony AI hackathon; media import)']]);
+        // Photo hosts (Wikimedia) answer 429 to a few quick downloads in a row: wait a moment and try again.
+        for ($attempt = 1; ; ++$attempt) {
+            $response = $this->http->request('GET', $url, ['timeout' => 30, 'max_redirects' => 5, 'headers' => ['User-Agent' => 'Cadenza/0.1 (Symfony AI hackathon; media import)']]);
+            if (429 !== $response->getStatusCode() || $attempt >= 3) {
+                break;
+            }
+            $response->cancel();
+            usleep($attempt * 1_500_000);
+        }
         $bytes = '';
         foreach ($this->http->stream($response) as $chunk) {
             $bytes .= $chunk->getContent();
