@@ -62,7 +62,7 @@ final class SiteTools
         preg_match_all('/\b('.implode('|', array_keys(self::HERO_FOR)).')\b/', json_encode($directions) ?: '', $m);
         $found = array_values(array_unique($m[1]));
         if (\count($found) < 2) {
-            return 'Give 2–3 design directions, e.g. "directions": ["warm", "elegant", "minimal"].';
+            return 'The site rejected the variants: give 2–3 design directions, e.g. "directions": ["warm", "elegant", "minimal"].';
         }
         $operations = Proposals::normalise($operations);
         $group = strtolower((string) new \Symfony\Component\Uid\Ulid());
@@ -88,7 +88,7 @@ final class SiteTools
             $made[] = $proposal->toArray();
         }
         if ([] === $made) {
-            return "No variant could be created. Fix the operations and call again:\n- ".implode("\n- ", $errors);
+            return "The site rejected the variants, none could be created. Fix the operations and call again:\n- ".implode("\n- ", $errors);
         }
         $this->turn->emit('variants', ['groupId' => $group, 'items' => $made]);
 
