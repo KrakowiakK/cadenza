@@ -78,7 +78,7 @@ final class Conductor
         if ('pl' !== substr($language, 0, 2)) {
             return [];
         }
-        preg_match_all('~(?-i:(?<=\p{Ll})[A-Z][a-z]{2,})|`[a-z0-9_-]+`|[\p{Cyrillic}\p{Greek}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}\p{Arabic}]+|(?<![\p{L}/_.-])(?:weitere|und|oder|nicht|ajout\p{L}*|the|owners?|site|drafts?|sketch|widgets?|live|preview|layout|feedback|changes?|approve[ds]?|ready|done|page|section|update[ds]?|skic\p{L}*|create_\w+|propose_\w+)(?![\p{L}/_-]|\.\p{L})~iu', $text, $m);
+        preg_match_all('~\p{L}*[áéíúýěščřďťňůäüßñàèìò]\p{L}*|(?-i:(?<=\p{Ll})[A-Z][a-z]{2,})|`[a-z0-9_-]+`|[\p{Cyrillic}\p{Greek}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}\p{Arabic}]+|(?<![\p{L}/_.-])(?:weitere|und|oder|nicht|ajout\p{L}*|the|owners?|site|drafts?|sketch|widgets?|live|preview|layout|feedback|changes?|approve[ds]?|ready|done|page|section|update[ds]?|skic\p{L}*|create_\w+|propose_\w+)(?![\p{L}/_-]|\.\p{L})~iu', $text, $m);
 
         return array_values(array_unique($m[0]));
     }
