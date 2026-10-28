@@ -11,11 +11,13 @@ final class ConductorTest extends TestCase
 {
     public function testRecognisesARepliesClaimOfASketch(): void
     {
-        self::assertTrue(Conductor::claimsSketch('Wszystko jest już w szkicu — możesz go przejrzeć i zatwierdzić w panelu.'));
+        self::assertTrue(Conductor::claimsSketch('Przygotowałam nową stronę. Wszystko jest już w szkicu — możesz go przejrzeć i zatwierdzić w panelu.'));
         self::assertTrue(Conductor::claimsSketch('Szkic gotowy: nowa strona.'));
         self::assertTrue(Conductor::claimsSketch('The sketch is ready.'));
         self::assertFalse(Conductor::claimsSketch('Jeszcze nikt się nie zapisał na warsztaty.'));
         self::assertFalse(Conductor::claimsSketch('Którą sekcję mam zmienić?'));
+        self::assertFalse(Conductor::claimsSketch('Na zatwierdzenie czeka 76 szkiców; możesz je zatwierdzić w panelu.'));
+        self::assertFalse(Conductor::claimsSketch('Szkic 214 czeka na Twoją decyzję w panelu.'));
     }
 
     public function testFindsForeignWordsInPolishReplies(): void

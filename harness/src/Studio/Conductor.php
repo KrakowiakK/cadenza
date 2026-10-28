@@ -136,7 +136,11 @@ final class Conductor
      */
     public static function claimsSketch(string $text): bool
     {
-        return (bool) preg_match('/\bw\s+szkicu\b|\bszkic\w*\s+(?:jest\s+)?gotow|\bgotow\w*\s+(?:w\s+)?szkic|zatwierd\w*\s+(?:go|szkic|w\s+panelu)|\bthe sketch is ready|\bin the sketch\b|approve it in the panel/iu', $text);
+        // Something made (first-person past, "gotowe", "ready") together with a sketch — not "you can approve them".
+        $made = preg_match('/\b\p{L}+ł(?:am|em)\b|\bgotow\w*|\bready\b|\bI(?:\'ve| have)? (?:made|added|changed|prepared)\b/iu', $text);
+        $sketch = preg_match('/\bszkic\w*|\bsketch\w*/iu', $text);
+
+        return $made && $sketch && !preg_match('/\b(?:czeka|czekaj\w*|waiting)\b.{0,40}\b\d+\s+szkic|\b\d+\s+szkic\w*\s+czeka/iu', $text);
     }
 
     /**
