@@ -36,7 +36,9 @@ final class PhoneCheck
             if (own && parseFloat(cs.fontSize) < 12) small.push(label(el));
             // A radio or a checkbox is tapped with its label; a link inside a sentence is part of the text.
             const target = el.matches('a[href], button, select, textarea, input:not([type=radio]):not([type=checkbox]):not([type=hidden])') && !el.closest('p, li, label');
-            if (target && (r.height < 32 || r.width < 32) && el.offsetParent) tiny.push(label(el));
+            // Not for people: honeypots and other fields hidden from visitors (aria-hidden, tabindex -1, off screen).
+            const hidden = el.closest('[aria-hidden="true"]') || el.getAttribute('tabindex') === '-1' || r.right < 0 || r.left > vw;
+            if (target && !hidden && (r.height < 32 || r.width < 32) && el.offsetParent) tiny.push(label(el));
         }
         const uniq = (a) => [...new Set(a)].slice(0, 6);
         const nav = performance.getEntriesByType('navigation')[0];
