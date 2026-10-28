@@ -571,6 +571,9 @@ Zrobione i działające end-to-end (sprawdzone w przeglądarce; testy: `./cadenz
 | Konektor Instagram jako pierwsza paczka biblioteki (`library/sources/instagram`): eksport ZIP + Instagram Login, import w tle (Messenger), codzienna synchronizacja (Scheduler) | ✅ (OAuth bez testu na koncie) |
 | Kolekcje z arkuszy (§6.3 Records + SpreadsheetImport): analiza typów kolumn, import, siatka z filtrami, tabela, strona rekordu | ✅ |
 | Strona ucząca: interaktywny quiz | ✅ (LearningPath/Flashcards/AskThisPage — nie) |
+| Formularze odwiedzających (RSVP, zapisy z limitem miejsc, zamówienia, kontakt): walidacja względem pól, honeypot + RateLimiter, `FormSubmitted`, odpowiedzi widoczne tylko właścicielowi na stronie, eksport do Excela, agent odpowiada na pytania o odpowiedzi | ✅ |
+| Odliczanie z plikiem „Dodaj do kalendarza” (.ics), pasek ogłoszenia znikający po dacie, kotwice do sekcji, język strony | ✅ |
+| Mapa: podróże z GPS zdjęć (trasa w czasie, legenda) i miejsca z adresów (Nominatim z uproszczeniami) | ✅ |
 | Diagnostyka przez Symfony AI Mate, izolacja błędów renderu, model zapasowy, tolerancja błędów modeli (JsonRepair, lenient resolver), polityka narzędzi w kodzie | ✅ |
 | Uruchomienie jednym poleceniem, README EN, licencja MIT, lista zgłoszeń do upstreamu, scenariusz filmu | ✅ |
 

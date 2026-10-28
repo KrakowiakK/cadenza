@@ -20,7 +20,8 @@ appears first as a **sketch on the live page**; nothing goes live until you appr
 - **“How could my site look?”** Content written once, three design directions side by side as live thumbnails; keep
   one.
 - **Beautiful by construction.** Pages are composed from designed **section patterns** (hero, feature split, menu,
-  bento, steps, timeline, team, pricing, testimonials, logos, visit us, quiz, collection grid/table, call to action)
+  bento, steps, timeline, team, pricing, testimonials, logos, visit us, quiz, form, countdown, map, collection
+  grid/table, call to action)
   and six **design directions** (minimal, editorial, warm, bold, elegant, fresh) built on UX Toolkit's shadcn kit.
 - **Your data, not lorem ipsum.**
   - *Spreadsheet → shop/catalogue*: columns are analysed (price, category, image, date…), rows become records with
@@ -30,6 +31,14 @@ appears first as a **sketch on the live page**; nothing goes live until you appr
   - *Instagram*: the official export ZIP, or Instagram Login for Business/Creator accounts with a daily sync.
   - *Free photos*: the agent offers a grid of Wikimedia Commons photos (Pexels/Unsplash with a key) with author and
     licence; one click puts the chosen one into the sketch. Images are always stored by the site, never hot-linked.
+- **A site that answers back.**
+  - *Forms* for RSVPs, sign-ups with limited places, orders, bookings, messages, surveys. Answers are validated against
+    the form's own fields, stored, and announced as a `FormSubmitted` event (optional e-mail to the owner). The owner sees
+    them on the page — only they do — downloads them as Excel, or simply asks: *“How many guests are coming, how many
+    vegetarian meals, who has allergies?”*
+  - *Countdown* to an event with an *Add to calendar* file, and an *announcement bar* that hides itself after a date.
+  - *Maps*: “our trips” drawn from the GPS of the owner's phone photos as a route in time order, or pins for addresses
+    (venues, shops) located automatically.
 - **Self-aware.** The agent reads the app's logs and profiler through **Symfony AI Mate**; one broken block never takes
   a page down; a busy model hands over to a fallback model.
 
@@ -59,6 +68,16 @@ CADENZA_LLM_API_KEY=hf_...
 
 Try: *“Jak mogłaby wyglądać strona mojego studia jogi?”*, attach [`examples/glina-cennik.xlsx`](examples/glina-cennik.xlsx)
 and ask for a shop, or click the phone icon and send photos from your phone (same Wi-Fi, or deploy it).
+
+### Things people have built with it
+
+| The owner says | Cadenza builds |
+|---|---|
+| “We're getting married on 14 June in Kazimierz — a page for the guests with an RSVP: name, how many, menu, a bed for the night, allergies. Answers by 1 May.” | timeline of the day, travel and stay, an RSVP form counting places and closing on 1 May, later a countdown with *Add to calendar*, a reminder bar, a map of the church and the party venue |
+| “How many vegetarian meals do we need?” | reads the answers and replies with the numbers |
+| *(attaches a price list)* “Make a shop out of this.” | a collection with a page per product, cards with filter chips and search, three looks to choose from |
+| *(sends photos from the phone)* “Our trips on a map.” | albums per trip, a map with the route and the photos |
+| “A page that explains photosynthesis, with a quiz at the end.” | sections, steps, a quiz with explanations and a score |
 
 `./cadenza test` runs all test suites; `./cadenza reset` starts the site over; `./cadenza stop`.
 
@@ -102,9 +121,11 @@ script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in th
 | **MCP Bundle — servers** | the site exposes `agent` and `control` servers, the editing guide as an MCP **prompt**, the outline as a **resource** |
 | **MCP Bundle — client** | the studio drives the site only through MCP |
 | **Symfony AI Mate** | the agent reads the app's logs and profiler, even when the app does not boot |
-| **Messenger, Scheduler, Workflow** | imports and events; daily sync of connected accounts; the proposal state machine |
+| **Messenger, Scheduler, Workflow** | imports and events (`MediaImported`, `FormSubmitted`); daily sync of connected accounts; the proposal state machine |
+| **RateLimiter, Mailer** | visitors' forms: a sliding window per address against bots, an optional note to the owner |
 | **UX Toolkit (shadcn), Twig/Live Components, Turbo, Icons** | patterns, the panel, View Transitions between versions |
-| **Doctrine, Uid, HttpClient, PhpSpreadsheet** | drafts and versions, media, collections |
+| **Doctrine, Uid, HttpClient, PhpSpreadsheet** | drafts and versions, media, collections; spreadsheets in (collections) and out (form answers) |
+| **AssetMapper (importmap)** | Leaflet for maps, loaded only on pages that have one — no Node, no build step for JS |
 
 ## Models
 
@@ -142,6 +163,8 @@ examples/                sample files to try
 - Generating new code blocks with the agent (spec §6.4) and Panther-based visual review are designed but not built.
 - Single owner, local by design: the owner token in `.env.local`; run behind HTTPS before exposing it.
 - Instagram Login needs a Meta app and a Business/Creator account; the export ZIP works for everyone.
+- Maps use OpenStreetMap tiles and Nominatim (fine for a small site; a busy one should use its own tile/geocoding
+  provider). Form answers can contain visitors' personal data: the agent reads them only when the owner asks.
 
 ## License
 
