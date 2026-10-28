@@ -38,6 +38,7 @@ final class ToolTraceSubscriber
         'find_records' => ['en' => 'Looking through the entries', 'pl' => 'Przeglądam wpisy'],
         'create_block' => ['en' => 'Designing a new block', 'pl' => 'Projektuję nowy blok'],
         'create_widget' => ['en' => 'Programming', 'pl' => 'Programuję'],
+        'leaderboard' => ['en' => 'Reading the leaderboard', 'pl' => 'Sprawdzam tablicę wyników'],
         'widget_status' => ['en' => 'Checking the widgets', 'pl' => 'Sprawdzam elementy'],
         'add_document' => ['en' => 'Putting the document on the site', 'pl' => 'Dodaję dokument do strony'],
         'translate_page' => ['en' => 'Translating the page', 'pl' => 'Tłumaczę stronę'],

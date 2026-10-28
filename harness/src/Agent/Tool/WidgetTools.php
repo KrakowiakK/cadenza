@@ -11,6 +11,7 @@ use App\Studio\WidgetWorkshop;
 use Symfony\AI\Agent\Toolbox\Attribute\AsTool;
 
 #[AsTool('create_widget', 'Make something ALIVE with real code, when blocks are not enough: a game (snake, tetris, frogger, memory, a quiz against the clock), a 3D scene with three.js (a turning product, floating shapes, a 3D logo), an SVG or canvas animation, a living background for the opening, an interactive calculator or chart. Describe it in "brief" in English, precisely: what it shows, rules and controls, mood; mention /media/… photos to use. A programmer writes the code, it is tried in a browser and fixed; it runs sandboxed. To change one, call again with the same name and describe only the change (or what is broken). Then place it with propose_changes: {"type": "widget", "props": {"widget": name, "title": …, "caption": …}}, or as a hero\'s "widget" (a living background behind the title, shape "background").', method: 'create')]
+#[AsTool('leaderboard', 'The shared leaderboard of a game widget (who has the best scores); clear: true empties it, e.g. for a new season. A game gets a leaderboard when its brief asks for one.', method: 'leaderboard')]
 #[AsTool('widget_status', 'The widgets of this site and the last error a browser reported for each — read it when the owner says a game or animation does not work.', method: 'status')]
 final class WidgetTools
 {
@@ -62,6 +63,11 @@ final class WidgetTools
             $r['version'] > 1 && null === $shape ? 'Pages that show it use the new version already; no sketch needed if it is placed.' : ('background' === $r['shape']
                 ? 'Now place it with propose_changes as the "widget" of a hero (variant "typographic").'
                 : 'Now place it with propose_changes: {"type": "widget", "props": {"widget": "'.$name.'", …}} (its frame is '.$r['shape'].').'));
+    }
+
+    public function leaderboard(string $name, bool $clear = false): string
+    {
+        return json_encode($this->site->widgetScores($name, $clear), \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES);
     }
 
     public function status(): string

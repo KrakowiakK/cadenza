@@ -109,6 +109,39 @@ final class Widgets
         return true;
     }
 
+    /**
+     * The best results of a game, highest first.
+     *
+     * @return list<array{player: string, score: int, at: string}>
+     */
+    public function topScores(string $name, int $limit = 10): array
+    {
+        $scores = $this->em->getRepository(\Cadenza\Runtime\Entity\WidgetScore::class)->findBy(['widget' => $name], ['score' => 'DESC', 'id' => 'ASC'], $limit);
+
+        return array_map(static fn ($s): array => $s->toArray(), $scores);
+    }
+
+    /**
+     * Keeps a visitor's result. Names are plain: letters, digits, spaces and a few signs, at most 24 characters.
+     */
+    public function addScore(string $name, string $player, int $score): bool
+    {
+        $player = trim((string) preg_replace('/\s+/u', ' ', (string) preg_replace('/[^\p{L}\p{N} ._\'-]/u', '', $player)));
+        $player = mb_substr($player, 0, 24);
+        if (null === $this->get($name) || '' === $player || $score < 0 || $score > 1_000_000_000) {
+            return false;
+        }
+        $this->em->persist(new \Cadenza\Runtime\Entity\WidgetScore($name, $player, $score));
+        $this->em->flush();
+
+        return true;
+    }
+
+    public function clearScores(string $name): int
+    {
+        return (int) $this->em->createQuery('DELETE FROM '.\Cadenza\Runtime\Entity\WidgetScore::class.' s WHERE s.widget = :w')->setParameter('w', $name)->execute();
+    }
+
     private static function stripFence(string $code): string
     {
         return preg_match('~^\s*```[a-z]*\s*\n(.*)\n```\s*$~s', $code, $m) ? $m[1] : $code;

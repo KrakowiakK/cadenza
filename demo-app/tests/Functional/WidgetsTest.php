@@ -21,6 +21,7 @@ final class WidgetsTest extends WebTestCase
     {
         $client = static::createClient();
         $container = static::getContainer();
+        $container->get('limiter.cadenza_form')->create('score-127.0.0.1')->reset();
         $em = $container->get(EntityManagerInterface::class);
         $tool = new SchemaTool($em);
         $tool->dropSchema($em->getMetadataFactory()->getAllMetadata());
@@ -90,6 +91,18 @@ final class WidgetsTest extends WebTestCase
         self::assertSelectorTextContains('[data-node-type="widget"] .cz-lead strong', 'Drag', 'models write **bold** in short texts');
         self::assertSelectorTextContains('[data-node-type="widget"] .cz-lead em', 'gently');
         self::assertSelectorNotExists('[data-node-type="widget"] .cz-lead script');
+
+        // A shared leaderboard: plain names, whole numbers, highest first.
+        $client->request('POST', '/_cadenza/widget/cube/scores', [], [], ['CONTENT_TYPE' => 'application/json'], '{"player":"Ania <b>","score":120}');
+        $client->request('POST', '/_cadenza/widget/cube/scores', [], [], ['CONTENT_TYPE' => 'application/json'], '{"player":"Kuba","score":300}');
+        $client->request('POST', '/_cadenza/widget/cube/scores', [], [], ['CONTENT_TYPE' => 'application/json'], '{"player":"","score":999}');
+        self::assertResponseStatusCodeSame(422);
+        $client->request('GET', '/_cadenza/widget/cube/scores');
+        $scores = json_decode((string) $client->getResponse()->getContent(), true)['scores'];
+        self::assertSame(['Kuba', 'Ania b'], array_column($scores, 'player'));
+        self::assertSame([300, 120], array_column($scores, 'score'));
+        $client->request('GET', '/_cadenza/widget/nothing-here/scores');
+        self::assertResponseStatusCodeSame(404);
 
         // Errors from a visitor's browser are not kept; only what the owner sees.
         $client->request('POST', '/_cadenza/widget/cube/error', [], [], ['CONTENT_TYPE' => 'application/json'], '{"version":1,"error":"x is not defined"}');

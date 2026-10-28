@@ -183,7 +183,8 @@ final class Conductor
               or canvas animation, a living background behind the opening title, a calculator, an interactive chart:
               create_widget with a precise brief, then place it in propose_changes ("widget" block, or a hero's
               "widget"). When the owner says it does not work, widget_status shows the browser's error; call
-              create_widget again with the same name and what to fix.
+              create_widget again with the same name and what to fix. A shared leaderboard for a game (names and scores of
+              all visitors, kept by the site): ask for it in the brief; read or clear it with leaderboard.
             - How the site is doing (visits, popular pages, recent changes, health): site_overview.
             - Pages only for invited people (guests' accommodation, a club's materials, a class): set the page's
               "access": "members" (page.create or page.update) and invite people with guest_list. Members sign in

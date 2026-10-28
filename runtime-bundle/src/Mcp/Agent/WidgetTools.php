@@ -66,4 +66,17 @@ final class WidgetTools
     {
         return $this->libraries->all();
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[McpTool(name: 'widget_scores', description: 'The shared leaderboard of a game widget (best results visitors sent); clear: true empties it.')]
+    public function scores(string $name, bool $clear = false): array
+    {
+        if (null === $this->widgets->get($name)) {
+            return ['error' => 'No widget "'.$name.'".'];
+        }
+
+        return $clear ? ['cleared' => $this->widgets->clearScores($name)] : ['scores' => $this->widgets->topScores($name, 20)];
+    }
 }

@@ -265,6 +265,15 @@ window.addEventListener('message', (e) => {
         const json = JSON.stringify(e.data.store);
         if (json.length < 50000) { try { localStorage.setItem(widgetKey(name), json); } catch (err) { /* storage full or blocked */ } }
     }
+    if (e.data.scores === true && Number.isInteger(e.data.id)) {
+        // The game's shared leaderboard: read it, or add a result first.
+        const submit = typeof e.data.player === 'string' && Number.isInteger(e.data.score);
+        fetch(`/_cadenza/widget/${encodeURIComponent(name)}/scores`, submit
+            ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ player: e.data.player, score: e.data.score }) }
+            : {})
+            .then((r) => r.json()).catch(() => ({}))
+            .then((r) => frame.contentWindow?.postMessage({ cadenzaScores: { id: e.data.id, scores: r.scores || [] } }, '*'));
+    }
     if (typeof e.data.error === 'string' && !reported.has(name + e.data.error)) {
         // Kept only when the owner is looking (the site answers 404 to anyone else).
         reported.add(name + e.data.error);

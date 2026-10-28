@@ -208,6 +208,14 @@ final class SiteClient
     }
 
     /**
+     * @return array<string, mixed> the leaderboard ("scores") or how many were removed ("cleared")
+     */
+    public function widgetScores(string $name, bool $clear = false): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('widget_scores', ['name' => $name, 'clear' => $clear]));
+    }
+
+    /**
      * @return array<string, string> import name => version
      */
     public function widgetLibraries(): array

@@ -35,6 +35,8 @@ final class WidgetController
         private readonly OwnerResolver $owner,
         #[Autowire('%kernel.project_dir%/public/media')]
         private readonly string $mediaDir,
+        #[Autowire(service: 'limiter.cadenza_form')]
+        private readonly \Symfony\Component\RateLimiter\RateLimiterFactoryInterface $limiter,
     ) {
     }
 
@@ -137,6 +139,30 @@ final class WidgetController
         return new JsonResponse(['ok' => $this->widgets->reportError($name, (int) ($data['version'] ?? 0), $error)]);
     }
 
+    /**
+     * The shared leaderboard of a game. The sandbox cannot reach the network: the page around it asks for it.
+     */
+    #[Route('/_cadenza/widget/{name}/scores', name: 'cadenza_widget_scores', requirements: ['name' => self::NAME], methods: ['GET', 'POST'])]
+    public function scores(Request $request, string $name): JsonResponse
+    {
+        if (null === $this->widgets->get($name)) {
+            throw new NotFoundHttpException();
+        }
+        if ($request->isMethod('POST')) {
+            if (!$this->limiter->create('score-'.$request->getClientIp())->consume()->isAccepted()) {
+                return new JsonResponse(['ok' => false, 'error' => 'too_many'], 429);
+            }
+            $data = json_decode($request->getContent(), true);
+            $ok = \is_array($data) && \is_string($data['player'] ?? null) && \is_int($data['score'] ?? null)
+                && $this->widgets->addScore($name, $data['player'], $data['score']);
+            if (!$ok) {
+                return new JsonResponse(['ok' => false, 'error' => 'invalid'], 422);
+            }
+        }
+
+        return new JsonResponse(['ok' => true, 'scores' => $this->widgets->topScores($name)], 200, ['Cache-Control' => 'no-store']);
+    }
+
     private const SHELL = <<<'HTML'
         <!doctype html>
         <html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -175,6 +201,15 @@ final class WidgetController
                 if (v.pointer && typeof v.pointer.x === 'number' && typeof v.pointer.y === 'number') window.cadenza.pointer = {x: v.pointer.x, y: v.pointer.y};
                 dispatchEvent(new CustomEvent('cadenza:view', {detail: window.cadenza}));
             });
+            // A shared leaderboard, kept by the site: await cadenza.scores.top(), await cadenza.scores.submit(name, score).
+            let asked = 0;
+            const waiting = {};
+            addEventListener('message', (e) => {
+                const r = e.source === parent && e.data && e.data.cadenzaScores;
+                if (r && waiting[r.id]) { waiting[r.id](Array.isArray(r.scores) ? r.scores : []); delete waiting[r.id]; }
+            });
+            const ask = (m) => new Promise((resolve) => { const id = ++asked; waiting[id] = resolve; send(Object.assign({scores: true, id}, m)); setTimeout(() => { if (waiting[id]) { waiting[id]([]); delete waiting[id]; } }, 8000); });
+            window.cadenza.scores = {top: () => ask({}), submit: (player, score) => ask({player: String(player).slice(0, 24), score: Math.max(0, Math.floor(Number(score) || 0))})};
             const report = (text) => send({error: String(text).slice(0, 500)});
             addEventListener('error', (e) => {
                 if (e.target && e.target.tagName === 'SCRIPT') { report('A script did not load: ' + (e.target.src || 'an import of an inline module')); return; }

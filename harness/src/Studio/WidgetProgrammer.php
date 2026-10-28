@@ -54,6 +54,9 @@ final class WidgetProgrammer
         window.cadenza.scroll (0 when the frame enters the screen from below, 1 when it leaves at the top), updated with
         a "cadenza:view" event on window — they work even for backgrounds that ignore the mouse. Use them for parallax,
         a scene that follows the mouse or turns as the page scrolls.
+        A leaderboard shared by all visitors (only when the brief asks for one): await window.cadenza.scores.top() and
+        await window.cadenza.scores.submit(playerName, score) both resolve to [{player, score, at}] highest first; after
+        a game ask for a name in your own small input overlay, then show the top 10 (escape names: textContent).
         Behaviour: requestAnimationFrame with delta time; pause when the tab is hidden; if window.cadenza.reducedMotion
         is true, keep decorative motion very slow or still. ALL visible text in the language "{language}", short labels
         too (score, best, level, player, computer, start, pause).
