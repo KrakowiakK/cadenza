@@ -86,9 +86,9 @@ start() {
         (cd "$STUDIO" && symfony server:start -d --port="$STUDIO_PORT" --no-tls >/dev/null)
     else
         step "Starting with PHP's built-in server (Symfony CLI not found)"
-        (cd "$APP" && PHP_CLI_SERVER_WORKERS=4 nohup php -c "$APP/php.ini" -S "0.0.0.0:$APP_PORT" -t public "$ROOT/bin/router.php" >"$RUN/app.log" 2>&1 & echo $! >"$RUN/app.pid")
-        (cd "$STUDIO" && PHP_CLI_SERVER_WORKERS=4 nohup php -c "$STUDIO/php.ini" -S "127.0.0.1:$STUDIO_PORT" -t public "$ROOT/bin/router.php" >"$RUN/studio.log" 2>&1 & echo $! >"$RUN/studio.pid")
-        (cd "$APP" && nohup php bin/console messenger:consume async scheduler_cadenza --time-limit=3600 >"$RUN/worker.log" 2>&1 & echo $! >"$RUN/worker.pid")
+        (cd "$APP" && PHP_CLI_SERVER_WORKERS=4 nohup php -c "$APP/php.ini" -S "0.0.0.0:$APP_PORT" -t public "$ROOT/bin/router.php" </dev/null >"$RUN/app.log" 2>&1 & echo $! >"$RUN/app.pid")
+        (cd "$STUDIO" && PHP_CLI_SERVER_WORKERS=4 nohup php -c "$STUDIO/php.ini" -S "127.0.0.1:$STUDIO_PORT" -t public "$ROOT/bin/router.php" </dev/null >"$RUN/studio.log" 2>&1 & echo $! >"$RUN/studio.pid")
+        (cd "$APP" && nohup php bin/console messenger:consume async scheduler_cadenza --time-limit=3600 </dev/null >"$RUN/worker.log" 2>&1 & echo $! >"$RUN/worker.pid")
     fi
     echo
     bold "Cadenza is running"
