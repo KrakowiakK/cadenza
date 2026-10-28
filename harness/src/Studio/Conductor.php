@@ -106,6 +106,13 @@ final class Conductor
         if ('' === $text && 0 === $this->turn->toolCalls) {
             throw new \RuntimeException('The model returned an empty answer.');
         }
+        if ('' === $text) {
+            // Work was done but the model said nothing about it: the owner still gets a word.
+            $pl = 'pl' === ($context['language'] ?? 'en');
+            $text = [] !== $this->turn->proposals
+                ? ($pl ? 'Szkic jest gotowy — zobacz go na stronie i zatwierdź albo napisz, co zmienić.' : 'The sketch is ready — have a look on the page and approve it, or tell me what to change.')
+                : ($pl ? 'Gotowe — zmiana jest już na stronie. Daj znać, czy tak jest dobrze.' : 'Done — the change is on the site already. Let me know if it is right.');
+        }
 
         $conversation->addAssistantTurn(trim($text), array_map(static fn ($p) => $p->getId(), $this->turn->proposals));
         $this->em->flush();
@@ -170,6 +177,8 @@ final class Conductor
             - No ceiling: when no built-in pattern fits what the owner asks for (a recipe card, a comparison table, a
               training plan, a spec sheet…), write a new block with create_block, then use it in propose_changes.
               Prefer built-in patterns when they fit; never fake a missing block with plain text.
+            - Not for what a pattern already does (prefer the pattern): a quiz → "quiz", numbers → "stats" (they count
+              up by themselves), a countdown → "countdown", photos → gallery patterns, a map → "map", a sign-up → "form".
             - Something that moves or reacts — a game (snake, tetris, frogger, memory), a 3D scene (three.js), an SVG
               or canvas animation, a living background behind the opening title, a calculator, an interactive chart:
               create_widget with a precise brief, then place it in propose_changes ("widget" block, or a hero's

@@ -27,9 +27,10 @@ final class WidgetTools
      * @param string $label Human name, e.g. "Snake"
      * @param string $shape Its frame on the page: "wide" (16:9), "square", "tall" (3:4), "banner" (3:1), "auto" (as tall as its content) or "background" (behind a hero's title); empty keeps the current one
      */
-    public function create(string $name, string $brief, string $label = '', ?string $shape = null): string
+    public function create(string $brief, string $name = '', string $label = '', ?string $shape = null): string
     {
-        $name = trim(strtolower($name));
+        // Models sometimes leave the name out: one is made from the label.
+        $name = trim(strtolower('' !== trim($name) ? $name : (string) preg_replace('/[^a-z0-9]+/', '-', strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $label ?: 'widget') ?: 'widget'))), '-');
         $pl = 'pl' === substr($this->turn->language, 0, 2);
         $label = '' !== trim($label) ? trim($label) : ucfirst(str_replace('-', ' ', $name));
         $steps = [

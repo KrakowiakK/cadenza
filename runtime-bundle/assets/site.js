@@ -297,3 +297,35 @@ window.addEventListener('pointermove', (e) => { lastPointer = { clientX: e.clien
 document.addEventListener('turbo:load', widgets);
 document.addEventListener('turbo:frame-load', widgets);
 if (document.readyState !== 'loading') widgets(); else document.addEventListener('DOMContentLoaded', widgets);
+
+/*
+ * Numbers in "stats" count up from zero when they come into view ("1 200+", "8 lat", "4,9"): the number is found in the
+ * text and everything around it stays. Once per number; not for people who prefer less motion.
+ */
+const counters = () => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        observer.unobserve(entry.target);
+        const el = entry.target;
+        const text = el.textContent;
+        const m = text.match(/\d[\d\s.,]*/);
+        if (!m) return;
+        const raw = m[0].trim();
+        const decimal = /[.,]\d{1,2}$/.test(raw) && !/^\d{1,3}([.,\s]\d{3})+$/.test(raw);
+        const target = parseFloat(decimal ? raw.replace(/\s/g, '').replace(',', '.') : raw.replace(/[\s.,]/g, ''));
+        if (!isFinite(target) || target === 0) return;
+        const digits = decimal ? (raw.split(/[.,]/)[1] || '').length : 0;
+        const format = (n) => decimal ? n.toFixed(digits).replace('.', raw.includes(',') ? ',' : '.') : Math.round(n).toLocaleString(document.body.lang || undefined);
+        const started = performance.now();
+        const step = (now) => {
+            const t = Math.min(1, (now - started) / 1400);
+            el.textContent = text.replace(m[0].trim(), format(target * (1 - Math.pow(1 - t, 3))));
+            if (t < 1) requestAnimationFrame(step); else el.textContent = text;
+        };
+        requestAnimationFrame(step);
+    }), { threshold: 0.6 });
+    document.querySelectorAll('[data-cz-count]:not([data-counted])').forEach((el) => { el.dataset.counted = '1'; observer.observe(el); });
+};
+document.addEventListener('turbo:load', counters);
+if (document.readyState !== 'loading') counters(); else document.addEventListener('DOMContentLoaded', counters);

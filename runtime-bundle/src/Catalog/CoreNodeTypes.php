@@ -113,7 +113,7 @@ final class CoreNodeTypes implements NodeTypeProviderInterface
             'avatar' => ['type' => 'image', 'default' => null],
         ]);
 
-        yield new NodeType('stats', 'Stats', 'Key numbers side by side.', 'content', [
+        yield new NodeType('stats', 'Stats', 'Key numbers side by side; they count up from zero when they come into view.', 'content', [
             'items' => ['type' => 'list', 'items' => [
                 'value' => ['type' => 'string', 'required' => true],
                 'label' => ['type' => 'string', 'required' => true],
