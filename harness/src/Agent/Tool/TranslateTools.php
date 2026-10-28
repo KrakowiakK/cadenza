@@ -62,7 +62,8 @@ final class TranslateTools
         if (null !== $nav = $this->translator->translateNav($settings['nav'] ?? null, $language, $translated)) {
             $operations[] = $nav;
         }
-        $paths = implode(', ', array_values(array_unique($translated)));
+        // The summary names the pages of this sketch only (pages translated earlier are live already).
+        $paths = implode(', ', array_values(array_unique([...$inSketch, $tree['path']])));
         $summary = \sprintf('pl' === substr($this->turn->language, 0, 2) ? 'Wersja „%s”: %s' : '"%s" version: %s', strtoupper($language), $paths);
         $result = $this->proposals->propose($this->turn->conversation, $operations, $summary, $sketch?->getDraftId());
         if (null === $result['proposal']) {
