@@ -268,8 +268,10 @@ model writes:
 
 **The favourite for running Cadenza locally: gpt-oss 20B** — everything right and the quickest; **Qwen 3.8 27B** and
 **Muse Glimmer 30B** did everything too, with the best judgement (both refused to invent reviews), Qwen a little
-slower, Muse Glimmer clearly so (it thinks before answering: 57 tokens a second, the first after 20 s). Bigger is not better here: gpt-oss 120B lost to its 20B sibling and generates slower (75 against 106 tokens a
-second on an M4 Max; Gemma 4 26B-A4B, with 4B active parameters, writes 228 a second). The 4B models that passed the easy round are not enough for real work: they fail multi-step tasks and, worse,
+slower, Muse Glimmer clearly so (a dense 30B: about 22 tokens a second, and it thinks before answering). Its DFlash 2
+drafter (llama.cpp PR #27342) did not make it much faster here: +10 % on code, up to +50 % on English-style
+reasoning, but slower on Polish prose, where few drafted tokens were accepted (10 % against 31 % on code). Bigger is not better here: gpt-oss 120B lost to its 20B sibling and generates slower (75 against about 100 tokens a
+second on an M4 Max; Gemma 4 26B-A4B writes about 58, the dense Muse Glimmer 30B about 22). The 4B models that passed the easy round are not enough for real work: they fail multi-step tasks and, worse,
 say they did what they did not.
 
 Smaller and free models make mistakes in tool arguments (numbers as strings, JSON as strings, extra brackets). The
