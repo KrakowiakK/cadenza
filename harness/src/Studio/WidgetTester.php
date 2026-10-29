@@ -29,12 +29,12 @@ final class WidgetTester
         private readonly string $appUrl,
         #[Autowire(service: 'ai.platform.generic.vision')]
         private readonly PlatformInterface $vision,
-        #[Autowire('%env(CADENZA_LLM_VISION_MODEL)%')]
+        #[Autowire('%env(vault:CADENZA_LLM_VISION_MODEL)%')]
         private readonly string $visionModel,
         // A model of the main API that can see (e.g. "gemma4:31b" on Ollama Cloud), when the vision API is rate-limited.
         #[Autowire(service: 'ai.platform.generic.default')]
         private readonly PlatformInterface $main,
-        #[Autowire('%env(CADENZA_REVIEW_MODEL)%')]
+        #[Autowire('%env(vault:CADENZA_REVIEW_MODEL)%')]
         private readonly string $reviewModel,
         #[Autowire('%kernel.project_dir%/drivers/chromedriver')]
         private readonly string $chromeDriver,

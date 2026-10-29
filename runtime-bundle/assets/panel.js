@@ -34,6 +34,14 @@ const I18N = {
         phoneOpened: 'Phone connected — pick photos', receiving: 'Receiving', photos: 'photos', phoneDone: 'Photos received',
         variants: 'Variants', choose: 'Choose this one', chosen: 'Chosen', open: 'Open',
         retry: 'Try again', modelBusy: 'The model did not answer in time.', fallbackUsed: 'Main model busy — answered by the fallback model',
+        services: 'Connections', servicesHint: 'What Cadenza uses to think and to find pictures. Keys stay encrypted on this computer.',
+        modelNow: 'Model', notConnected: 'No model connected yet — pick one below, it takes a minute.', foundHere: 'Found on this computer',
+        useThis: 'Use', pasteKey: 'Or connect with a key', keyPlaceholder: 'Paste the API key', connect: 'Connect', whereKey: 'Where do I get a key?',
+        featureServices: 'Pictures', disconnect: 'Disconnect', connecting: 'Checking…', noModels: 'no models yet — download one first',
+        chooseModel: 'Model', baseUrl: 'API address (https://…)', modelName: 'Model name', keyInEnv: 'key already set on this computer',
+        runningHere: 'running on this computer', signedInPlan: 'signed in with your plan', signedInKey: 'signed in', notSignedIn: 'installed, not signed in',
+        subscriptionUse: 'can write games and widgets with your plan', connectedNow: 'Connected', fromEnvironment: 'from the start script', fromVault: 'saved in Cadenza', fromDotenv: 'from a .env file',
+        freePlan: 'free plan', localModel: 'on this computer', useForGames: 'Write games with it', writesGames: 'writes your games and widgets', stopUsing: 'Stop',
         instagramPhone: 'Your Instagram photos are in your phone\'s gallery — the fastest way:', exportAll: 'Everything from Instagram at once (export)', openExport: 'Open Instagram export',
     },
     pl: {
@@ -66,6 +74,14 @@ const I18N = {
         phoneOpened: 'Telefon połączony — wybierz zdjęcia', receiving: 'Odbieram', photos: 'zdjęć', phoneDone: 'Odebrano zdjęcia',
         variants: 'Warianty', choose: 'Wybieram ten', chosen: 'Wybrany', open: 'Otwórz',
         retry: 'Spróbuj ponownie', modelBusy: 'Model nie odpowiedział na czas.', fallbackUsed: 'Główny model zajęty — odpowiada model zapasowy',
+        services: 'Połączenia', servicesHint: 'Z czego Cadenza korzysta, żeby myśleć i szukać zdjęć. Klucze zostają zaszyfrowane na tym komputerze.',
+        modelNow: 'Model', notConnected: 'Nie ma jeszcze połączonego modelu — wybierz jeden poniżej, to chwila.', foundHere: 'Znalezione na tym komputerze',
+        useThis: 'Użyj', pasteKey: 'Albo połącz kluczem', keyPlaceholder: 'Wklej klucz API', connect: 'Połącz', whereKey: 'Skąd wziąć klucz?',
+        featureServices: 'Zdjęcia', disconnect: 'Odłącz', connecting: 'Sprawdzam…', noModels: 'brak modeli — najpierw pobierz jakiś',
+        chooseModel: 'Model', baseUrl: 'Adres API (https://…)', modelName: 'Nazwa modelu', keyInEnv: 'klucz jest już na tym komputerze',
+        runningHere: 'działa na tym komputerze', signedInPlan: 'zalogowane Twoim planem', signedInKey: 'zalogowane', notSignedIn: 'zainstalowane, niezalogowane',
+        subscriptionUse: 'może pisać gry i widżety w ramach Twojego planu', connectedNow: 'Połączono', fromEnvironment: 'ze skryptu startowego', fromVault: 'zapisane w Cadenzie', fromDotenv: 'z pliku .env',
+        freePlan: 'darmowy plan', localModel: 'na tym komputerze', useForGames: 'Pisz nią gry', writesGames: 'pisze Twoje gry i widżety', stopUsing: 'Wyłącz',
         instagramPhone: 'Twoje zdjęcia z Instagrama są w galerii telefonu — najszybciej tak:', exportAll: 'Wszystko z Instagrama naraz (eksport)', openExport: 'Otwórz eksport Instagrama',
     },
 };
@@ -125,6 +141,7 @@ const ICONS = {
     type: '<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>',
     eraser: '<path d="m7 21-4.3-4.3a1 1 0 0 1 0-1.4l10-10a1 1 0 0 1 1.4 0l5.6 5.6a1 1 0 0 1 0 1.4L11 21z"/><path d="M22 21H7"/>',
     undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/>',
+    plug: '<path d="M9 2v6M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0z"/><path d="M12 18v4"/>',
     trash: '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>',
 };
 const icon = (name, cls = 'size-4') => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cls}">${ICONS[name]}</svg>`;
@@ -170,6 +187,7 @@ class Studio {
     </div>
     <a href="/_cadenza/dashboard" data-cz="dashboard" title="${t('dashboard')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('dashboard')}</a>
     <button type="button" data-cz="tab-history" title="${t('history')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('clock')}</button>
+    <button type="button" data-cz="services" title="${t('services')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('plug')}</button>
     <button type="button" data-cz="phone-view" title="${t('phoneView')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('phone')}</button>
     <button type="button" data-cz="new" title="${t('newChat')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('plus')}</button>
     <button type="button" data-cz="collapse" title="${t('collapse')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('minimize')}</button>
@@ -216,6 +234,7 @@ class Studio {
         this.el('show').addEventListener('click', () => this.setState('open'));
         this.el('new').addEventListener('click', () => this.newConversation());
         this.el('phone-view').addEventListener('click', () => this.phoneView());
+        this.el('services').addEventListener('click', () => this.servicesCard());
         // The phone follows the page (and the sketch) the owner moves to.
         document.addEventListener('turbo:load', () => { if (this.phoneOpen) this.phoneView(true); });
         this.el('tab-history').addEventListener('click', () => this.toggleHistory());
@@ -565,7 +584,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
     }
 
     async loadHistory() {
-        this.api('/api/info').then((info) => this.showModel(info.model)).catch(() => {});
+        this.api('/api/info').then((info) => { this.showModel(info.model); if (info.ready === false) { this.setState('open'); this.servicesCard(); } }).catch(() => {});
         if (!this.conversationId) { this.welcome(); this.setStatus('idle'); this.otherSketches(); return; }
         try {
             const data = await this.api(`/api/conversations/${encodeURIComponent(this.conversationId)}`);
@@ -780,6 +799,9 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
                 break;
             case 'toast':
                 this.toast(cmd.text);
+                break;
+            case 'showServices':
+                this.servicesCard(cmd.focus ?? null);
                 break;
             case 'phoneView':
                 if (cmd.path) await this.uiCommand({ command: 'navigate', path: cmd.path });
@@ -1036,6 +1058,144 @@ ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-30
                 }
             });
         }
+        this.scrollDown();
+    }
+
+    /**
+     * Connections: the model the studio thinks with and the services behind pictures — what is connected, what this
+     * computer already has (one click), and a key pasted for the rest. Keys go to the studio's vault and never back.
+     */
+    async servicesCard(focus = null) {
+        if (this.showingHistory) this.toggleHistory();
+        this.messages.querySelector('[data-cz-services]')?.remove();
+        const card = document.createElement('div');
+        card.dataset.czServices = '';
+        card.className = 'cz-msg rounded-xl border border-border p-3 text-[13px]';
+        card.innerHTML = `<div class="flex items-center gap-2 font-semibold">${icon('plug')}${t('services')}</div><div class="mt-3 flex justify-center"><span class="size-5 animate-spin rounded-full border-2 border-violet-500 border-t-transparent"></span></div>`;
+        this.messages.append(card);
+        this.scrollDown();
+        let s;
+        try { s = await this.api('/api/services'); } catch (e) { card.innerHTML += `<p class="mt-2 text-rose-600">${escapeHtml(e.message)}</p>`; return; }
+        this.renderServices(card, s, focus);
+    }
+
+    renderServices(card, s, focus = null) {
+        const from = { environment: t('fromEnvironment'), vault: t('fromVault'), '.env': t('fromDotenv') };
+        const origin = (f) => f ? (from[f] ?? (f.startsWith('env:') ? t('keyInEnv') + ' (' + f.slice(4) + ')' : f)) : '';
+        const m = s.model;
+        const button = (label, attrs, primary = true) => `<button type="button" ${attrs} class="shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-medium ${primary ? 'bg-foreground text-background hover:opacity-90' : 'border border-border hover:bg-muted'}">${label}</button>`;
+        const row = (title, sub, actions) => `<div class="flex items-center gap-2 rounded-lg border border-border px-2.5 py-2"><div class="min-w-0 flex-1"><div class="font-medium">${title}</div>${sub ? `<div class="truncate text-xs text-muted-foreground">${sub}</div>` : ''}</div>${actions}</div>`;
+        const found = s.found ?? [];
+        const models = found.filter((f) => f.kind === 'model');
+        const subscriptions = found.filter((f) => f.kind === 'subscription');
+        const keyed = Object.entries(s.providers).filter(([, p]) => !p.local);
+        card.innerHTML = `<div class="flex items-center gap-2 font-semibold">${icon('plug')}${t('services')}</div>
+<p class="mt-0.5 text-xs text-muted-foreground">${t('servicesHint')}</p>
+<div class="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">${t('modelNow')}</div>
+<div class="mt-1.5">${s.ready
+            ? row(`<span class="text-emerald-600">${icon('check', 'size-3.5 inline')}</span> ${escapeHtml(m.label ?? m.baseUrl)} · ${escapeHtml(String(m.model ?? '').split('?')[0])}`, escapeHtml(origin(m.from)), '')
+            : `<p class="rounded-lg bg-amber-500/10 px-2.5 py-2 text-amber-700">${t('notConnected')}</p>`}</div>
+${models.length || subscriptions.length ? `<div class="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">${t('foundHere')}</div>
+<div class="mt-1.5 flex flex-col gap-1.5">${models.map((f, i) => {
+            const local = !!f.baseUrl;
+            const sub = local ? (f.models?.length ? t('runningHere') : t('noModels')) : t('keyInEnv') + ' (' + escapeHtml(f.env) + ')';
+            const select = local && f.models?.length ? `<select data-model="${i}" class="max-w-36 rounded-lg border border-border bg-background px-1.5 py-1 text-xs">${f.models.map((x) => `<option>${escapeHtml(x)}</option>`).join('')}</select>` : '';
+            return row(escapeHtml(f.label), sub, select + (local && !f.models?.length ? '' : button(t('useThis'), `data-use="${i}"`)));
+        }).join('')}${subscriptions.map((f) => {
+            const using = s.code?.subscription === f.id;
+            const sub = !f.signedIn ? t('notSignedIn') : using ? t('writesGames') + ' · ' + s.code.model : (f.plan ? t('signedInPlan') : t('signedInKey')) + ' — ' + t('subscriptionUse');
+            const actions = !f.signedIn ? '' : using
+                ? button(t('stopUsing'), 'data-code-stop', false)
+                : `<select data-code-model="${f.id}" class="max-w-28 rounded-lg border border-border bg-background px-1.5 py-1 text-xs">${(f.models ?? []).map((x) => `<option>${escapeHtml(x)}</option>`).join('')}</select>` + button(t('useForGames'), `data-code="${f.id}"`);
+            return row(`${using ? `<span class="text-emerald-600">${icon('check', 'size-3.5 inline')}</span> ` : ''}${escapeHtml(f.label)}`, escapeHtml(sub), actions);
+        }).join('')}</div>` : ''}
+<div class="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">${t('pasteKey')}</div>
+<div class="mt-1.5 flex flex-wrap gap-1">${keyed.map(([id, p]) => `<button type="button" data-provider="${id}" class="rounded-full border border-border px-2.5 py-1 text-xs hover:bg-muted">${escapeHtml(id === 'custom' ? (LANG === 'pl' ? 'Inne API' : 'Other API') : p.label)}${p.free ? ` <span class="text-emerald-600">· ${t('freePlan')}</span>` : ''}</button>`).join('')}</div>
+<form data-part="key-form" class="mt-2 hidden flex-col gap-1.5">
+  <input data-part="base" type="url" placeholder="${t('baseUrl')}" class="hidden rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs outline-none">
+  <input data-part="name" placeholder="${t('modelName')}" class="hidden rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs outline-none">
+  <div class="flex gap-1.5"><input data-part="key" type="password" autocomplete="off" placeholder="${t('keyPlaceholder')}" class="min-w-0 flex-1 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs outline-none">${button(t('connect'), 'type="submit"').replace('type="button" type="submit"', 'type="submit"')}</div>
+  <a data-part="where" target="_blank" rel="noopener" class="text-xs text-violet-600 underline"></a>
+</form>
+<div class="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">${t('featureServices')}</div>
+<div class="mt-1.5 flex flex-col gap-1.5">${Object.entries(s.services).map(([id, x]) => {
+            const env = found.find((f) => f.kind === 'service' && f.id === id);
+            const actions = x.connected
+                ? button(t('disconnect'), `data-disconnect="${id}"`, false)
+                : (env ? button(t('useThis'), `data-service-env="${id}" data-env="${escapeHtml(env.env)}"`) : button(t('connect'), `data-service="${id}" data-url="${escapeHtml(x.keyUrl)}"`, false));
+            return row(`${x.connected ? `<span class="text-emerald-600">${icon('check', 'size-3.5 inline')}</span> ` : ''}${escapeHtml(x.label)}`, escapeHtml(x.connected ? origin(x.from) : x.for), actions);
+        }).join('')}</div>
+<p data-part="message" class="mt-2 hidden text-xs"></p>`;
+
+        const message = (text, ok) => {
+            const p = card.querySelector('[data-part="message"]');
+            p.classList.remove('hidden', 'text-rose-600', 'text-emerald-600', 'text-muted-foreground');
+            p.classList.add(ok === null ? 'text-muted-foreground' : ok ? 'text-emerald-600' : 'text-rose-600');
+            p.textContent = text;
+        };
+        const post = async (path, body) => {
+            message(t('connecting'), null);
+            card.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+            try {
+                const res = await fetch(HARNESS + path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Cadenza-Token': TOKEN }, body: JSON.stringify(body) });
+                const data = await res.json();
+                if (!data.ok) { card.querySelectorAll('button').forEach((b) => { b.disabled = false; }); message(data.error ?? t('connectFailed'), false); return; }
+                this.toast(t('connectedNow'));
+                this.api('/api/info').then((info) => this.showModel(info.model)).catch(() => {});
+                const fresh = await this.api('/api/services');
+                this.renderServices(card, fresh);
+                message(t('connectedNow'), true);
+            } catch (e) {
+                card.querySelectorAll('button').forEach((b) => { b.disabled = false; });
+                message(e.message, false);
+            }
+        };
+
+        card.querySelectorAll('[data-use]').forEach((b) => b.addEventListener('click', () => {
+            const f = models[+b.dataset.use];
+            const choice = card.querySelector(`[data-model="${b.dataset.use}"]`)?.value;
+            post('/api/services/model', f.baseUrl ? { provider: f.id, baseUrl: f.baseUrl, model: choice } : { provider: f.id, env: f.env });
+        }));
+        const form = card.querySelector('[data-part="key-form"]');
+        let provider = null;
+        const pick = (id) => {
+            provider = id;
+            const p = s.providers[id];
+            card.querySelectorAll('[data-provider]').forEach((c) => c.classList.toggle('bg-muted', c.dataset.provider === id));
+            form.classList.remove('hidden');
+            form.classList.add('flex');
+            form.querySelector('[data-part="base"]').classList.toggle('hidden', id !== 'custom');
+            form.querySelector('[data-part="name"]').classList.toggle('hidden', id !== 'custom');
+            const where = form.querySelector('[data-part="where"]');
+            where.classList.toggle('hidden', !p.keyUrl);
+            if (p.keyUrl) { where.href = p.keyUrl; where.textContent = t('whereKey') + ' → ' + new URL(p.keyUrl).host; }
+            form.querySelector('[data-part="key"]').focus();
+        };
+        card.querySelectorAll('[data-provider]').forEach((c) => c.addEventListener('click', () => pick(c.dataset.provider)));
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const key = form.querySelector('[data-part="key"]');
+            const body = { provider, key: key.value };
+            if (provider === 'custom') Object.assign(body, { baseUrl: form.querySelector('[data-part="base"]').value, model: form.querySelector('[data-part="name"]').value });
+            key.value = '';
+            post('/api/services/model', body);
+        });
+        card.querySelectorAll('[data-code]').forEach((b) => b.addEventListener('click', () => post('/api/services/code', { model: b.dataset.code + ':' + card.querySelector(`[data-code-model="${b.dataset.code}"]`).value })));
+        card.querySelector('[data-code-stop]')?.addEventListener('click', () => post('/api/services/code', { model: null }));
+        card.querySelectorAll('[data-service-env]').forEach((b) => b.addEventListener('click', () => post('/api/services/feature', { service: b.dataset.serviceEnv, env: b.dataset.env })));
+        card.querySelectorAll('[data-disconnect]').forEach((b) => b.addEventListener('click', () => post('/api/services/feature', { service: b.dataset.disconnect, disconnect: true })));
+        card.querySelectorAll('[data-service]').forEach((b) => b.addEventListener('click', () => {
+            const holder = document.createElement('div');
+            holder.className = 'flex flex-wrap items-center gap-1.5 px-1';
+            b.parentElement.after(holder);
+            b.remove();
+            holder.innerHTML = `<form class="flex w-full gap-1.5"><input type="password" autocomplete="off" placeholder="${t('keyPlaceholder')}" class="min-w-0 flex-1 rounded-lg border border-border bg-background px-2 py-1 text-xs outline-none">${button(t('connect'), '').replace('type="button" ', 'type="submit" ')}</form><a href="${b.dataset.url}" target="_blank" rel="noopener" class="text-xs text-violet-600 underline">${t('whereKey')}</a>`;
+            const f = holder.querySelector('form');
+            f.querySelector('input').focus();
+            f.addEventListener('submit', (e) => { e.preventDefault(); const v = f.querySelector('input').value; f.querySelector('input').value = ''; post('/api/services/feature', { service: b.dataset.service, key: v }); });
+        }));
+        if (focus && s.providers[focus]) pick(focus);
+        else if (focus && s.services[focus]) card.querySelector(`[data-service="${focus}"]`)?.click();
         this.scrollDown();
     }
 

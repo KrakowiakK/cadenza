@@ -95,7 +95,7 @@ final class ImageTools
     public function generate(string $prompt, string $orientation = 'landscape'): string
     {
         if (!$this->generator->isAvailable()) {
-            return 'Image generation is not configured on this installation. Use find_images / offer_images, or a "stub" node.';
+            return 'Image generation is not connected. Use find_images / offer_images, or a "stub" node; if the owner wants drawn pictures, show_connections(service: "huggingface-images") lets them connect Hugging Face.';
         }
         $upload = $this->generator->generate($prompt, $orientation);
         $media = $this->placer->import($upload['id'], 'generated: '.mb_substr($prompt, 0, 120));

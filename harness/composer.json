@@ -15,6 +15,8 @@
         "phpdocumentor/reflection-docblock": "^6.0",
         "phpstan/phpdoc-parser": "^2.3",
         "symfony/ai-bundle": "^1.0@beta",
+        "symfony/ai-claude-code-platform": "^1.0@beta",
+        "symfony/ai-codex-platform": "^1.0@beta",
         "symfony/ai-generic-platform": "^1.0@beta",
         "symfony/ai-mcp-tool": "^1.0@beta",
         "symfony/asset": "8.1.*",

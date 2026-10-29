@@ -54,11 +54,11 @@ final class PhoneCheck
         private readonly WidgetTester $tester,
         #[Autowire(service: 'ai.platform.generic.vision')]
         private readonly PlatformInterface $vision,
-        #[Autowire('%env(CADENZA_LLM_VISION_MODEL)%')]
+        #[Autowire('%env(vault:CADENZA_LLM_VISION_MODEL)%')]
         private readonly string $visionModel,
         #[Autowire(service: 'ai.platform.generic.default')]
         private readonly PlatformInterface $main,
-        #[Autowire('%env(CADENZA_REVIEW_MODEL)%')]
+        #[Autowire('%env(vault:CADENZA_REVIEW_MODEL)%')]
         private readonly string $reviewModel,
         #[Autowire('%kernel.project_dir%/drivers/chromedriver')]
         private readonly string $chromeDriver,

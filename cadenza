@@ -81,9 +81,9 @@ setup() {
     bold "Done."
     if ! grep -q '^CADENZA_LLM_API_KEY=.\+' "$STUDIO/.env.local" 2>/dev/null && [ -z "${CADENZA_LLM_API_KEY:-}" ]; then
         echo
-        echo "  Choose a model (any OpenAI-compatible API with tool calling) in harness/.env.local, e.g. Hugging Face:"
-        echo "    CADENZA_LLM_API_KEY=hf_…"
-        echo "  or OpenRouter / Ollama Cloud / LM Studio — see README.md, section \"Models\"."
+        echo "  No model to configure here: after ./cadenza start, the panel on your site opens \"Connections\"."
+        echo "  It finds what this computer already has (Ollama, LM Studio, keys in your environment, a signed-in"
+        echo "  Claude Code or Codex) and takes a key for the rest (Ollama Cloud and OpenRouter have free plans)."
     fi
     echo
     echo "  Next: ./cadenza start"

@@ -15,7 +15,7 @@ final class ImageGenerator
     public function __construct(
         private readonly HttpClientInterface $http,
         private readonly UploadStore $uploads,
-        #[Autowire('%env(default::HUGGINGFACE_API_KEY)%')]
+        #[Autowire('%env(default::vault:HUGGINGFACE_API_KEY)%')]
         private readonly ?string $apiKey = null,
         #[Autowire('%env(default:cadenza_image_model:CADENZA_IMAGE_MODEL)%')]
         private readonly string $model = 'black-forest-labs/FLUX.1-schnell',

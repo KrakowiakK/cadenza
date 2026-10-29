@@ -602,6 +602,11 @@ final class OperationApplier
             $spec['id'] ??= $spec['props']['id'];
             unset($spec['props']['id']);
         }
+        // So is a "label" (the owner's name for the block in the panel).
+        if (\is_string($spec['props']['label'] ?? null) && !isset($type->props['label'])) {
+            $spec['label'] ??= $spec['props']['label'];
+            unset($spec['props']['label']);
+        }
         // A slot written among the props ("props": {"actions": [buttons]}) is the slot.
         foreach ($type->slots as $slot) {
             if (\is_array($spec['props'][$slot] ?? null) && !isset($type->props[$slot]) && !isset($spec['slots'][$slot]) && !isset($spec[$slot])) {

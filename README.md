@@ -95,18 +95,14 @@ git clone <this repository> cadenza && cd cadenza
 ./cadenza setup        # dependencies, SQLite databases, assets, a shared secret — nothing to configure by hand
 ```
 
-Pick a model (any OpenAI-compatible API with tool calling) in `harness/.env.local`:
-
-```dotenv
-# Hugging Face Inference Providers (default endpoint, hackathon credits)
-CADENZA_LLM_API_KEY=hf_...
-
-# or OpenRouter / Ollama Cloud / LM Studio / Ollama — see "Models" below
-```
-
 ```bash
 ./cadenza start        # → open http://127.0.0.1:8010
 ```
+
+No file to edit for the model: with none connected yet, the panel opens **Connections**. It lists what this computer
+already has, so connecting takes one click (Ollama or LM Studio running here, a key already in your environment); for
+the rest you paste a key, which is checked with one request and kept encrypted. Ollama Cloud and OpenRouter have free
+plans that Cadenza was tested with.
 
 The first visit asks you to create the **owner account** (e-mail and password; possible only from the computer that runs
 the site, or with the setup token). Then the Cadenza bar is at the bottom; later you sign in at `/_cadenza/login`, and a
@@ -181,11 +177,22 @@ script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in th
 
 ## Models
 
-The studio talks to any OpenAI-compatible chat API with tool calling. Configure in `harness/.env.local`:
+The studio talks to any OpenAI-compatible chat API with tool calling. The owner connects one in the panel
+(**Connections**, the plug icon): Cadenza finds model servers running on this computer (Ollama, LM Studio, the port LM
+Studio says), keys in the environment it was started with (`OLLAMA_API_KEY`, `OPENROUTER_API_KEY`, `HF_TOKEN`,
+`OPENAI_API_KEY`…; used by reference, not copied) and the coding CLIs signed in with the owner's own plan. A pasted key
+is tried with one request, then kept in the studio's **vault**: `harness/var/vault/`, a JSON file encrypted with
+libsodium's secretbox under a key of its own, both readable by the owner of the files only and never committed. Key
+values go in through the panel and never come back out — the agent only learns *connected* or *not*.
+
+The vault plugs into Symfony's configuration as an env var processor: settings read as `%env(vault:CADENZA_LLM_MODEL)%`
+come from the environment the studio was started with first (a start script that exports keys, like
+`harness/bin/serve-with-1password`, still wins), then from the vault, then from the `.env` files. So the settings below
+can still be written by hand in `harness/.env.local`:
 
 | | `CADENZA_LLM_BASE_URL` | `CADENZA_LLM_MODEL` |
 |---|---|---|
-| Hugging Face (default, not yet tested by us) | `https://router.huggingface.co` | `Qwen/Qwen3-Coder-480B-A35B-Instruct` |
+| Hugging Face *(not yet tested by us)* | `https://router.huggingface.co` | `Qwen/Qwen3-Coder-480B-A35B-Instruct` |
 | Ollama Cloud *(tested)* | `https://ollama.com` | `beam?max_tokens=12000&reasoning_effort=low` |
 | OpenRouter *(tested, free models)* | `https://openrouter.ai/api` | `nvidia/nemotron-3-ultra-550b-a55b:free?max_tokens=12000` |
 | LM Studio / Ollama, local *(LM Studio tested)* | `http://127.0.0.1:1234` | the loaded model |
@@ -204,6 +211,14 @@ spelling and forms best of the free models we tried), a pass that fixes words an
 Pictures the owner attaches (photos, a layout drawn by hand) are looked at by `CADENZA_SEEING_MODEL` (the start script
 uses `gemma4:31b` on Ollama Cloud): it describes them, and the main model builds the page from that description — a
 model that sees well is not always good with tools, and the free vision models elsewhere are rate-limited.
+
+**Your own plan for games and widgets.** Signed in to Claude Code (Claude plan) or Codex (ChatGPT plan) on this
+computer? Connections offers *Write games with it*: the code of widgets is then written through that CLI with Symfony
+AI's `symfony/ai-claude-code-platform` and `symfony/ai-codex-platform` bridges (`CADENZA_CODE_MODEL=claude-code:sonnet`
+or `codex:<model>`), while the chat stays on the API above — the bridges return text, not tool calls. The CLI runs with
+every tool of its own switched off (Claude Code: `--tools ""`, `--strict-mcp-config`; Codex: a read-only sandbox) in an
+empty directory. It is meant for the owner's own computer, with the owner's own plan; check your plan's terms before
+running it for anyone else.
 
 Smaller and free models make mistakes in tool arguments (numbers as strings, JSON as strings, extra brackets). The
 studio tolerates them on purpose (`LenientArgumentResolver`, `JsonRepair`) and enforces the important rules in code.

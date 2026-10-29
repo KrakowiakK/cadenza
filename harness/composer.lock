@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aa3093bbce62a6b7f3e9d3a8fb0cfba9",
+    "content-hash": "df021891bc19aa421cbfd565371c82fa",
     "packages": [
         {
             "name": "composer/semver",
@@ -3041,6 +3041,172 @@
             "description": "Integration bundle for Symfony AI components",
             "support": {
                 "source": "https://github.com/symfony/ai-bundle/tree/v1.0.0-BETA1"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-10-26T14:03:07+00:00"
+        },
+        {
+            "name": "symfony/ai-claude-code-platform",
+            "version": "v1.0.0-BETA1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/ai-claude-code-platform.git",
+                "reference": "83819ce82d6431bdf18d95e8c2f5e46b11805a81"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/ai-claude-code-platform/zipball/83819ce82d6431bdf18d95e8c2f5e46b11805a81",
+                "reference": "83819ce82d6431bdf18d95e8c2f5e46b11805a81",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2",
+                "symfony/ai-platform": "^1.0",
+                "symfony/process": "^7.3|^8.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^11.5.53"
+            },
+            "type": "symfony-ai-platform",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/ai",
+                    "name": "symfony/ai"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\AI\\Platform\\Bridge\\ClaudeCode\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Christopher Hertel",
+                    "email": "mail@christopher-hertel.de"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Claude Code CLI platform bridge for Symfony AI",
+            "keywords": [
+                "Bridge",
+                "ai",
+                "claude",
+                "claude-code",
+                "cli",
+                "platform"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/ai-claude-code-platform/tree/v1.0.0-BETA1"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-10-26T14:03:07+00:00"
+        },
+        {
+            "name": "symfony/ai-codex-platform",
+            "version": "v1.0.0-BETA1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/ai-codex-platform.git",
+                "reference": "937734bb71b9717d8f536dbabe04b0d393bb1709"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/ai-codex-platform/zipball/937734bb71b9717d8f536dbabe04b0d393bb1709",
+                "reference": "937734bb71b9717d8f536dbabe04b0d393bb1709",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2",
+                "symfony/ai-platform": "^1.0",
+                "symfony/process": "^7.3|^8.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^11.5.53"
+            },
+            "type": "symfony-ai-platform",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/ai",
+                    "name": "symfony/ai"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\AI\\Platform\\Bridge\\Codex\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Johannes Wachter",
+                    "email": "johannes@sulu.io"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "OpenAI Codex CLI platform bridge for Symfony AI",
+            "keywords": [
+                "Bridge",
+                "ai",
+                "cli",
+                "codex",
+                "openai",
+                "platform"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/ai-codex-platform/tree/v1.0.0-BETA1"
             },
             "funding": [
                 {
@@ -12178,6 +12344,8 @@
     "minimum-stability": "beta",
     "stability-flags": {
         "symfony/ai-bundle": 10,
+        "symfony/ai-claude-code-platform": 10,
+        "symfony/ai-codex-platform": 10,
         "symfony/ai-generic-platform": 10,
         "symfony/ai-mcp-tool": 10,
         "symfony/mcp-bundle": 10

@@ -24,7 +24,7 @@ final class SiteTools
         private readonly \App\Repository\ProposalRepository $openProposals,
         #[\Symfony\Component\DependencyInjection\Attribute\Autowire(service: 'ai.platform.generic.default')]
         private readonly \Symfony\AI\Platform\PlatformInterface $platform,
-        #[\Symfony\Component\DependencyInjection\Attribute\Autowire('%env(default:cadenza.review_model:CADENZA_PROOFREAD_MODEL)%')]
+        #[\Symfony\Component\DependencyInjection\Attribute\Autowire('%env(default:cadenza.review_model:vault:CADENZA_PROOFREAD_MODEL)%')]
         private readonly string $proofreadModel = '',
     ) {
     }

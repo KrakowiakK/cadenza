@@ -75,3 +75,25 @@ the docblock description is dropped as well. Models then send a list, and the MC
 forwards ("Invalid type. Expected array"). The MCP SDK's `#[Schema(type: 'object')]` fixes the server side; Symfony
 AI's `#[Schema]` has no `type`, so the agent side needs a DTO or tolerant input handling. Suggestion: map
 `array<string, …>` to `object` with `additionalProperties`, keep the description, and allow a `type` override.
+
+## 12. Claude Code / Codex bridges send only the last user message
+
+**Where:** `symfony/ai-claude-code-platform` and `symfony/ai-codex-platform` 1.0.0-BETA1,
+`Contract\MessageBagNormalizer`.
+
+The normalizer walks the `MessageBag` backwards and keeps the first user text as the CLI prompt; earlier user and
+assistant messages are dropped without a warning. A two-step exchange ("write X" → answer → "it fails with Y, fix it")
+reaches the CLI as "it fails with Y, fix it" alone. Workaround in Cadenza (`App\Connection\Subscriptions::flattened()`):
+write the conversation out into one prompt. Suggestion: do that in the normalizer (or `--resume` a session), or at least
+throw when there is more than one turn.
+
+## 13. Codex bridge: the model list rejects the models of a ChatGPT plan
+
+**Where:** `symfony/ai-codex-platform` 1.0.0-BETA1, `ModelCatalog`.
+
+The catalog lists `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex`…; with Codex signed in with a ChatGPT account the API
+answers *"The 'gpt-5.4' model is not supported when using Codex with a ChatGPT account"*, and the models that work
+(the ones in the user's `~/.codex/config.toml` and `models_cache.json`) are unknown to the catalog, so the router
+rejects them before the CLI is started. Workaround: pass a `ModelCatalog` with `additionalModels` read from Codex's own
+cache. Suggestion: accept any model name (the CLI validates it), or read Codex's cache, or omit `--model` to use the
+CLI's default.

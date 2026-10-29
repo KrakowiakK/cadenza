@@ -19,9 +19,9 @@ final class ImageSearch
     public function __construct(
         private readonly HttpClientInterface $http,
         private readonly LoggerInterface $logger,
-        #[Autowire('%env(default::PEXELS_API_KEY)%')]
+        #[Autowire('%env(default::vault:PEXELS_API_KEY)%')]
         private readonly ?string $pexelsKey = null,
-        #[Autowire('%env(default::UNSPLASH_ACCESS_KEY)%')]
+        #[Autowire('%env(default::vault:UNSPLASH_ACCESS_KEY)%')]
         private readonly ?string $unsplashKey = null,
     ) {
     }

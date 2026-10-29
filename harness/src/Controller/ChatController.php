@@ -31,11 +31,12 @@ final class ChatController
         private readonly EntityManagerInterface $em,
         private readonly LoggerInterface $logger,
         private readonly \App\Studio\SiteClient $site,
-        #[Autowire('%env(CADENZA_LLM_MODEL)%')]
+        private readonly \App\Connection\Connections $connections,
+        #[Autowire('%env(vault:CADENZA_LLM_MODEL)%')]
         private readonly string $model,
-        #[Autowire('%env(CADENZA_LLM_BASE_URL)%')]
+        #[Autowire('%env(vault:CADENZA_LLM_BASE_URL)%')]
         private readonly string $baseUrl,
-        #[Autowire('%env(default::CADENZA_LLM_LABEL)%')]
+        #[Autowire('%env(default::vault:CADENZA_LLM_LABEL)%')]
         private readonly ?string $label = null,
     ) {
         $host = parse_url($this->baseUrl, \PHP_URL_HOST) ?: $this->baseUrl;
@@ -95,7 +96,9 @@ final class ChatController
     #[Route('/api/info', methods: ['GET'])]
     public function info(): JsonResponse
     {
-        return new JsonResponse(['model' => $this->modelLabel, 'apiKey' => '' !== (string) ($_SERVER['CADENZA_LLM_API_KEY'] ?? $_ENV['CADENZA_LLM_API_KEY'] ?? getenv('CADENZA_LLM_API_KEY') ?: '')]);
+        $ready = $this->connections->status(false)['ready'];
+
+        return new JsonResponse(['model' => $this->modelLabel, 'ready' => $ready, 'apiKey' => $ready]);
     }
 
     /**

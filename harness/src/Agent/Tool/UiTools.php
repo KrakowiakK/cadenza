@@ -4,19 +4,38 @@ declare(strict_types=1);
 
 namespace App\Agent\Tool;
 
+use App\Connection\Connections;
 use App\Studio\PhoneCheck;
 use App\Studio\Turn;
 use Symfony\AI\Agent\Toolbox\Attribute\AsTool;
 
 #[AsTool('show_page', 'Take the owner to a page of the site (the browser navigates there). Use it to show what you talk about.', method: 'navigate')]
 #[AsTool('check_on_phone', 'How a page of the LIVE site looks on a phone: shows the owner the page in a phone frame, and a test browser at phone size reports what sticks out of the screen, text too small, buttons too small, and what a visitor would struggle with. It also measures how long the page takes to load and its heaviest files. Use it when the owner asks about phones or speed, or after big layout changes.', method: 'phone')]
+#[AsTool('show_connections', 'Open the "Connections" card in the panel, where the owner connects the model Cadenza thinks with and the services behind pictures (Pexels, Unsplash, Hugging Face) — with one click for what this computer already has, or by pasting a key that is checked and kept encrypted. Use it when the owner wants another model or service, or a feature needs a service that is not connected. Never ask for a key in the chat. Returns what is connected (never key values).', method: 'connections')]
 #[AsTool('point_at', 'Highlight elements on the page the owner is looking at (scrolls to them, outlines them, moves the Cadenza cursor).', method: 'highlight')]
 final class UiTools
 {
     public function __construct(
         private readonly Turn $turn,
         private readonly PhoneCheck $phoneCheck,
+        private readonly Connections $connections,
     ) {
+    }
+
+    /**
+     * @param string|null $service the service to open the key form for: a model API (ollama-cloud, openrouter, huggingface, openai, deepseek, custom) or a picture service (pexels, unsplash, huggingface-images)
+     */
+    public function connections(?string $service = null): string
+    {
+        $this->turn->emit('ui', ['command' => 'showServices', 'focus' => $service]);
+        $s = $this->connections->status(false);
+        $lines = ['The owner now sees the Connections card in the panel.'];
+        $lines[] = $s['ready'] ? \sprintf('Model: %s, %s.', $s['model']['label'] ?? $s['model']['baseUrl'], strtok((string) $s['model']['model'], '?')) : 'No model is connected yet.';
+        foreach ($s['services'] as $service) {
+            $lines[] = \sprintf('%s (%s): %s.', $service['label'], $service['for'], $service['connected'] ? 'connected' : 'not connected');
+        }
+
+        return implode("\n", $lines);
     }
 
     /**

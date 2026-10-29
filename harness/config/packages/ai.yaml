@@ -2,7 +2,7 @@ ai:
     agent:
         studio:
             platform: 'ai.platform.generic.default'
-            model: '%env(CADENZA_LLM_MODEL)%'
+            model: '%env(vault:CADENZA_LLM_MODEL)%'
             max_tool_calls: 24
             tools:
                 - 'App\Agent\Tool\SiteTools'
@@ -23,7 +23,7 @@ ai:
         # Used when the main model does not answer in time (local servers can be busy).
         studio_fallback:
             platform: 'ai.platform.generic.fallback'
-            model: '%env(CADENZA_LLM_FALLBACK_MODEL)%'
+            model: '%env(vault:CADENZA_LLM_FALLBACK_MODEL)%'
             max_tool_calls: 24
             tools:
                 - 'App\Agent\Tool\SiteTools'
@@ -43,7 +43,7 @@ ai:
                 - 'App\Agent\Tool\SketchTools'
         studio_vision:
             platform: 'ai.platform.generic.vision'
-            model: '%env(CADENZA_LLM_VISION_MODEL)%'
+            model: '%env(vault:CADENZA_LLM_VISION_MODEL)%'
             max_tool_calls: 24
             tools:
                 - 'App\Agent\Tool\SiteTools'
@@ -65,7 +65,7 @@ ai:
         # Pictures on the main API (e.g. Gemma on Ollama Cloud): the vision API's free models are rate-limited.
         studio_seeing:
             platform: 'ai.platform.generic.default'
-            model: '%env(default:cadenza.vision_model:CADENZA_SEEING_MODEL)%'
+            model: '%env(default:cadenza.vision_model:vault:CADENZA_SEEING_MODEL)%'
             max_tool_calls: 24
             tools:
                 - 'App\Agent\Tool\SiteTools'

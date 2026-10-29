@@ -7,7 +7,7 @@ framework:
         scoped_clients:
             # The main model gets 75 s of silence at most; then the turn moves on to the fallback model.
             cadenza.llm_client:
-                base_uri: '%env(CADENZA_LLM_BASE_URL)%'
+                base_uri: '%env(vault:CADENZA_LLM_BASE_URL)%'
                 timeout: 75
     secret: '%env(APP_SECRET)%'
 

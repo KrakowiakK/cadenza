@@ -8,11 +8,11 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     # The model that writes widget code (CADENZA_CODE_MODEL) is the main one unless set otherwise.
-    cadenza.llm_model: '%env(CADENZA_LLM_MODEL)%'
+    cadenza.llm_model: '%env(vault:CADENZA_LLM_MODEL)%'
     # A model of the main API that looks at screenshots of widgets under test; empty = the vision model.
     env(CADENZA_REVIEW_MODEL): ''
-    cadenza.review_model: '%env(CADENZA_REVIEW_MODEL)%'
-    cadenza.vision_model: '%env(CADENZA_LLM_VISION_MODEL)%'
+    cadenza.review_model: '%env(vault:CADENZA_REVIEW_MODEL)%'
+    cadenza.vision_model: '%env(vault:CADENZA_LLM_VISION_MODEL)%'
     # A model of the main API that sees pictures the owner attaches (e.g. "gemma4:31b?max_tokens=12000"); empty = the vision API.
     env(CADENZA_SEEING_MODEL): ''
 

@@ -36,11 +36,11 @@ final class Conductor
         private readonly AgentInterface $visionAgent,
         #[Autowire(service: 'ai.agent.studio_seeing')]
         private readonly AgentInterface $seeingAgent,
-        #[Autowire('%env(CADENZA_LLM_VISION_MODEL)%')]
+        #[Autowire('%env(vault:CADENZA_LLM_VISION_MODEL)%')]
         private readonly string $visionModel,
-        #[Autowire('%env(CADENZA_LLM_FALLBACK_MODEL)%')]
+        #[Autowire('%env(vault:CADENZA_LLM_FALLBACK_MODEL)%')]
         private readonly string $fallbackModel,
-        #[Autowire('%env(CADENZA_LLM_MODEL)%')]
+        #[Autowire('%env(vault:CADENZA_LLM_MODEL)%')]
         private readonly string $model,
         private readonly SiteClient $site,
         private readonly Turn $turn,
@@ -51,9 +51,9 @@ final class Conductor
         #[Autowire(service: 'ai.platform.generic.default')]
         private readonly \Symfony\AI\Platform\PlatformInterface $platform,
         // A model of the main API with good Polish that proofreads replies (default: the widget review model).
-        #[Autowire('%env(default:cadenza.review_model:CADENZA_PROOFREAD_MODEL)%')]
+        #[Autowire('%env(default:cadenza.review_model:vault:CADENZA_PROOFREAD_MODEL)%')]
         private readonly string $proofreadModel = '',
-        #[Autowire('%env(CADENZA_SEEING_MODEL)%')]
+        #[Autowire('%env(vault:CADENZA_SEEING_MODEL)%')]
         private readonly string $seeingModel = '',
         private readonly ?\Psr\Log\LoggerInterface $logger = null,
     ) {
@@ -420,6 +420,9 @@ final class Conductor
               "powinieneś / powinnaś", "zrobiłeś".
             - About Cadenza itself: it is open-source software running on the owner's own server; what it costs is
               that hosting and the AI models it uses (free ones work). There is no Cadenza subscription.
+            - Another model, a service for photos (Pexels, Unsplash) or for drawn pictures (Hugging Face): call
+              show_connections — the owner connects it there with one click or a key. Never ask for a key in the chat;
+              if the owner pastes one, do not repeat it and tell them to put it in Connections instead.
             - Logs, warnings and diagnostics are for you: mention them only when the owner asks about a problem, and
               then in plain words.
             - When a tool fails, try another way (read_page for the right ids, a different operation); if it still

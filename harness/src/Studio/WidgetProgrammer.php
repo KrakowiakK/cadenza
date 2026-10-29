@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Studio;
 
+use App\Connection\Subscriptions;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\PlatformInterface;
@@ -81,8 +82,9 @@ final class WidgetProgrammer
     public function __construct(
         #[Autowire(service: 'ai.platform.generic.default')]
         private readonly PlatformInterface $platform,
-        #[Autowire('%env(default:cadenza.llm_model:CADENZA_CODE_MODEL)%')]
+        #[Autowire('%env(default:cadenza.llm_model:vault:CADENZA_CODE_MODEL)%')]
         private string $model,
+        private readonly ?Subscriptions $subscriptions = null,
     ) {
         // A whole game is longer than a chat answer.
         $this->model = (string) preg_replace('/max_tokens=\d+/', 'max_tokens=24000', $this->model);
@@ -202,7 +204,12 @@ final class WidgetProgrammer
     {
         // Streamed: a long program takes minutes, and the client gives up after a while of silence.
         $text = '';
-        $result = $this->platform->invoke($this->model, $messages, ['stream' => true] + (str_contains($this->model, '/') ? ['reasoning' => ['enabled' => false]] : []));
+        if (null !== $this->subscriptions && null !== [$cli, $name] = Subscriptions::parse($this->model)) {
+            // The owner's own plan (Claude Code, Codex) through its CLI.
+            $result = $this->subscriptions->platform($cli)->invoke($name, Subscriptions::flattened($messages), ['stream' => true] + Subscriptions::options($cli));
+        } else {
+            $result = $this->platform->invoke($this->model, $messages, ['stream' => true] + (str_contains($this->model, '/') ? ['reasoning' => ['enabled' => false]] : []));
+        }
         foreach ($result->asStream() as $delta) {
             if ($delta instanceof TextDelta || \is_string($delta)) {
                 $text .= (string) $delta;

@@ -41,6 +41,7 @@ final class ToolTraceSubscriber
         'leaderboard' => ['en' => 'Reading the leaderboard', 'pl' => 'Sprawdzam tablicę wyników'],
         'widget_status' => ['en' => 'Checking the widgets', 'pl' => 'Sprawdzam elementy'],
         'check_on_phone' => ['en' => 'Looking at it on a phone', 'pl' => 'Sprawdzam na telefonie'],
+        'show_connections' => ['en' => 'Opening Connections', 'pl' => 'Otwieram Połączenia'],
         'pending_sketches' => ['en' => 'Looking at waiting sketches', 'pl' => 'Przeglądam szkice'],
         'discard_sketches' => ['en' => 'Throwing sketches away', 'pl' => 'Usuwam szkice'],
         'add_document' => ['en' => 'Putting the document on the site', 'pl' => 'Dodaję dokument do strony'],

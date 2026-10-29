@@ -27,7 +27,7 @@ final class PageTranslator
     public function __construct(
         #[Autowire(service: 'ai.platform.generic.default')]
         private readonly PlatformInterface $platform,
-        #[Autowire('%env(CADENZA_LLM_MODEL)%')]
+        #[Autowire('%env(vault:CADENZA_LLM_MODEL)%')]
         private readonly string $model,
     ) {
     }
