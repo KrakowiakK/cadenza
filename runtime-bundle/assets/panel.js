@@ -1144,7 +1144,7 @@ ${models.length || subscriptions.length ? `<div class="mt-3 text-xs font-semibol
                 this.api('/api/info').then((info) => this.showModel(info.model)).catch(() => {});
                 const fresh = await this.api('/api/services');
                 this.renderServices(card, fresh);
-                message(t('connectedNow'), true);
+                if (data.warning) message(data.warning, false); else message(t('connectedNow'), true);
             } catch (e) {
                 card.querySelectorAll('button').forEach((b) => { b.disabled = false; });
                 message(e.message, false);

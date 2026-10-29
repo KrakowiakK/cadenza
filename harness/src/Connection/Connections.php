@@ -99,7 +99,7 @@ final class Connections
      * has it, or none (a server on this computer). The roles we tested on that API get their models; the others use
      * the chosen one.
      *
-     * @return array{ok: bool, error?: string}
+     * @return array{ok: bool, error?: string, warning?: string}
      */
     public function useProvider(string $provider, ?string $key = null, ?string $environmentVariable = null, ?string $model = null, ?string $baseUrl = null): array
     {
@@ -149,7 +149,25 @@ final class Connections
             }
         }
 
-        return ['ok' => true];
+        return ['ok' => true] + array_filter(['warning' => 'lmstudio' === $provider ? $this->contextWarning($baseUrl, $chosen) : null]);
+    }
+
+    /**
+     * LM Studio loads a model with a short context unless told otherwise; Cadenza's instructions and tools do not fit
+     * in 8k tokens, and every request is then refused.
+     */
+    private function contextWarning(string $baseUrl, string $model): ?string
+    {
+        try {
+            $info = $this->http->request('GET', $baseUrl.'/api/v0/models/'.rawurlencode($model), ['timeout' => 3])->toArray();
+        } catch (\Throwable) {
+            return null;
+        }
+        $loaded = (int) ($info['loaded_context_length'] ?? 0);
+
+        return $loaded > 0 && $loaded < 32768
+            ? \sprintf('LM Studio has this model loaded with a context of %d tokens; Cadenza needs at least 32768. Reload it with a longer context (LM Studio → the model → Context Length, or: lms load %s --context-length 65536).', $loaded, $model)
+            : null;
     }
 
     /**

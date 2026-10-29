@@ -76,6 +76,11 @@ forwards ("Invalid type. Expected array"). The MCP SDK's `#[Schema(type: 'object
 AI's `#[Schema]` has no `type`, so the agent side needs a DTO or tolerant input handling. Suggestion: map
 `array<string, …>` to `object` with `additionalProperties`, keep the description, and allow a `type` override.
 
+The bare `{"type": "array"}` (no `items`) also breaks local models: the chat template of gpt-oss in LM Studio reads
+`param_spec['items']`, gets the dictionary's method, and fails with *"Function is not a bool value"* — every request
+with such a tool is answered HTTP 400. Workaround in Cadenza: a decorator of `ai.tool_factory`
+(`App\Agent\Schema\ListItemsToolFactory`) adds `"items": {}` to every array. Suggestion: always emit `items`.
+
 ## 12. Claude Code / Codex bridges send only the last user message
 
 **Where:** `symfony/ai-claude-code-platform` and `symfony/ai-codex-platform` 1.0.0-BETA1,

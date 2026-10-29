@@ -220,6 +220,30 @@ every tool of its own switched off (Claude Code: `--tools ""`, `--strict-mcp-con
 empty directory. It is meant for the owner's own computer, with the owner's own plan; check your plan's terms before
 running it for anyone else.
 
+**How small can a local model be?** Five everyday tasks on a bakery site (a question about the page, a short section
+when one like it already exists, a contact page, a price list, a new title), each model in LM Studio on an M4 Max with a
+64k context, judged by what the sketch really contains:
+
+| Model (LM Studio) | Size | Question | "Closed on Sundays" (already there) | Contact page | Price list | Title | Time per task |
+|---|---|---|---|---|---|---|---|
+| LFM3-VL | 2B | ✓ | ✗ | ✓ | ✗ | ✓ | 9–60 s |
+| Granite 4.2 | 3B | ✓ | ✓ noticed it is there | ✓ | ✗ heading without prices | ✓ | 26–570 s |
+| **Qwen 3.5** | **4B** | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 4–27 s |
+| **Gemma 4 E4B** | **4B effective** | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 6–31 s |
+| Granite 4.2 | 8B | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 30–213 s |
+| Qwen 3.5 | 9B | ✓ | ✓ added a second one | ✗ | ✓ | ✗ said it changed it, did not | 3–68 s |
+| **gpt-oss** | **20B** | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 5–15 s |
+| Qwen 3.8 | 27B | ✓ | ✓ noticed it is there | ✓ | ✓ | ✓ | 7–54 s |
+| Gemma 4 26B-A4B | 26B | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 5–145 s |
+| Granite 4.2 | 30B | ✓ | ✓ noticed it is there | ✗ too slow (timeout) | ✓ | ✓ | 50–704 s |
+
+The smallest that did everything: **Qwen 3.5 4B and Gemma 4 E4B**; the quickest all-rounder: **gpt-oss 20B**. Below 4B a
+model calls tools but does not learn from their errors (LFM3 repeated one mistake six times) and cannot plan two steps
+in one turn. Size is not everything: the 9B Qwen did worse than the 4B. Two things to know: LM Studio loads a model with
+an 8k context unless told otherwise, too short for Cadenza's tools (Connections warns about it); and gpt-oss's chat
+template in LM Studio refused every request over an `array` parameter without `items`, which Cadenza now always adds.
+Five tasks are a first look, not a benchmark: games and widgets were not part of it.
+
 Smaller and free models make mistakes in tool arguments (numbers as strings, JSON as strings, extra brackets). The
 studio tolerates them on purpose (`LenientArgumentResolver`, `JsonRepair`) and enforces the important rules in code.
 
