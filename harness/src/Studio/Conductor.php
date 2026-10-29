@@ -525,6 +525,14 @@ final class Conductor
             return $this->useVision
                 ? $this->visionAgent->call($bag, self::options($this->visionModel))->asText()
                 : $this->agent->call($bag, self::options($this->model))->asText();
+        } catch (\Symfony\AI\Agent\Exception\MaxIterationsExceededException) {
+            // A model that does not stop when told to (small local ones) runs out of tool calls: the owner hears what
+            // came of the turn instead of an error.
+            $pl = 'pl' === ($context['language'] ?? 'en');
+
+            return [] !== $this->turn->proposals
+                ? ($pl ? 'Część zmian jest w szkicu — zajrzyj do panelu. Reszty nie udało mi się zrobić; spróbuj poprosić o nią osobno, krótszymi krokami.' : 'Part of it is in the sketch — have a look in the panel. The rest did not work; try asking for it separately, in smaller steps.')
+                : ($pl ? 'Nie udało mi się tego zrobić. Spróbuj poprosić prościej albo w mniejszych krokach — albo połącz mocniejszy model w Połączeniach.' : 'I could not do that. Try asking more simply or in smaller steps — or connect a stronger model in Connections.');
         } catch (\Throwable $e) {
             if (!$this->isUnreachable($e)) {
                 throw $e;

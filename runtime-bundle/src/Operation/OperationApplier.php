@@ -607,6 +607,11 @@ final class OperationApplier
             $spec['label'] ??= $spec['props']['label'];
             unset($spec['props']['label']);
         }
+        // {"type": "text", "props": {"text": "…"}}: the words of a block written in markdown.
+        if (\is_string($spec['props']['text'] ?? null) && isset($type->props['markdown']) && !isset($type->props['text']) && !isset($spec['props']['markdown'])) {
+            $spec['props']['markdown'] = $spec['props']['text'];
+            unset($spec['props']['text']);
+        }
         // A slot written among the props ("props": {"actions": [buttons]}) is the slot.
         foreach ($type->slots as $slot) {
             if (\is_array($spec['props'][$slot] ?? null) && !isset($type->props[$slot]) && !isset($spec['slots'][$slot]) && !isset($spec[$slot])) {

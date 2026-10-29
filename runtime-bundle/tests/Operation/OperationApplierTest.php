@@ -41,7 +41,7 @@ final class OperationApplierTest extends TestCase
         $result = $this->applier->apply(Document::empty('Test'), [
             ['op' => 'page.create', 'path' => '/', 'title' => 'Home', 'nodes' => [
                 ['type' => 'hero', 'props' => ['title' => 'Piekarnia', 'actions' => [['text' => 'Nasze wypieki', 'href' => '#wypieki']]]],
-                ['type' => 'section', 'children' => [['type' => 'heading', 'props' => ['text' => 'Wypieki']]]],
+                ['type' => 'section', 'children' => [['type' => 'heading', 'props' => ['text' => 'Wypieki']], ['type' => 'text', 'props' => ['text' => 'Chleb na zakwasie.']]]],
             ]],
         ]);
 
@@ -50,6 +50,7 @@ final class OperationApplierTest extends TestCase
         $button = $page['nodes'][0]['slots']['actions'][0];
         self::assertSame(['button', 'Nasze wypieki'], [$button['type'], $button['props']['label']]);
         self::assertSame('#'.$page['nodes'][1]['id'], $button['props']['href'], 'the link points to the section of the heading "Wypieki"');
+        self::assertSame('Chleb na zakwasie.', $page['nodes'][1]['slots']['children'][1]['props']['markdown']);
     }
 
     public function testABlockWithTheHeadingOfASectionBecomesASection(): void
