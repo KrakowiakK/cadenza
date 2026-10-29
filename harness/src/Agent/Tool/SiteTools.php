@@ -36,6 +36,11 @@ final class SiteTools
      */
     public function propose(array $operations, string $summary = '', ?int $reviseDraftId = null): string
     {
+        // Models put other tools among the operations ({"op": "create_collection", …}): say what to do instead.
+        $tools = array_values(array_unique(array_filter(array_map(static fn (mixed $op): ?string => \is_array($op) && \is_string($op['op'] ?? null) && preg_match('/^[a-z]+(_[a-z]+)+$/', $op['op']) ? $op['op'] : null, $operations))));
+        if ([] !== $tools) {
+            return \sprintf('Nothing was saved: %s %s a tool of its own, not an operation. Call %s directly first; then call propose_changes with page and node operations only (e.g. a collection-grid node showing the collection).', implode(', ', $tools), 1 === \count($tools) ? 'is' : 'are', implode(' / ', $tools));
+        }
         $summary = '' !== trim($summary) ? $this->asChange($summary) : self::summaryOf(Proposals::normalise($operations), str_starts_with($this->turn->language, 'pl'));
         $result = $this->proposals->propose($this->turn->conversation, $operations, $summary, $reviseDraftId);
         // Changes to a page or block that exists only in a sketch of this conversation belong to that sketch.

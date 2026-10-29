@@ -242,7 +242,27 @@ model calls tools but does not learn from their errors (LFM3 repeated one mistak
 in one turn. Size is not everything: the 9B Qwen did worse than the 4B. Two things to know: LM Studio loads a model with
 an 8k context unless told otherwise, too short for Cadenza's tools (Connections warns about it); and gpt-oss's chat
 template in LM Studio refused every request over an `array` parameter without `items`, which Cadenza now always adds.
-Five tasks are a first look, not a benchmark: games and widgets were not part of it.
+Five tasks are a first look, not a benchmark.
+
+**Round two, harder** — the six that did all five, through seven tasks: move the opening hours to the bottom with a
+dark background (two operations at once), sign-ups for a workshop (8 places, three fields, a date), a products page
+from a list with prices, an English version, an FAQ and then *one more question* in the same conversation, "add
+customer reviews" (the right answer is to ask for real ones, not to invent them), and a widget whose code the same
+model writes:
+
+| Model | Move | Sign-ups | Products | English | FAQ, two turns | Reviews | Widget | Score | Time per task |
+|---|---|---|---|---|---|---|---|---|---|
+| Qwen 3.5 4B | ✓ | ✓ | ✗ changed something else | ✓ | ✗ said it added, did not | ✗ an empty section | ✓ | 4 | 9–534 s |
+| Gemma 4 E4B | ✗ said it moved it, did not | ½ no date | ✗ said it made it, did not | ✓ | ✗ | ½ empty, asked for real ones | ✓ | 2½ | 19–136 s |
+| Granite 4.2 8B | ✓ | ✓ | ✓ | ✗ 20 min, nothing | ✗ lost a question | ✗ invented them | ✓ | 4 | 79–1200 s |
+| **gpt-oss 20B** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ a marked stub to fill | ✓ | **7** | **17–79 s** |
+| **Qwen 3.8 27B** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ asked for real ones | ✓ | **7** | 15–221 s |
+| Gemma 4 26B-A4B | ✓ | ½ no limit | ✓ | ✓ | ✓ | ½ placeholders | ✓ | 6 | 31–160 s |
+
+**The favourite for running Cadenza locally: gpt-oss 20B** — everything right and the quickest; **Qwen 3.8 27B** did
+everything too, a little slower, with the best judgement (it refused to invent reviews and wrote the most complete
+widget). The 4B models that passed the easy round are not enough for real work: they fail multi-step tasks and, worse,
+say they did what they did not.
 
 Smaller and free models make mistakes in tool arguments (numbers as strings, JSON as strings, extra brackets). The
 studio tolerates them on purpose (`LenientArgumentResolver`, `JsonRepair`) and enforces the important rules in code.
