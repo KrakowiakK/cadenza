@@ -164,6 +164,10 @@ final class Connections
             return null;
         }
         $loaded = (int) ($info['loaded_context_length'] ?? 0);
+        if (\is_array($info) && \array_key_exists('capabilities', $info) && !\in_array('tool_use', (array) $info['capabilities'], true)) {
+            // E.g. Gemma 3: it writes about the changes instead of making them.
+            return 'LM Studio says this model cannot call tools, and Cadenza changes the site only through tools: it would talk about changes without making them. Choose a model with tool use (Qwen 3.5, Gemma 4, gpt-oss).';
+        }
 
         return $loaded > 0 && $loaded < 32768
             ? \sprintf('LM Studio has this model loaded with a context of %d tokens; Cadenza needs at least 32768. Reload it with a longer context (LM Studio → the model → Context Length, or: lms load %s --context-length 65536).', $loaded, $model)

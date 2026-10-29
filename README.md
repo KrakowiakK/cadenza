@@ -236,10 +236,12 @@ when one like it already exists, a contact page, a price list, a new title), eac
 | Qwen 3.8 | 27B | ✓ | ✓ noticed it is there | ✓ | ✓ | ✓ | 7–54 s |
 | Gemma 4 26B-A4B | 26B | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 5–145 s |
 | Granite 4.2 | 30B | ✓ | ✓ noticed it is there | ✗ too slow (timeout) | ✓ | ✓ | 50–704 s |
+| Gemma 3 | 12B | ✗ | ✗ | ✗ | ✗ | ✗ | not one tool call: LM Studio lists no tool use for it (round two: 0 of 7 too) |
 
 The smallest that did everything: **Qwen 3.5 4B and Gemma 4 E4B**; the quickest all-rounder: **gpt-oss 20B**. Below 4B a
 model calls tools but does not learn from their errors (LFM3 repeated one mistake six times) and cannot plan two steps
-in one turn. Size is not everything: the 9B Qwen did worse than the 4B. Two things to know: LM Studio loads a model with
+in one turn. Size is not everything: the 9B Qwen did worse than the 4B. A model has to be trained for tool calling (Gemma 3 is not; Gemma 4 is): Connections warns when LM Studio says a
+model has no tool use. Two more things to know: LM Studio loads a model with
 an 8k context unless told otherwise, too short for Cadenza's tools (Connections warns about it); and gpt-oss's chat
 template in LM Studio refused every request over an `array` parameter without `items`, which Cadenza now always adds.
 Five tasks are a first look, not a benchmark.
