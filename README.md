@@ -238,6 +238,7 @@ when one like it already exists, a contact page, a price list, a new title), eac
 | Qwen 3.8 | 27B | ✓ | ✓ noticed it is there | ✓ | ✓ | ✓ | 7–54 s |
 | Gemma 4 26B-A4B | 26B | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 5–145 s |
 | Granite 4.2 | 30B | ✓ | ✓ noticed it is there | ✗ too slow (timeout) | ✓ | ✓ | 50–704 s |
+| Gemma 4 | 12B | ✓ | ✓ moved the one there | ✓ | ✗ too slow (timeout) | ✓ | 10–435 s |
 | Gemma 3 | 12B | ✗ | ✗ | ✗ | ✗ | ✗ | not one tool call: LM Studio lists no tool use for it (round two: 0 of 7 too) |
 
 The smallest that did everything: **Qwen 3.5 4B and Gemma 4 E4B**; the quickest all-rounder: **gpt-oss 20B**. Below 4B a
@@ -263,12 +264,16 @@ model writes:
 | **Qwen 3.8 27B** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ asked for real ones | ✓ | **7** | 15–221 s |
 | **Muse Glimmer 30B** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ asked for real ones | ✓ | **7** | 70–448 s |
 | gpt-oss 120B | ✓ | ✓ | ✓ | ✓ | ✗ a second FAQ instead of one more question | ½ an empty section | ✓ | 5½ | 14–51 s |
+| Gemma 4 12B | ✓ | ✗ | ✗ | ✗ | ✓ | ✗ invented them | ✓ | 3 | 59–342 s |
 | Gemma 3 12B | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ nothing made | ✗ | 0 | no tool calls at all |
 | Gemma 4 26B-A4B | ✓ | ½ no limit | ✓ | ✓ | ✓ | ½ placeholders | ✓ | 6 | 31–160 s |
 
 **The favourite for running Cadenza locally: gpt-oss 20B** — everything right and the quickest; **Qwen 3.8 27B** and
 **Muse Glimmer 30B** did everything too, with the best judgement (both refused to invent reviews), Qwen a little
-slower, Muse Glimmer clearly so (a dense 30B: about 22 tokens a second, and it thinks before answering). Its DFlash 2
+slower, Muse Glimmer clearly so (a dense 30B: about 22 tokens a second, and it thinks before answering). Speculative decoding does pay off for a dense model with a
+matching drafter: Gemma 4 31B Q8 in LM Studio goes from about 12.5 to 25–34 tokens a second with Google's own MTP
+drafter (`google/gemma-4-31B-it-assistant`, as an MTP sidecar), more than with a community MTP head, DFlash or EAGLE3
+(DFlash again slower on Polish). Muse Glimmer's DFlash 2
 drafter (llama.cpp PR #27342) did not make it much faster here: +10 % on code, up to +50 % on English-style
 reasoning, but slower on Polish prose, where few drafted tokens were accepted (10 % against 31 % on code). Bigger is not better here: gpt-oss 120B lost to its 20B sibling and generates slower (75 against about 100 tokens a
 second on an M4 Max; Gemma 4 26B-A4B writes about 58, the dense Muse Glimmer 30B about 22). The 4B models that passed the easy round are not enough for real work: they fail multi-step tasks and, worse,
