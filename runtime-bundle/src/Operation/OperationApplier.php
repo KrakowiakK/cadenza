@@ -58,10 +58,63 @@ final class OperationApplier
         }
 
         if ([] === $errors) {
+            $doc = $this->namedAnchors($doc);
             $errors = $this->brokenAnchors($doc, $operations);
         }
 
         return new ApplyResult($doc, $errors, $this->created);
+    }
+
+    /**
+     * Models link to a section by its name ("#produkty") rather than by its node's id: in the nodes created in this
+     * batch such a link points to the node whose heading is that name, on the page the link goes to.
+     *
+     * @param array<string, mixed> $doc
+     *
+     * @return array<string, mixed>
+     */
+    private function namedAnchors(array $doc): array
+    {
+        $named = $pageOf = [];
+        foreach (Document::walk($doc) as $entry) {
+            $node = $entry['node'];
+            $pageOf[$node['id']] = $entry['page'];
+            foreach (['title', 'text', 'eyebrow', 'heading', 'label'] as $key) {
+                if (\is_string($node['props'][$key] ?? null) && 'button' !== $node['type']) {
+                    // A heading's section is the place to scroll to.
+                    $named[$entry['page']][self::slug($node['props'][$key])] ??= 'heading' === $node['type'] && null !== $entry['parent'] ? $entry['parent'] : $node['id'];
+                }
+            }
+        }
+        foreach ($this->created as $id) {
+            $doc = $this->mapNode($doc, $id, static function (array $node) use ($doc, $named, $pageOf): array {
+                array_walk_recursive($node['props'], static function (mixed &$v, int|string $k) use ($doc, $named, $pageOf, $node): void {
+                    if (!\is_string($v) || !\in_array($k, ['href', 'buttonHref', 'secondaryHref'], true) || !preg_match('~^(/[^#]*)?#([^#\s]+)$~', $v, $m) || isset($pageOf[$m[2]])) {
+                        return;
+                    }
+                    $page = '' !== ($m[1] ?? '') ? (Document::findPage($doc, $m[1])['id'] ?? null) : $pageOf[$node['id']] ?? null;
+                    $slug = self::slug($m[2]);
+                    foreach ($named[$page] ?? [] as $name => $target) {
+                        if ($name === $slug || str_starts_with($name, $slug.'-') || str_contains('-'.$name.'-', '-'.$slug.'-')) {
+                            $v = ($m[1] ?? '').'#'.$target;
+
+                            return;
+                        }
+                    }
+                });
+
+                return $node;
+            });
+        }
+
+        return $doc;
+    }
+
+    private static function slug(string $text): string
+    {
+        $text = strtr(mb_strtolower($text), ['ą' => 'a', 'ć' => 'c', 'ę' => 'e', 'ł' => 'l', 'ń' => 'n', 'ó' => 'o', 'ś' => 's', 'ź' => 'z', 'ż' => 'z', 'ä' => 'a', 'ö' => 'o', 'ü' => 'u', 'ß' => 'ss']);
+
+        return trim((string) preg_replace('~[^a-z0-9]+~', '-', $text), '-');
     }
 
     /**
@@ -532,6 +585,11 @@ final class OperationApplier
         if (\is_array($spec) && \is_array($spec['node'] ?? null) && !isset($spec['props']) && \is_string($spec['node']['type'] ?? null)) {
             $spec = $spec['node'] + (isset($spec['id']) ? ['id' => $spec['id']] : []);
         }
+        // {"label"/"text": "Zobacz", "href": "#menu"} without a type, as models write the buttons of a hero: a button.
+        if (\is_array($spec) && !isset($spec['type']) && \is_string($spec['href'] ?? null) && $this->catalog->has('button')) {
+            $label = $spec['label'] ?? $spec['text'] ?? $spec['title'] ?? null;
+            $spec = ['type' => 'button', 'props' => array_filter(['label' => $label, 'href' => $spec['href'], 'variant' => $spec['variant'] ?? null], static fn (mixed $v): bool => null !== $v)];
+        }
         if (!\is_array($spec) || !\is_string($spec['type'] ?? null)) {
             throw new OperationException(\sprintf('%s needs a "type" (one of: %s).', $path, implode(', ', array_keys($this->catalog->all()))));
         }
@@ -543,6 +601,13 @@ final class OperationApplier
         if (\is_string($spec['props']['id'] ?? null) && !isset($type->props['id'])) {
             $spec['id'] ??= $spec['props']['id'];
             unset($spec['props']['id']);
+        }
+        // A slot written among the props ("props": {"actions": [buttons]}) is the slot.
+        foreach ($type->slots as $slot) {
+            if (\is_array($spec['props'][$slot] ?? null) && !isset($type->props[$slot]) && !isset($spec['slots'][$slot]) && !isset($spec[$slot])) {
+                $spec['slots'][$slot] = $spec['props'][$slot];
+                unset($spec['props'][$slot]);
+            }
         }
         if (null !== $wrapped = $this->inSection($type, $spec)) {
             return $this->buildNode($wrapped, $path, $keepId);

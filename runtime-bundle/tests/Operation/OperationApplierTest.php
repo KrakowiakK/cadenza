@@ -35,6 +35,23 @@ final class OperationApplierTest extends TestCase
         self::assertCount(3, $result->created, 'page, hero and button get ids');
     }
 
+    public function testButtonsAmongTheHeroPropsAreItsActions(): void
+    {
+        // As a model wrote the opening of a new site: a slot among the props, buttons without a type, a link by name.
+        $result = $this->applier->apply(Document::empty('Test'), [
+            ['op' => 'page.create', 'path' => '/', 'title' => 'Home', 'nodes' => [
+                ['type' => 'hero', 'props' => ['title' => 'Piekarnia', 'actions' => [['text' => 'Nasze wypieki', 'href' => '#wypieki']]]],
+                ['type' => 'section', 'children' => [['type' => 'heading', 'props' => ['text' => 'Wypieki']]]],
+            ]],
+        ]);
+
+        self::assertTrue($result->isValid(), implode(' ', $result->errors));
+        $page = Document::findPage($result->document, '/');
+        $button = $page['nodes'][0]['slots']['actions'][0];
+        self::assertSame(['button', 'Nasze wypieki'], [$button['type'], $button['props']['label']]);
+        self::assertSame('#'.$page['nodes'][1]['id'], $button['props']['href'], 'the link points to the section of the heading "Wypieki"');
+    }
+
     public function testABlockWithTheHeadingOfASectionBecomesASection(): void
     {
         $result = $this->applier->apply(Document::empty('Test'), [

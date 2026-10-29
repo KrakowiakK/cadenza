@@ -19,7 +19,7 @@ final class ToolPolicyListener
     private const IMAGE_TOOLS = ['find_images', 'offer_images', 'generate_image'];
     private const IMAGE_BUDGET = 3;
 
-    private const PROPOSAL_ATTEMPTS = 4;
+    private const PROPOSAL_ATTEMPTS = 6;
 
     private int $imageCalls = 0;
     private int $proposalAttempts = 0;

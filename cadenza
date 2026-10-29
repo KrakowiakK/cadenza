@@ -40,6 +40,15 @@ env_local() { # file key value — set a key in .env.local unless it is already 
     grep -q "^$key=" "$file" || printf '%s=%s\n' "$key" "$value" >> "$file"
 }
 
+env_url() { # file key value — like env_local, but ports given on the command line replace an earlier address
+    local file="$1" key="$2" value="$3"
+    if [ -n "${CADENZA_APP_PORT:-}${CADENZA_STUDIO_PORT:-}" ] && [ -f "$file" ]; then
+        grep -v "^$key=" "$file" > "$file.tmp" || true
+        mv "$file.tmp" "$file"
+    fi
+    env_local "$file" "$key" "$value"
+}
+
 setup() {
     check
     bold "Cadenza setup"
@@ -50,11 +59,11 @@ setup() {
     step "Configuration (.env.local files, never committed)"
     env_local "$APP/.env.local" DATABASE_URL '"sqlite:///%kernel.project_dir%/var/data_%kernel.environment%.db"'
     env_local "$APP/.env.local" CADENZA_TOKEN "$token"
-    env_local "$APP/.env.local" CADENZA_HARNESS_URL "http://127.0.0.1:$STUDIO_PORT"
+    env_url "$APP/.env.local" CADENZA_HARNESS_URL "http://127.0.0.1:$STUDIO_PORT"
     env_local "$STUDIO/.env.local" DATABASE_URL '"sqlite:///%kernel.project_dir%/var/data_%kernel.environment%.db"'
     env_local "$STUDIO/.env.local" CADENZA_TOKEN "$token"
-    env_local "$STUDIO/.env.local" CADENZA_APP_URL "http://127.0.0.1:$APP_PORT"
-    env_local "$STUDIO/.env.local" CADENZA_PUBLIC_URL "http://127.0.0.1:$STUDIO_PORT"
+    env_url "$STUDIO/.env.local" CADENZA_APP_URL "http://127.0.0.1:$APP_PORT"
+    env_url "$STUDIO/.env.local" CADENZA_PUBLIC_URL "http://127.0.0.1:$STUDIO_PORT"
 
     for dir in "$APP" "$STUDIO"; do
         step "$(basename "$dir"): dependencies"
