@@ -233,6 +233,7 @@ when one like it already exists, a contact page, a price list, a new title), eac
 | Granite 4.2 | 8B | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 30–213 s |
 | Qwen 3.5 | 9B | ✓ | ✓ added a second one | ✗ | ✓ | ✗ said it changed it, did not | 3–68 s |
 | **gpt-oss** | **20B** | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 5–15 s |
+| gpt-oss | 120B (MoE) | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 5–30 s |
 | Qwen 3.8 | 27B | ✓ | ✓ noticed it is there | ✓ | ✓ | ✓ | 7–54 s |
 | Gemma 4 26B-A4B | 26B | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 5–145 s |
 | Granite 4.2 | 30B | ✓ | ✓ noticed it is there | ✗ too slow (timeout) | ✓ | ✓ | 50–704 s |
@@ -259,11 +260,14 @@ model writes:
 | Granite 4.2 8B | ✓ | ✓ | ✓ | ✗ 20 min, nothing | ✗ lost a question | ✗ invented them | ✓ | 4 | 79–1200 s |
 | **gpt-oss 20B** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ a marked stub to fill | ✓ | **7** | **17–79 s** |
 | **Qwen 3.8 27B** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ asked for real ones | ✓ | **7** | 15–221 s |
+| gpt-oss 120B | ✓ | ✓ | ✓ | ✓ | ✗ a second FAQ instead of one more question | ½ an empty section | ✓ | 5½ | 14–51 s |
+| Gemma 3 12B | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ nothing made | ✗ | 0 | no tool calls at all |
 | Gemma 4 26B-A4B | ✓ | ½ no limit | ✓ | ✓ | ✓ | ½ placeholders | ✓ | 6 | 31–160 s |
 
 **The favourite for running Cadenza locally: gpt-oss 20B** — everything right and the quickest; **Qwen 3.8 27B** did
 everything too, a little slower, with the best judgement (it refused to invent reviews and wrote the most complete
-widget). The 4B models that passed the easy round are not enough for real work: they fail multi-step tasks and, worse,
+widget). Bigger is not better here: gpt-oss 120B lost to its 20B sibling and generates slower (75 against 106 tokens a
+second on an M4 Max; Gemma 4 26B-A4B, with 4B active parameters, writes 228 a second). The 4B models that passed the easy round are not enough for real work: they fail multi-step tasks and, worse,
 say they did what they did not.
 
 Smaller and free models make mistakes in tool arguments (numbers as strings, JSON as strings, extra brackets). The
