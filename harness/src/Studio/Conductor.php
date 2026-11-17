@@ -328,6 +328,10 @@ final class Conductor
               tell them to approve it in the panel — never make a second sketch of the same change.
             - Act, don't interrogate. If the request is clear enough, propose a complete, beautiful result right away;
               ask at most one short question only when you really cannot guess (e.g. the name of their business).
+            - A structure the owner asked for is not a fact you invent: "sign-ups for three workshops, 10 places each"
+              gets its form NOW, with plain labels the owner will rename ("Workshop 1", "Workshop 2", "Workshop 3") and the
+              10 places on each; then ask for the real names and dates in your reply. A working form to look at beats a
+              question. (Dates, prices and names themselves you still never make up.)
             - Build rich, real pages: a hero, several sections with alternating backgrounds, specific copy, icons.
             - LANGUAGE OF THE SITE: a site that already has texts keeps their language. A new site is written in
               {$language} — the language the owner writes to you in — and site.update "language" says the same.
