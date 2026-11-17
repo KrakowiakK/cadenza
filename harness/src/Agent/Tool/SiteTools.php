@@ -201,12 +201,14 @@ final class SiteTools
      */
     private function photosFor(\App\Entity\Proposal $proposal, array $created, string $hero, string $photo): void
     {
-        if ('' === $photo || 'typographic' === $hero || null === $this->images || null === $this->offers) {
+        if ('' === $photo || null === $this->images || null === $this->offers) {
             return;
         }
+        // An opening made of type alone has no photo: the first section with a picture beside its text gets one.
+        $slot = 'typographic' === $hero ? 'feature-split' : 'hero';
         $nodeId = null;
         foreach ($created as $line) {
-            if (\is_string($line) && 1 === preg_match('/^(\S+) hero\b/', $line, $m)) {
+            if (\is_string($line) && 1 === preg_match('/^(\S+) '.$slot.'\b/', $line, $m)) {
                 $nodeId = $m[1];
                 break;
             }
@@ -227,7 +229,9 @@ final class SiteTools
         $this->offers->awaitProposal($proposal->getId(), $this->offers->create([
             'nodeId' => $nodeId,
             'prop' => 'collage' === $hero ? 'images' : 'image',
-            'label' => str_starts_with($this->turn->language, 'pl') ? 'Zdjęcie na otwarcie' : 'Opening photo',
+            'label' => 'hero' === $slot
+                ? (str_starts_with($this->turn->language, 'pl') ? 'Zdjęcie na otwarcie' : 'Opening photo')
+                : (str_starts_with($this->turn->language, 'pl') ? 'Zdjęcie do pierwszej sekcji' : 'Photo for the first section'),
             'query' => $photo,
             'draftId' => $proposal->getDraftId(),
             'conversationId' => $this->turn->conversation?->getId(),
