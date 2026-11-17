@@ -192,7 +192,7 @@ can still be written by hand in `harness/.env.local`:
 
 | | `CADENZA_LLM_BASE_URL` | `CADENZA_LLM_MODEL` |
 |---|---|---|
-| Hugging Face *(not yet tested by us)* | `https://router.huggingface.co` | `Qwen/Qwen3-Coder-480B-A35B-Instruct` |
+| Hugging Face *(token accepted; a model call needs pre-paid credits, so not tested end to end)* | `https://router.huggingface.co` | `Qwen/Qwen3-Coder-480B-A35B-Instruct` |
 | Ollama Cloud *(tested)* | `https://ollama.com` | `beam?max_tokens=12000&reasoning_effort=low` |
 | OpenRouter *(tested, free models)* | `https://openrouter.ai/api` | `nvidia/nemotron-3-ultra-550b-a55b:free?max_tokens=12000` |
 | LM Studio / Ollama, local *(LM Studio tested)* | `http://127.0.0.1:1234` | the loaded model |
