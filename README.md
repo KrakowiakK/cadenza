@@ -10,6 +10,31 @@ appears first as a **sketch on the live page**; nothing goes live until you appr
 
 ![Three looks of the same content, as live thumbnails, side by side](docs/img/variants.jpg)
 
+## Try it in 3 minutes
+
+**Watch first:** the [90-second demo](https://youtu.be/A3mZrCXw59g). Then run it yourself:
+
+```bash
+git clone https://github.com/KrakowiakK/cadenza.git && cd cadenza
+./cadenza setup      # about 20 s: dependencies, SQLite databases, assets; nothing to configure by hand
+./cadenza start      # → open http://127.0.0.1:8010
+```
+
+Requirements: **PHP 8.4+** (extensions `pdo_sqlite`, `gd`, `intl`, `zip`, `sodium`) and **Composer**, on macOS or Linux (on
+Windows use WSL). The script checks all of this and says what is missing. Chrome is optional (only to try the games the
+agent writes).
+
+1. **Create the owner account** on the first visit (it works only from the computer that runs the site).
+2. **Connect a model.** The panel opens *Connections*: it finds Ollama or LM Studio on your computer (one click), or you
+   paste a key for Ollama Cloud, OpenRouter (both have free plans), OpenAI, DeepSeek or any OpenAI-compatible API.
+   Prefer the environment? Start it with three variables instead, for example:
+   `CADENZA_LLM_BASE_URL=https://api.deepseek.com CADENZA_LLM_MODEL=deepseek-flash CADENZA_LLM_API_KEY=… ./cadenza start`
+3. **Say something** in the bar at the bottom: *"I run a small yoga studio in Gdynia. How could my website look?"* Free
+   cloud models need 20–60 s for the three looks and a few minutes for a full page; paid or local fast models are quicker.
+
+Stuck? `./cadenza stop` and `./cadenza start` restart both servers; `./cadenza reset` starts the site over; the full
+description is in [Quick start](#quick-start-5-minutes) and [Models](#models) below.
+
 ## What it does
 
 - **Chat on your own site.** A bar at the bottom, a side panel that slides out. Point at anything with the
@@ -91,7 +116,7 @@ appears first as a **sketch on the live page**; nothing goes live until you appr
 Requirements: PHP 8.4+ (`pdo_sqlite`, `gd`, `intl`, `zip`, `sodium`), Composer. The Symfony CLI is used when present.
 
 ```bash
-git clone <this repository> cadenza && cd cadenza
+git clone https://github.com/KrakowiakK/cadenza.git && cd cadenza
 ./cadenza setup        # dependencies, SQLite databases, assets, a shared secret — nothing to configure by hand
 ```
 
