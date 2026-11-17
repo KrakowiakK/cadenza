@@ -142,7 +142,12 @@ final class SiteTools
      */
     public function variants(array $directions = [], array $operations = [], string $summary = '', string $photo = ''): string
     {
-        $summary = '' !== trim($summary) ? $summary : 'Propozycja strony';
+        $pl = str_starts_with($this->turn->language, 'pl');
+        // The same guard as in propose_changes: a Polish summary for an owner who writes in another language is replaced.
+        if (!$pl && 1 === preg_match('/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/u', $summary)) {
+            $summary = '';
+        }
+        $summary = '' !== trim($summary) ? $summary : ($pl ? 'Propozycja strony' : 'A first look at your site');
         // Models express the directions in many shapes; take the known direction names in the order given.
         preg_match_all('/\b('.implode('|', array_keys(self::HERO_FOR)).')\b/', json_encode($directions) ?: '', $m);
         $found = array_values(array_unique($m[1]));

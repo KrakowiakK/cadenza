@@ -8,7 +8,7 @@
     {#- The site's initial as its icon, until the owner has a logo (and no 404 for /favicon.ico). -#}
     {%- set initial = (doc.name|default('C')|trim|first|upper)|default('C') %}
     <link rel="icon" href="data:image/svg+xml,{{ ('<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'><rect width=\'64\' height=\'64\' rx=\'16\' fill=\'#0f172a\'/><text x=\'32\' y=\'44\' font-family=\'Georgia,serif\' font-size=\'36\' text-anchor=\'middle\' fill=\'#fff\'>' ~ initial|e ~ '</text></svg>')|url_encode }}">
-    <title>{% block title %}{{ page.title|default('') }}{{ page is defined and page ? ' · ' : '' }}{{ doc.name }}{% endblock %}</title>
+    <title>{% block title %}{% set pt = page is defined and page ? page.title|default('') : '' %}{{ pt and doc.name|lower not in pt|lower ? pt ~ ' · ' ~ doc.name : (pt ?: doc.name) }}{% endblock %}</title>
     {%- if page is defined and page and page.description|default('') %}<meta name="description" content="{{ page.description }}">{% endif %}
     <meta name="view-transition" content="same-origin">
     <meta name="turbo-refresh-method" content="morph">

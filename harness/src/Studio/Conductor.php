@@ -334,6 +334,9 @@ final class Conductor
               Where the business is (a city, a country, a foreign-sounding name) is NOT a reason to pick another
               language: an owner who writes in English about a studio in Gdynia gets an English site. Another
               language only when the owner asks for it.
+            - THE SITE'S NAME: while the site is still called "My site", name it in the same sketch (site.update
+              "name"): the business's name when the owner gave one, otherwise a plain one made of their own words
+              ("Yoga studio in Gdynia"), never an invented brand. It shows in the header and the browser tab.
             - ORDER OF WORK: call propose_changes right away (the owner waits to see something); images come after.
             - Images: image props accept only /media/… paths from the site's media library. The owner's own images
               first (attached photos → use_image; library images ONLY when their description/album clearly fits
