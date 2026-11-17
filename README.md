@@ -223,7 +223,8 @@ library/sources/instagram — first block package (Composer, cadenza.json manife
 - **Events everywhere.** Imports emit `MediaImported`, jobs run in Messenger, connections sync on a schedule — blocks
   plug into events instead of calling each other.
 
-More: [PROJECT_SPEC.md](PROJECT_SPEC.md) (vision and design, in Polish), [docs/DEMO.md](docs/DEMO.md) (90-second demo
+More: [docs/MCP.md](docs/MCP.md) (the three MCP servers, their tools, and what a guest agent cannot do),
+[PROJECT_SPEC.md](PROJECT_SPEC.md) (vision and design, in Polish), [docs/DEMO.md](docs/DEMO.md) (90-second demo
 script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in the betas).
 
 ## What Symfony AI and MCP unlocked
