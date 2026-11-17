@@ -15,6 +15,10 @@
             {%- if item.image|default(false) %}
                 <img src="{{ item.image }}" alt="" loading="lazy" class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
+            {%- elseif (sizes[loop.index0] ?? 'small') in ['large', 'tall'] %}
+                {#- A big tile without a photo is not left as an empty box: a soft glow and its icon, large and faint. -#}
+                <div class="pointer-events-none absolute -right-16 -top-16 size-72 rounded-full bg-primary/10 blur-3xl"></div>
+                {%- if item.icon|default(false) %}<div class="pointer-events-none absolute right-6 top-6 text-primary/15">{{ cadenza_icon(item.icon, 'size-36') }}</div>{% endif %}
             {%- endif %}
             <div class="relative">
                 {%- if item.icon|default(false) and not item.image|default(false) %}<div class="mb-auto inline-flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">{{ cadenza_icon(item.icon, 'size-5') }}</div>{% endif %}
