@@ -8,6 +8,7 @@
 #                       CADENZA_PHP_SERVER=1 forces the built-in one; CADENZA_APP_PORT / CADENZA_STUDIO_PORT)
 #   ./cadenza stop      stop them
 #   ./cadenza test      run all test suites
+#   ./cadenza doctor    check this computer: PHP, extensions, Composer, ports, Chrome, and what is running
 #   ./cadenza reset     start the site over from a blank canvas (history deleted)
 set -euo pipefail
 
@@ -135,7 +136,35 @@ tests() {
     (cd "$APP" && php bin/phpunit)
 }
 
+doctor() {
+    local bad=0
+    ok() { printf '  \033[32m✓\033[0m %s\n' "$*"; }
+    no() { printf '  \033[31m✗\033[0m %s\n' "$*"; bad=1; }
+    maybe() { printf '  \033[33m•\033[0m %s\n' "$*"; }
+    bold "Cadenza doctor"
+    if has php && php -r 'exit(PHP_VERSION_ID >= 80400 ? 0 : 1);'; then ok "PHP $(php -r 'echo PHP_VERSION;')"; else no "PHP 8.4+ is required (https://php.net, or: brew install php)"; fi
+    if has php; then
+        local modules; modules="$(php -m)"
+        for ext in pdo_sqlite gd intl zip sodium; do
+            if grep -qix "$ext" <<<"$modules"; then ok "PHP extension $ext"; else no "PHP extension $ext is missing (on Debian/Ubuntu: apt install php-${ext#pdo_})"; fi
+        done
+    fi
+    if has composer; then ok "Composer"; else no "Composer is required (https://getcomposer.org)"; fi
+    for pair in "site:$APP_PORT" "studio:$STUDIO_PORT"; do
+        local name="${pair%%:*}" port="${pair##*:}"
+        if curl -s -o /dev/null --max-time 2 "http://127.0.0.1:$port/"; then ok "$name is running on port $port"
+        elif (exec 3<>"/dev/tcp/127.0.0.1/$port") 2>/dev/null; then no "port $port is taken by something else (use CADENZA_APP_PORT / CADENZA_STUDIO_PORT)"
+        else maybe "port $port is free (the $name is not running: ./cadenza start)"; fi
+    done
+    [ -d "$APP/vendor" ] && [ -d "$STUDIO/vendor" ] && ok "dependencies installed" || maybe "dependencies not installed yet: ./cadenza setup"
+    if [ -d "$STUDIO/vendor" ] && (cd "$STUDIO" && vendor/bin/bdi detect drivers >/dev/null 2>&1); then ok "Chrome found (widgets are tried in a browser)"; else maybe "Chrome not found: optional, widgets are then not tried before you see them"; fi
+    if [ -n "${CADENZA_LLM_API_KEY:-}" ] || grep -q '^CADENZA_LLM_API_KEY=.\+' "$STUDIO/.env.local" 2>/dev/null; then ok "model key in the environment"; else maybe "no model key in the environment: connect one in the panel (Connections) after start"; fi
+    echo
+    if [ "$bad" = 0 ]; then bold "All good."; else fail "Fix the ✗ lines above, then run ./cadenza setup."; fi
+}
+
 case "${1:-}" in
+    doctor) doctor ;;
     setup) setup ;;
     start) start ;;
     stop) stop ;;
