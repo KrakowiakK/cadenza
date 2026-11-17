@@ -4,7 +4,9 @@
 
 **A living Symfony website that its non-technical owner shapes by talking to it.** Bring your material — a
 spreadsheet, the photos on your phone, a drawn sketch, or just an idea — and Cadenza proposes a page. Every change
-appears first as a **sketch on the live page**; nothing goes live until you approve it. Built for the
+appears first as a **sketch on the live page**; nothing goes live until you approve it. The site is an MCP server:
+Cadenza's own studio works through it, and so can the agent you already use (Claude Code, Cursor), which may read and
+leave sketches but never publish. Visitors get an assistant that answers only from what the site says. Built for the
 [Symfony AI & MCP Hackathon](https://symfony.com/hackathon) with Symfony AI 1.0.0-BETA1 and the official PHP MCP SDK.
 
 > *Cadenza*: the passage of a concerto where the soloist improvises freely — on top of a solid structure.
