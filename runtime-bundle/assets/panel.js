@@ -787,7 +787,8 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
             case 'error': {
                 const box = turn.part('text');
                 box.classList.remove('hidden');
-                const busy = /timeout|timed out|Failed to connect|refused/i.test(data.message);
+                // "Connection refused" is a server that is not there; "refused the key" is an answer, and has its own words.
+                const busy = /timeout|timed out|Failed to connect|connection refused|could not resolve host/i.test(data.message);
                 box.insertAdjacentHTML('beforeend', `<div class="rounded-xl border border-rose-200 bg-rose-50 p-3 text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200"><p>${escapeHtml(busy ? t('modelBusy') : t('error'))}</p>${busy ? '' : `<p class="mt-1 text-xs opacity-70">${escapeHtml(data.message.slice(0, 200))}</p>`}<button type="button" data-retry class="mt-2 rounded-lg bg-rose-600 px-3 py-1 text-xs font-semibold text-white">${t('retry')}</button></div>`);
                 const request = this.lastRequest;
                 box.querySelector('[data-retry]').addEventListener('click', (e) => {
