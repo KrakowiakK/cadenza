@@ -217,7 +217,8 @@ library/sources/instagram — first block package (Composer, cadenza.json manife
 - **Two processes on purpose.** The studio is never modified by the agent, and the site's MCP servers separate what an
   agent may do (`agent`: read, propose drafts) from what only the owner's approval does (`control`: publish). An agent from
   outside gets less still (`guest`): the split is by server and by token, so it holds whatever the model is told.
-- **Safety is code, not prompt.** Only the approve transition publishes; image props accept only the site's media
+- **Safety is code, not prompt.** Only the approve transition publishes; reviews the owner never gave are taken out
+  of a batch before it becomes a sketch (`InventedReviews`), whatever the model was told; image props accept only the site's media
   library; a tool policy enforces “sketch first” and budgets; credentials of connected accounts are sealed with
   libsodium and never reach the model.
 - **Events everywhere.** Imports emit `MediaImported`, jobs run in Messenger, connections sync on a schedule — blocks
