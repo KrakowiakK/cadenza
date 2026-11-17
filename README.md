@@ -185,8 +185,11 @@ site: see [`docs/DEMO.md`](docs/DEMO.md).
 | “Lots of tourists come here — make an English version.” | `/en` with the same layout, an English menu and a PL/EN switcher |
 | “Add a news page for the guests: the bus from Warsaw leaves at 11:00…” | a news list sorted by date, posts as drafts to publish from the panel |
 | “A page that explains photosynthesis, with a quiz at the end.” | sections, steps, a quiz with explanations and a score |
+| “Add an assistant that answers my visitors' questions.” … later: “What do visitors ask that my site does not answer?” | an ask box that answers in about a second from the site's own text; then the list of unanswered questions, and a sketch with the answers once the owner gives the facts |
+| “Check my site: is anything broken or missing?” | a real check (links, placeholders, descriptions, contact) and one sketch that fixes what needs no facts |
+| *(in Claude Code, after `./cadenza mcp`)* “Add a short FAQ before the contact form on my site, as a sketch.” | Claude Code reads the site over MCP and leaves a signed sketch; it appears in the open panel and waits for the owner |
 
-`./cadenza test` runs all test suites; `./cadenza reset` starts the site over; `./cadenza stop`.
+`./cadenza test` runs all test suites; `./cadenza mcp` prints how to connect your own agent; `./cadenza doctor` checks this computer; `./cadenza reset` starts the site over; `./cadenza stop`.
 
 ## Architecture
 
