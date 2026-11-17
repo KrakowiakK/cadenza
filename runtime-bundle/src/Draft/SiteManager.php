@@ -10,6 +10,7 @@ use Cadenza\Runtime\Operation\OperationApplier;
 use Cadenza\Runtime\Repository\SiteVersionRepository;
 use Cadenza\Runtime\Site\Diff;
 use Cadenza\Runtime\Site\Document;
+use Cadenza\Runtime\Site\LinkRepair;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -72,6 +73,18 @@ final class SiteManager
             $result = $this->applier->apply($base, $allOperations);
         }
 
+        // A button of a new block never leads nowhere: "#" left by the model becomes a link to the section it means.
+        $made = array_flip($result->created);
+        $repairs = array_values(array_filter(LinkRepair::operations($result->document), static fn (array $op): bool => isset($made[$op['id']])));
+        if ([] !== $repairs) {
+            $repaired = $this->applier->apply($base, [...$allOperations, ...$repairs]);
+            if ($repaired->isValid()) {
+                $allOperations = [...$allOperations, ...$repairs];
+                $created = $result->created;
+                $result = $repaired;
+            }
+        }
+
         $diff = Diff::between($base, $result->document);
         if ($diff->isEmpty()) {
             return DraftResult::invalid(['The operations change nothing.']);
@@ -85,7 +98,7 @@ final class SiteManager
         }
         $this->em->flush();
 
-        return DraftResult::valid($draft, $diff, $result->created);
+        return DraftResult::valid($draft, $diff, $created ?? $result->created);
     }
 
     /**

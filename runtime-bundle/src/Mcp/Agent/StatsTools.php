@@ -16,6 +16,8 @@ final class StatsTools
     public function __construct(
         private readonly SiteStats $stats,
         private readonly \Cadenza\Runtime\Ask\VisitorQuestions $questions,
+        private readonly \Cadenza\Runtime\Draft\SiteManager $site,
+        private readonly \Cadenza\Runtime\Collection\Collections $collections,
     ) {
     }
 
@@ -38,5 +40,16 @@ final class StatsTools
     public function visitorQuestions(int $limit = 30): array
     {
         return $this->questions->summary(max(1, min(100, $limit)));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[McpTool(name: 'site_review', description: 'A check of the published site that needs no model: links that lead nowhere, placeholders left behind, filler text, pages without a description, no way to get in touch, a site without a name. Each finding names the page and the node, and how to fix it.', annotations: new ToolAnnotations(readOnlyHint: true))]
+    public function review(): array
+    {
+        $findings = \Cadenza\Runtime\Site\Review::of($this->site->document(), array_map(static fn ($c): string => $c->getSlug(), $this->collections->all()));
+
+        return ['findings' => $findings, 'unansweredQuestions' => $this->questions->summary(5)['unanswered']];
     }
 }

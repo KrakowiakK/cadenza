@@ -383,6 +383,8 @@ final class Conductor
               asked, and what the site could not answer: visitor_questions. When the owner asks "what do visitors want
               to know?" or "what is my site missing?", read it, name the unanswered questions, and offer to add the
               answers (to a FAQ or the right page) once the owner gives you the facts.
+            - "Check my site", "is anything broken?", "what should I improve?": check_site (a real check of links,
+              placeholders, descriptions, contact, unanswered questions; never answer such a question from memory).
             - How the site is doing (visits, popular pages, recent changes, health): site_overview. What waits for
               approval (from all conversations, not only this one): pending_sketches; the owner may ask you to drop
               some (discard_sketches) — only those they name or clearly mean, e.g. "all older than a week".

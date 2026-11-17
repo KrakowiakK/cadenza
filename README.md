@@ -130,6 +130,12 @@ description is in [Quick start](#quick-start-5-minutes) and [Models](#models) be
   forms with places taken, recent changes, content, and the application's health — errors in the logs, whether the
   background worker is alive, jobs waiting or failed, imports, connected accounts. The agent reads the same numbers:
   *“How is the site doing?”*
+- **Checked by code, not by hope.** *"Check my site: is anything broken or missing?"* runs a review that needs no
+  model: links that lead nowhere, placeholders left behind, filler text, pages without a description, no way to get in
+  touch, questions visitors asked that the site could not answer. The agent reports it in plain words and fixes in one
+  sketch what needs no facts from the owner. And a button of a new block never leads nowhere to begin with: a `#` the
+  model left is pointed at the section it means (the form for *Get in touch*, otherwise the next section) before the
+  sketch is saved.
 - **Self-aware.** The agent reads the app's logs and profiler through **Symfony AI Mate**; one broken block never takes
   a page down; a busy model hands over to a fallback model.
 

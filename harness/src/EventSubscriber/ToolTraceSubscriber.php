@@ -32,6 +32,7 @@ final class ToolTraceSubscriber
         'read_spreadsheet' => ['en' => 'Reading the spreadsheet', 'pl' => 'Czytam arkusz'],
         'read_answers' => ['en' => 'Reading the answers', 'pl' => 'Czytam odpowiedzi'],
         'site_overview' => ['en' => 'Looking at the dashboard', 'pl' => 'Zaglądam do pulpitu'],
+        'check_site' => ['en' => 'Checking links, placeholders and descriptions', 'pl' => 'Sprawdzam linki, zaślepki i opisy'],
         'visitor_questions' => ['en' => 'Reading what visitors asked', 'pl' => 'Czytam pytania odwiedzających'],
         'create_collection' => ['en' => 'Creating a collection', 'pl' => 'Tworzę kolekcję'],
         'save_record' => ['en' => 'Writing an entry', 'pl' => 'Zapisuję wpis'],
