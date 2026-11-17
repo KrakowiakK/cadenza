@@ -100,9 +100,11 @@ start() {
     else
         step "Starting with PHP's built-in server (Symfony CLI not found)"
         stop >/dev/null 2>&1 # whatever an earlier start left running
-        (cd "$APP" && PHP_CLI_SERVER_WORKERS=4 nohup php -c "$APP/php.ini" -S "0.0.0.0:$APP_PORT" -t public "$ROOT/bin/router.php" </dev/null >"$RUN/app.log" 2>&1 & echo $! >"$RUN/app.pid")
-        (cd "$STUDIO" && PHP_CLI_SERVER_WORKERS=4 nohup php -c "$STUDIO/php.ini" -S "127.0.0.1:$STUDIO_PORT" -t public "$ROOT/bin/router.php" </dev/null >"$RUN/studio.log" 2>&1 & echo $! >"$RUN/studio.pid")
-        (cd "$APP" && nohup php "$APP/bin/console" messenger:consume async scheduler_cadenza --no-debug --memory-limit=192M </dev/null >"$RUN/worker.log" 2>&1 & echo $! >"$RUN/worker.pid")
+        # "exec": each background job IS its server (not a shell waiting for it), so nothing keeps the caller's output
+        # open (./cadenza start | tee log returns) and the pid files name the real processes.
+        (cd "$APP" && PHP_CLI_SERVER_WORKERS=4 exec nohup php -c "$APP/php.ini" -S "0.0.0.0:$APP_PORT" -t public "$ROOT/bin/router.php" </dev/null >"$RUN/app.log" 2>&1 & echo $! >"$RUN/app.pid")
+        (cd "$STUDIO" && PHP_CLI_SERVER_WORKERS=4 exec nohup php -c "$STUDIO/php.ini" -S "127.0.0.1:$STUDIO_PORT" -t public "$ROOT/bin/router.php" </dev/null >"$RUN/studio.log" 2>&1 & echo $! >"$RUN/studio.pid")
+        (cd "$APP" && exec nohup php "$APP/bin/console" messenger:consume async scheduler_cadenza --no-debug --memory-limit=192M </dev/null >"$RUN/worker.log" 2>&1 & echo $! >"$RUN/worker.pid")
     fi
     echo
     bold "Cadenza is running"
