@@ -92,7 +92,8 @@ final class ImageSearch
             $out[] = [
                 'id' => 'wm-'.$page['pageid'],
                 'thumb' => $info['thumburl'],
-                'url' => $info['width'] > 2400 ? (preg_replace('~/\d+px-~', '/2400px-', strtok($info['thumburl'], '?')) ?? $info['url']) : $info['url'],
+                // Wikimedia serves thumbnails only at fixed widths (…1280, 1920, 3840); any other width, like 2400, is a 400.
+                'url' => $info['width'] > 1920 ? (preg_replace('~/\d+px-~', '/1920px-', strtok($info['thumburl'], '?')) ?? $info['url']) : $info['url'],
                 'title' => html_entity_decode(strip_tags((string) ($meta['ObjectName']['value'] ?? preg_replace(['/^File:/', '/\.\w+$/'], '', $page['title'])))),
                 'author' => trim(html_entity_decode(strip_tags((string) ($meta['Artist']['value'] ?? '')))) ?: null,
                 'license' => $meta['LicenseShortName']['value'] ?? null,
