@@ -48,6 +48,13 @@ final class SiteTools
             $summary = '';
         }
         $summary = '' !== trim($summary) ? $this->asChange($summary) : self::summaryOf(Proposals::normalise($operations), str_starts_with($this->turn->language, 'pl'));
+        // A touch-up of a sketch made a moment ago in this same answer (fixing where its buttons lead) does not rename
+        // it: the owner asked for "a page for my café", not for "buttons now jump to the menu".
+        foreach ($this->turn->proposals as $made) {
+            if (null !== $reviseDraftId && $made->getDraftId() === $reviseDraftId) {
+                $summary = $made->getSummary();
+            }
+        }
         $result = $this->proposals->propose($this->turn->conversation, $operations, $summary, $reviseDraftId);
         // Changes to a page or block that exists only in a sketch of this conversation belong to that sketch.
         if (null === $result['proposal'] && null === $reviseDraftId && null !== $this->turn->conversation
