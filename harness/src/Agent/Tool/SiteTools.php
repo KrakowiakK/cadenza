@@ -41,6 +41,10 @@ final class SiteTools
         if ([] !== $tools) {
             return \sprintf('Nothing was saved: %s %s a tool of its own, not an operation. Call %s directly first; then call propose_changes with page and node operations only (e.g. a collection-grid node showing the collection).', implode(', ', $tools), 1 === \count($tools) ? 'is' : 'are', implode(' / ', $tools));
         }
+        // A model sometimes writes the summary in Polish for an English-speaking owner: the generated one is always in the owner's language.
+        if (!str_starts_with($this->turn->language, 'pl') && 1 === preg_match('/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/u', $summary)) {
+            $summary = '';
+        }
         $summary = '' !== trim($summary) ? $this->asChange($summary) : self::summaryOf(Proposals::normalise($operations), str_starts_with($this->turn->language, 'pl'));
         $result = $this->proposals->propose($this->turn->conversation, $operations, $summary, $reviseDraftId);
         // Changes to a page or block that exists only in a sketch of this conversation belong to that sketch.
