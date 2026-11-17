@@ -56,6 +56,27 @@ final class Document
         return $find($page['nodes'] ?? []);
     }
 
+    /**
+     * Where a visitor can write to the owner: the first form on a public page, as "/path#id".
+     *
+     * @param array<string, mixed> $doc
+     */
+    public static function contactLink(array $doc): ?string
+    {
+        foreach ($doc['pages'] ?? [] as $page) {
+            if ('members' === ($page['access'] ?? 'public')) {
+                continue;
+            }
+            foreach (self::walkList($page['nodes'] ?? [], (string) $page['id'], null, null, 0) as $entry) {
+                if ('form' === ($entry['node']['type'] ?? null)) {
+                    return self::normalisePath((string) $page['path']).'#'.$entry['node']['id'];
+                }
+            }
+        }
+
+        return null;
+    }
+
     public static function normalisePath(string $path): string
     {
         $path = '/'.trim(trim($path), '/');

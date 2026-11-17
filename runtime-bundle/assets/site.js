@@ -124,6 +124,14 @@ async function askSite(box, question) {
     } catch {}
     answer.classList.remove('animate-pulse', 'opacity-70');
     answer.textContent = text;
+    // Nothing on the site answers it: the way to the owner is one tap away.
+    if (text === box.dataset.none && box.dataset.contact) {
+        const link = document.createElement('a');
+        link.href = box.dataset.contact;
+        link.textContent = box.dataset.contactLabel + ' →';
+        link.className = 'mt-2 block font-medium text-primary underline underline-offset-4';
+        answer.append(link);
+    }
     input.disabled = button.disabled = false;
     answer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
