@@ -9,6 +9,8 @@ doctrine:
         profiling_collect_backtrace: '%kernel.debug%'
     orm:
         validate_xml_mapping: true
+        # The schema is built with DBAL's schema editor (the way that stays in ORM 4).
+        use_schema_editor_api: true
         naming_strategy: doctrine.orm.naming_strategy.underscore
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
