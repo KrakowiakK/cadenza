@@ -336,7 +336,7 @@ class Studio {
     setState(state) {
         this.root.dataset.state = state;
         store.set('panel', state);
-        if (state === 'open') setTimeout(() => this.input.focus(), 250);
+        if (state === 'open') setTimeout(() => { this.input.focus(); this.scrollDown(); }, 250);
         if (state === 'closed') setTimeout(() => this.barInput.focus({ preventScroll: true }), 50);
     }
 
@@ -621,6 +621,9 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
             }
             this.refreshWaiting();
             this.otherSketches();
+            // After a reload (approving reloads the page) the owner sees the end of the conversation, not its start:
+            // cards and thumbnails get their height a moment after they are added.
+            for (const ms of [0, 300, 1200]) setTimeout(() => this.scrollDown(), ms);
         } catch (e) {
             this.welcome();
             this.setStatus('error', t('harnessDown'));

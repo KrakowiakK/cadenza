@@ -146,11 +146,34 @@ final class Document
         $items = \is_array($explicit)
             ? $explicit
             : array_map(
-                static fn (array $page): array => ['label' => $page['navLabel'] ?? $page['title'], 'href' => $page['path']],
+                static fn (array $page): array => ['label' => $page['navLabel'] ?? self::menuLabel($doc, $page), 'href' => $page['path']],
                 array_values(array_filter($doc['pages'], static fn (array $p): bool => !($p['hidden'] ?? false) && (null === $language || self::pageLanguage($doc, $p) === $language))),
             );
 
         return array_map(static fn (array $item): array => $item + ['members' => $members[parse_url((string) $item['href'], \PHP_URL_PATH) ?: ''] ?? false], $items);
+    }
+
+    /**
+     * What a page is called in the menu when nobody said: its title without the name of the site — a title is written
+     * for the browser tab and search engines ("Weekly classes — Tidewater Yoga"), a menu wants "Weekly classes". The
+     * opening page, whose title is the site itself, is "Home".
+     *
+     * @param array<string, mixed> $doc
+     * @param array<string, mixed> $page
+     */
+    public static function menuLabel(array $doc, array $page): string
+    {
+        $title = trim((string) ($page['title'] ?? ''));
+        $site = mb_strtolower(trim((string) ($doc['name'] ?? '')));
+        $parts = array_values(array_filter(array_map('trim', preg_split('/\s+[—–|·-]\s+/u', $title) ?: [$title]), static fn (string $p): bool => '' !== $p));
+        $own = array_values(array_filter($parts, static fn (string $p): bool => '' === $site || !str_contains(mb_strtolower($p), $site)));
+        $language = self::pageLanguage($doc, $page);
+        $home = '/' === $page['path'] || '/'.$language === $page['path'];
+        if ($home && (\count($parts) > 1 || [] === $own)) {
+            return ['pl' => 'Start', 'de' => 'Startseite', 'fr' => 'Accueil', 'es' => 'Inicio', 'it' => 'Home'][$language] ?? 'Home';
+        }
+
+        return $own[0] ?? $title;
     }
 
     /**

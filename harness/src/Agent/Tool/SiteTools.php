@@ -60,7 +60,9 @@ final class SiteTools
         if (null === $result['proposal'] && null === $reviseDraftId && null !== $this->turn->conversation
             && [] !== preg_grep('/does not exist/', $result['errors'])) {
             foreach (array_reverse($this->openProposals->open($this->turn->conversation)) as $open) {
-                $retry = $this->proposals->propose($this->turn->conversation, $operations, $summary, $open->getDraftId());
+                // …and when that sketch was made in this same answer, it keeps its name.
+                $madeNow = [] !== array_filter($this->turn->proposals, static fn ($made): bool => $made->getDraftId() === $open->getDraftId());
+                $retry = $this->proposals->propose($this->turn->conversation, $operations, $madeNow ? $open->getSummary() : $summary, $open->getDraftId());
                 if (null !== $retry['proposal']) {
                     $result = $retry;
                     break;
