@@ -38,6 +38,10 @@ class SiteVersion
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $publishedAt = null;
 
+    /** Name of the outside agent that left this draft over MCP; null for the studio's own drafts. */
+    #[ORM\Column(length: 80, nullable: true)]
+    private ?string $author = null;
+
     /**
      * @param array<string, mixed>       $document
      * @param list<array<string, mixed>> $operations
@@ -105,6 +109,17 @@ class SiteVersion
     public function getPublishedAt(): ?\DateTimeImmutable
     {
         return $this->publishedAt;
+    }
+
+    public function getAuthor(): ?string
+    {
+        return $this->author;
+    }
+
+    public function signedBy(string $agent): void
+    {
+        $name = trim((string) preg_replace(['~[^\p{L}\p{N} ._\-]+~u', '~\s+~'], ' ', $agent));
+        $this->author = '' !== $name ? mb_substr($name, 0, 80) : 'An outside agent';
     }
 
     public function isDraft(): bool

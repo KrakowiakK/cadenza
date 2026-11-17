@@ -40,7 +40,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
 
     public function getGlobals(): array
     {
-        return ['cadenza_harness_url' => $this->harnessUrl, 'cadenza_token' => $this->token];
+        return ['cadenza_harness_url' => $this->harnessUrl, 'cadenza_token' => $this->token, 'cadenza_guest_token' => \Cadenza\Runtime\EventSubscriber\McpGuardSubscriber::guestToken($this->token)];
     }
 
     public function getFilters(): array

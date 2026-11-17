@@ -1,4 +1,5 @@
 {#- A placeholder is a note to the owner: visitors never see it (a section that holds nothing else is hidden too). -#}
+{%- set state = cadenza_state() -%}
 {%- if state.owner -%}
 {%- set heights = {sm: 'min-h-24', md: 'min-h-44', lg: 'min-h-72'} -%}
 {%- set ownerOnly = {pl: 'Tę ramkę widzisz tylko Ty. Odwiedzający nie zobaczą tu nic.', de: 'Diesen Rahmen sehen nur Sie. Besucher sehen hier nichts.'}[state.language] ?? 'Only you see this frame. Visitors see nothing here.' -%}

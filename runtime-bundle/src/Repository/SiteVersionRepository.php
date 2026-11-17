@@ -42,4 +42,19 @@ final class SiteVersionRepository extends ServiceEntityRepository
     {
         return $this->findBy(['status' => SiteVersion::PUBLISHED], ['number' => 'DESC'], $limit);
     }
+
+    /**
+     * Drafts waiting for a decision, newest first.
+     *
+     * @return list<SiteVersion>
+     */
+    public function drafts(int $limit = 40, bool $outsideOnly = false): array
+    {
+        $qb = $this->createQueryBuilder('v')->where('v.status = :s')->setParameter('s', SiteVersion::DRAFT)->orderBy('v.id', 'DESC')->setMaxResults($limit);
+        if ($outsideOnly) {
+            $qb->andWhere('v.author IS NOT NULL');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

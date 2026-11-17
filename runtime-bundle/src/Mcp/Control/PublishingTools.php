@@ -70,6 +70,28 @@ final class PublishingTools
     /**
      * @return list<array<string, mixed>>
      */
+    #[McpTool(name: 'drafts_waiting', description: 'Drafts waiting for the owner, newest first; "author" names the outside agent that left one over MCP.', annotations: new ToolAnnotations(readOnlyHint: true))]
+    public function draftsWaiting(bool $outsideOnly = false): array
+    {
+        $out = [];
+        foreach ($this->versions->drafts(40, $outsideOnly) as $draft) {
+            $diff = $this->site->diff($draft);
+            $out[] = [
+                'draftId' => $draft->getId(),
+                'summary' => $draft->getSummary(),
+                'author' => $draft->getAuthor(),
+                'changes' => $diff->summary(),
+                'focusPath' => $diff->focusPath($draft->getDocument()) ?? '/',
+                'at' => $draft->getCreatedAt()->format(\DATE_ATOM),
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
     #[McpTool(name: 'history', description: 'Published versions, newest first.', annotations: new ToolAnnotations(readOnlyHint: true))]
     public function history(int $limit = 30): array
     {

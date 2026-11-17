@@ -7,6 +7,14 @@ mcp:
             http:
                 path: /_cadenza/mcp/agent
             registry: ['Cadenza\Runtime\Mcp\Agent\']
+        # An agent the owner brings along (Claude Code, Claude Desktop, Cursor...): a token of its own, a handful of tools
+        # to read the site and leave sketches. Nothing here reads visitors' answers, and nothing publishes.
+        guest:
+            name: 'cadenza-site-guest'
+            instructions: 'You are a guest on this website. Read it (site_outline, editor_guide), then leave a sketch with draft_propose. Only the owner can publish: your sketch waits in their panel.'
+            http:
+                path: /_cadenza/mcp/guest
+            registry: ['Cadenza\Runtime\Mcp\Guest\']
         # Owner decisions, used by the Cadenza harness after the owner approved in the panel.
         control:
             name: 'cadenza-site-control'

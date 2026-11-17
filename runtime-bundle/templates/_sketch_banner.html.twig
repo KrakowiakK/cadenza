@@ -3,6 +3,7 @@
 <div id="cz-sketch-banner" class="cz-ui sticky top-0 z-40 border-b border-amber-300/60 bg-amber-50/95 text-amber-950 backdrop-blur dark:bg-amber-950/90 dark:text-amber-50" data-cz-draft="{{ s.draftId }}">
     <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-6 py-2.5 text-sm">
         <span class="inline-flex items-center gap-2 font-semibold"><span class="cz-pulse-dot"></span><span data-cz-i18n="sketch">Sketch</span></span>
+        {%- if s.draftAuthor %}<span class="inline-flex items-center gap-1 rounded-full bg-violet-600/15 px-2 py-0.5 text-xs font-medium text-violet-800 dark:text-violet-200" title="Left over MCP by an agent you connected. It cannot publish.">{{ cadenza_icon('plug', 'size-3') }}{{ s.draftAuthor }} · MCP</span>{% endif %}
         <span class="min-w-0 flex-1 truncate opacity-80" data-cz-sketch-summary>{{ s.draftSummary|default('') }}</span>
         <span class="flex items-center gap-2 text-xs">
             {%- if sum.added|default(0) %}<span class="rounded-full bg-emerald-600/15 px-2 py-0.5 font-medium text-emerald-800 dark:text-emerald-200">+{{ sum.added }}</span>{% endif %}

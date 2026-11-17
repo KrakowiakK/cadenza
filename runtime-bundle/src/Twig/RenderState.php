@@ -18,6 +18,8 @@ final class RenderState
     /** Rendered inside a preview frame (variant thumbnails): no studio UI. */
     public bool $embed = false;
     public ?string $draftSummary = null;
+    /** The outside agent that left this sketch over MCP, if it was not the studio. */
+    public ?string $draftAuthor = null;
 
     /** Published version shown read-only (timeline preview). */
     public ?\Cadenza\Runtime\Entity\SiteVersion $previewVersion = null;

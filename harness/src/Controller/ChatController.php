@@ -108,8 +108,22 @@ final class ChatController
     public function sketches(): JsonResponse
     {
         $open = $this->proposals->allOpen();
+        $items = array_map(static fn ($p): array => $p->toArray() + ['at' => $p->getCreatedAt()->format(\DATE_ATOM)], \array_slice($open, 0, 40));
+        // Sketches an agent the owner brought along left over MCP: they wait here like the studio's own.
+        try {
+            $outside = $this->site->outsideDrafts();
+        } catch (\Throwable) {
+            $outside = [];
+        }
+        foreach ($outside as $draft) {
+            array_unshift($items, [
+                'proposalId' => 'outside-'.$draft['draftId'], 'draftId' => (int) $draft['draftId'], 'summary' => (string) ($draft['summary'] ?? ''),
+                'changes' => $draft['changes'] ?? [], 'focusPath' => (string) ($draft['focusPath'] ?? '/'), 'status' => 'sketched',
+                'author' => (string) ($draft['author'] ?? ''), 'at' => $draft['at'] ?? null,
+            ]);
+        }
 
-        return new JsonResponse(['total' => \count($open), 'items' => array_map(static fn ($p): array => $p->toArray() + ['at' => $p->getCreatedAt()->format(\DATE_ATOM)], \array_slice($open, 0, 40))]);
+        return new JsonResponse(['total' => \count($open) + \count($outside), 'items' => $items]);
     }
 
     #[Route('/api/conversations/{id}', methods: ['GET'])]

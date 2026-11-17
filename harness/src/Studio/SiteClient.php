@@ -110,6 +110,19 @@ final class SiteClient
     }
 
     /**
+     * Sketches an outside agent left on the site over MCP (the "guest" server), still waiting for the owner.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function outsideDrafts(): array
+    {
+        $result = $this->mcp->get('control')->callTool('drafts_waiting', ['outsideOnly' => true]);
+        $data = \is_array($result->structuredContent) ? $result->structuredContent : json_decode($this->text($result), true);
+
+        return array_values(array_filter(\is_array($data) ? ($data['result'] ?? $data) : [], '\is_array'));
+    }
+
+    /**
      * @return list<array<string, mixed>>
      */
     public function history(int $limit = 50): array

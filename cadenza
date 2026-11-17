@@ -8,6 +8,7 @@
 #                       CADENZA_PHP_SERVER=1 forces the built-in one; CADENZA_APP_PORT / CADENZA_STUDIO_PORT)
 #   ./cadenza stop      stop them
 #   ./cadenza test      run all test suites
+#   ./cadenza mcp       how to connect an agent of your own (Claude Code, Cursor...) to the site: it reads and sketches
 #   ./cadenza doctor    check this computer: PHP, extensions, Composer, ports, Chrome, and what is running
 #   ./cadenza reset     start the site over from a blank canvas (history deleted)
 set -euo pipefail
@@ -169,6 +170,7 @@ case "${1:-}" in
     start) start ;;
     stop) stop ;;
     test) tests ;;
+    mcp) (cd "$APP" && php bin/console cadenza:guest-agent "http://127.0.0.1:$APP_PORT") ;;
     reset) (cd "$APP" && printf 'yes\n' | php bin/console cadenza:reset "My site" --hard) ;;
-    *) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

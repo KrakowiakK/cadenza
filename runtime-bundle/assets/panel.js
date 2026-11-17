@@ -15,7 +15,7 @@ const I18N = {
         suggestions: ['A website for my café with a menu and opening hours', 'A portfolio for my travel photos', 'A page that explains photosynthesis for high school'],
         suggestionsSite: ['How does my site look on a phone?', 'What is waiting for my approval?', 'Add a little game for my visitors'],
         showSketch: 'Show sketch', approve: 'Approve', reject: 'Reject', revise: 'Ask for changes',
-        approved: 'Published', rejected: 'Rejected', recordsTitle: 'Entries waiting', otherSketches: 'Sketches from earlier conversations', more: 'more', recordNew: 'new', recordChanged: 'changed', recordRemoved: 'to remove', pending: 'Waiting for your decision', sketch: 'Sketch',
+        approved: 'Published', rejected: 'Rejected', recordsTitle: 'Entries waiting', otherSketches: 'Sketches waiting for you', more: 'more', recordNew: 'new', recordChanged: 'changed', recordRemoved: 'to remove', pending: 'Waiting for your decision', sketch: 'Sketch',
         added: 'added', changed: 'changed', removed: 'removed', pages: 'pages', themeChanged: 'theme', siteChanged: 'site',
         before: 'Before', after: 'After', published: 'Published — the change is live.', discarded: 'Draft rejected.',
         error: 'Something went wrong', harnessDown: 'Cannot reach the Cadenza studio (harness). Is it running?',
@@ -34,6 +34,7 @@ const I18N = {
         connectedOk: 'Connected', connectFailed: 'Connection failed',
         fromPhone: 'Photos from your phone', scanQr: 'Scan with your phone camera and pick photos from the gallery.', waitingPhone: 'Waiting for the phone…',
         phoneOpened: 'Phone connected — pick photos', receiving: 'Receiving', photos: 'photos', phoneDone: 'Photos received',
+        ownAgent: 'Your own agent (MCP)', ownAgentHint: 'Claude Code, Claude Desktop, Cursor: any MCP client can read this site and leave sketches. It cannot publish. Its sketches wait here for your decision.', copy: 'Copy', copied: 'Copied', otherClients: 'Other clients (JSON)', leftSketch: 'left a sketch for you', by: 'by',
         variants: 'Variants', choose: 'Choose this one', chosen: 'Chosen', open: 'Open',
         retry: 'Try again', modelBusy: 'The model did not answer in time.', fallbackUsed: 'Main model busy — answered by the fallback model',
         services: 'Connections', servicesHint: 'What Cadenza uses to think and to find pictures. Keys stay encrypted on this computer.',
@@ -57,7 +58,7 @@ const I18N = {
         suggestions: ['Strona mojej kawiarni z menu i godzinami otwarcia', 'Portfolio moich zdjęć z podróży', 'Strona, która wytłumaczy fotosyntezę na poziomie matury'],
         suggestionsSite: ['Jak moja strona wygląda na telefonie?', 'Co czeka na moje zatwierdzenie?', 'Dodaj małą grę dla odwiedzających'],
         showSketch: 'Pokaż szkic', approve: 'Zatwierdź', reject: 'Odrzuć', revise: 'Popraw',
-        approved: 'Opublikowano', rejected: 'Odrzucono', recordsTitle: 'Wpisy do zatwierdzenia', otherSketches: 'Szkice z wcześniejszych rozmów', more: 'więcej', recordNew: 'nowy', recordChanged: 'zmiana', recordRemoved: 'do usunięcia', pending: 'Czeka na Twoją decyzję', sketch: 'Szkic',
+        approved: 'Opublikowano', rejected: 'Odrzucono', recordsTitle: 'Wpisy do zatwierdzenia', otherSketches: 'Szkice, które czekają na Ciebie', more: 'więcej', recordNew: 'nowy', recordChanged: 'zmiana', recordRemoved: 'do usunięcia', pending: 'Czeka na Twoją decyzję', sketch: 'Szkic',
         added: 'nowe', changed: 'zmienione', removed: 'usunięte', pages: 'strony', themeChanged: 'motyw', siteChanged: 'ustawienia strony',
         before: 'Przed', after: 'Po', published: 'Opublikowano — zmiana jest na stronie.', discarded: 'Szkic odrzucony.',
         error: 'Coś poszło nie tak', harnessDown: 'Nie mogę połączyć się ze studiem Cadenzy (harness). Czy działa?',
@@ -76,6 +77,7 @@ const I18N = {
         connectedOk: 'Połączono', connectFailed: 'Nie udało się połączyć',
         fromPhone: 'Zdjęcia z telefonu', scanQr: 'Zeskanuj aparatem telefonu i wybierz zdjęcia z galerii.', waitingPhone: 'Czekam na telefon…',
         phoneOpened: 'Telefon połączony — wybierz zdjęcia', receiving: 'Odbieram', photos: 'zdjęć', phoneDone: 'Odebrano zdjęcia',
+        ownAgent: 'Twój własny agent (MCP)', ownAgentHint: 'Claude Code, Claude Desktop, Cursor: każdy klient MCP może czytać tę stronę i zostawiać szkice. Nie może publikować. Jego szkice czekają tutaj na Twoją decyzję.', copy: 'Kopiuj', copied: 'Skopiowano', otherClients: 'Inne klienty (JSON)', leftSketch: 'zostawił(a) dla Ciebie szkic', by: 'od',
         variants: 'Warianty', choose: 'Wybieram ten', chosen: 'Wybrany', open: 'Otwórz',
         retry: 'Spróbuj ponownie', modelBusy: 'Model nie odpowiedział na czas.', fallbackUsed: 'Główny model zajęty — odpowiada model zapasowy',
         services: 'Połączenia', servicesHint: 'Z czego Cadenza korzysta, żeby myśleć i szukać zdjęć. Klucze zostają zaszyfrowane na tym komputerze.',
@@ -95,6 +97,12 @@ const t = (key) => I18N[LANG][key] ?? I18N.en[key] ?? key;
 const meta = (name) => document.querySelector(`meta[name="${name}"]`)?.content ?? null;
 const HARNESS = meta('cz-harness');
 const TOKEN = meta('cz-token');
+// The address and the token of the "guest" MCP server: for an agent the owner brings along. It reads and sketches, no more.
+const GUEST_MCP = meta('cz-guest-mcp');
+const GUEST_TOKEN = document.querySelector('meta[name="cz-guest-mcp"]')?.dataset.token ?? '';
+const guestCommand = (kind) => kind === 'claude'
+    ? `claude mcp add --transport http cadenza-site ${GUEST_MCP} --header "Authorization: Bearer ${GUEST_TOKEN}"`
+    : JSON.stringify({ mcpServers: { 'cadenza-site': { type: 'http', url: GUEST_MCP, headers: { Authorization: `Bearer ${GUEST_TOKEN}` } } } }, null, 2);
 
 const store = {
     get(key, fallback = null) { try { return localStorage.getItem('cz.' + key) ?? fallback; } catch { return fallback; } },
@@ -162,6 +170,9 @@ class Studio {
         this.build();
         this.bind();
         this.setState(store.get('panel', 'closed'));
+        // A sketch may arrive from outside this conversation: an agent the owner connected over MCP.
+        clearInterval(window.czSketchPoll);
+        window.czSketchPoll = setInterval(() => { if (!this.busy && !document.hidden && this.root.isConnected) this.otherSketches(); }, 6000);
         this.loadHistory();
     }
 
@@ -529,6 +540,13 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         let data;
         try { data = await this.api('/api/sketches'); } catch { return; }
         const items = (data.items ?? []).filter((p) => !this.proposals.has(p.proposalId));
+        // Asked again every few seconds (an agent of the owner's own may leave a sketch at any time): redraw only on a change.
+        const key = items.map((p) => p.proposalId + ':' + p.summary).join('|');
+        if (key === this.otherKey && (this.root.querySelector('[data-other-sketches]') || !items.length)) return;
+        const fresh = items.filter((p) => p.author && this.otherKey !== undefined && !(this.otherSeen ?? new Set()).has(p.proposalId));
+        this.otherKey = key;
+        this.otherSeen = new Set(items.map((p) => p.proposalId));
+        if (fresh.length) { this.toast(`${fresh[0].author} ${t('leftSketch')}`); if (this.root.dataset.state !== 'open') this.setState('open'); }
         this.root.querySelector('[data-other-sketches]')?.remove();
         if (!items.length) return;
         const card = document.createElement('div');
@@ -539,7 +557,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         const rest = others - shown.length;
         card.innerHTML = `<div class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">${t('otherSketches')} · ${others}</div>
 <ul class="mt-2 space-y-1">${shown.map((p) => `<li class="flex items-center gap-1.5" data-draft="${p.draftId}">
-  <button type="button" data-do="show" class="min-w-0 flex-1 truncate rounded-md px-1 py-1 text-left hover:bg-background/70" title="${escapeHtml(p.summary)}">${escapeHtml(p.summary)}</button>
+  <button type="button" data-do="show" class="min-w-0 flex-1 rounded-md px-1 py-1 text-left hover:bg-background/70" title="${escapeHtml(p.summary)}"><span class="block truncate">${escapeHtml(p.summary)}</span>${p.author ? `<span class="flex items-center gap-1 text-[11px] text-violet-600">${icon('plug', 'size-3')}${t('by')} ${escapeHtml(p.author)} · MCP</span>` : ''}</button>
   <button type="button" data-do="approve" title="${t('approve')}" class="flex size-7 shrink-0 items-center justify-center rounded-md bg-foreground text-background hover:opacity-90">${icon('check', 'size-3.5')}</button>
   <button type="button" data-do="reject" title="${t('reject')}" class="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted">${icon('x', 'size-3.5')}</button>
 </li>`).join('')}</ul>${rest > 0 ? `<div class="mt-1 px-1 text-xs text-muted-foreground">+ ${rest} ${t('more')}</div>` : ''}`;
@@ -1140,7 +1158,19 @@ ${models.length || subscriptions.length ? `<div class="mt-3 text-xs font-semibol
                 : (env ? button(t('useThis'), `data-service-env="${id}" data-env="${escapeHtml(env.env)}"`) : button(t('connect'), `data-service="${id}" data-url="${escapeHtml(x.keyUrl)}"`, false));
             return row(`${x.connected ? `<span class="text-emerald-600">${icon('check', 'size-3.5 inline')}</span> ` : ''}${escapeHtml(x.label)}`, escapeHtml(x.connected ? origin(x.from) : x.for), actions);
         }).join('')}</div>
+${GUEST_MCP ? `<div class="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">${t('ownAgent')}</div>
+<p class="mt-0.5 text-xs text-muted-foreground">${t('ownAgentHint')}</p>
+<div class="mt-1.5 rounded-lg border border-border bg-muted/40 p-2">
+  <div class="flex items-center justify-between gap-2"><span class="text-xs font-medium">Claude Code</span>${button(t('copy'), 'data-copy="claude"', false)}</div>
+  <code class="mt-1 block max-h-16 overflow-hidden break-all font-mono text-[11px] leading-snug text-muted-foreground">${escapeHtml(guestCommand('claude'))}</code>
+  <div class="mt-2 flex items-center justify-between gap-2 border-t border-border pt-2"><span class="text-xs font-medium">${t('otherClients')}</span>${button(t('copy'), 'data-copy="json"', false)}</div>
+</div>` : ''}
 <p data-part="message" class="mt-2 hidden text-xs"></p>`;
+
+        card.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+            try { await navigator.clipboard.writeText(guestCommand(b.dataset.copy)); } catch { return; }
+            const label = b.textContent; b.textContent = t('copied'); setTimeout(() => { b.textContent = label; }, 1600);
+        }));
 
         const message = (text, ok) => {
             const p = card.querySelector('[data-part="message"]');

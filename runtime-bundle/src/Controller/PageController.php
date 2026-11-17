@@ -49,6 +49,7 @@ final class PageController
             $this->state->diff = Diff::between($document, $sketch);
             $this->state->draftId = $draftId;
             $this->state->draftSummary = $draft->getSummary();
+            $this->state->draftAuthor = $draft->getAuthor();
             $this->state->showBefore = 'before' === $request->query->get('cz_view');
             if (!$this->state->showBefore) {
                 $document = $sketch;

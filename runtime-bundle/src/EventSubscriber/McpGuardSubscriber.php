@@ -11,7 +11,9 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * The application's MCP servers answer only the Cadenza harness (or another client holding the token).
+ * The application's MCP servers answer only the Cadenza harness (or another client holding the token). The "guest"
+ * server has a token of its own, derived from the first: an agent the owner brings along can read the site and leave
+ * sketches there, and that token opens neither the studio's servers nor publishing.
  */
 final class McpGuardSubscriber
 {
@@ -19,6 +21,11 @@ final class McpGuardSubscriber
         #[Autowire('%cadenza.token%')]
         private readonly string $token,
     ) {
+    }
+
+    public static function guestToken(string $token): string
+    {
+        return 'czg_'.substr(hash_hmac('sha256', 'cadenza guest agent', $token), 0, 40);
     }
 
     #[AsEventListener(KernelEvents::REQUEST, priority: 250)]
@@ -29,7 +36,8 @@ final class McpGuardSubscriber
             return;
         }
         $given = $request->headers->get('X-Cadenza-Token') ?? preg_replace('/^Bearer\s+/i', '', (string) $request->headers->get('Authorization'));
-        if (!hash_equals($this->token, (string) $given)) {
+        $guest = str_starts_with($request->getPathInfo(), '/_cadenza/mcp/guest');
+        if (!hash_equals($this->token, (string) $given) && !($guest && hash_equals(self::guestToken($this->token), (string) $given))) {
             $event->setResponse(new JsonResponse(['error' => 'Invalid Cadenza token.'], 401));
         }
     }

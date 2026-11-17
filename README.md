@@ -33,6 +33,10 @@ agent writes).
    cloud models need 20–60 s for the three looks and a few minutes for a full page; paid or local fast models are quicker.
    Keep a look and the panel offers photos for the opening (from Wikimedia Commons; a free Pexels key in *Connections*
    gives stock-quality ones).
+4. **Bring your own agent (optional, one minute).** `./cadenza mcp` prints one line for Claude Code (and the JSON for
+   Claude Desktop, Cursor or any MCP client). Paste it, then ask your agent: *"Add a short FAQ before the contact form on
+   my site, as a sketch."* About 15 seconds later the sketch is waiting in the panel, signed with the agent's name. It
+   cannot publish; you approve or reject.
 
 Stuck? `./cadenza doctor` checks PHP, extensions, Composer, ports and Chrome in one go and says what to fix; `./cadenza stop` and `./cadenza start` restart both servers; `./cadenza reset` starts the site over; the full
 description is in [Quick start](#quick-start-5-minutes) and [Models](#models) below.
@@ -104,12 +108,21 @@ description is in [Quick start](#quick-start-5-minutes) and [Models](#models) be
   the owner adds guests (or tells the agent *“invite Kasia and Piotr…”*) and copies each one's personal sign-in link
   (Symfony login links: signed, expiring, no passwords). Strangers see a closed door that does not reveal what is
   behind it; a guest who lost the link asks for a new one by e-mail.
+- **Bring your own agent.** The site is an MCP server with three doors. The studio uses two (`agent`: read and draft;
+  `control`: publish after the owner's click). The third, `guest`, is for an agent the owner already has: Claude Code,
+  Claude Desktop, Cursor, anything that speaks MCP. *Connections* shows the line to paste (so does `./cadenza mcp`). The
+  guest gets a token of its own and five tools: read the outline, a page, a node, the editing guide, and
+  `draft_propose`. Its sketch shows up in the open panel within seconds, signed (*by Claude Code · MCP*), with the same
+  Before / After, Approve and Reject as any other. The guest token opens neither the other two servers nor the
+  visitors' answers, the members or the keys, and a runaway client can leave at most twelve sketches waiting.
 - **A dashboard for the owner** (grid icon in the panel): visits counted without cookies or personal data, answers to
   forms with places taken, recent changes, content, and the application's health — errors in the logs, whether the
   background worker is alive, jobs waiting or failed, imports, connected accounts. The agent reads the same numbers:
   *“How is the site doing?”*
 - **Self-aware.** The agent reads the app's logs and profiler through **Symfony AI Mate**; one broken block never takes
   a page down; a busy model hands over to a fallback model.
+
+![Claude Code left a sketch over MCP: it waits in the panel, signed, for the owner to approve](docs/img/own-agent.jpg)
 
 ![A spreadsheet became a shop: filter chips, search, a page per product](docs/img/collection-grid.jpg)
 
@@ -165,6 +178,7 @@ site: see [`docs/DEMO.md`](docs/DEMO.md).
 │  MCP client of the site ──────────────┐            SSE stream to the panel (trace, UI, cards) │
 └───────────────────────────────────────┼─────────────────────────────────────────────────────┘
                                         │ MCP over HTTP: server "agent" (read + drafts), "control" (publish)
+   Claude Code · Claude Desktop · Cursor ┼ MCP over HTTP: server "guest" (read + sketches, its own token)
 ┌───────────────────────────────────────▼──── demo-app/ — the owner's website ────────────────┐
 │  runtime-bundle/: page tree + operation language, drafts & versions, renderer (Twig          │
 │  Components, UX Toolkit), studio panel, MCP servers, media library, collections, connectors  │
@@ -177,7 +191,8 @@ library/sources/instagram — first block package (Composer, cadenza.json manife
   small operations (`node.insert`, `node.replace`, `theme.update` …) that are validated against the node catalogue.
   Replacing an element is one operation on one id.
 - **Two processes on purpose.** The studio is never modified by the agent, and the site's MCP servers separate what an
-  agent may do (`agent`: read, propose drafts) from what only the owner's approval does (`control`: publish).
+  agent may do (`agent`: read, propose drafts) from what only the owner's approval does (`control`: publish). An agent from
+  outside gets less still (`guest`): the split is by server and by token, so it holds whatever the model is told.
 - **Safety is code, not prompt.** Only the approve transition publishes; image props accept only the site's media
   library; a tool policy enforces “sketch first” and budgets; credentials of connected accounts are sealed with
   libsodium and never reach the model.
@@ -193,7 +208,7 @@ script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in th
 |---|---|
 | **Symfony AI Agent** + Toolbox events | the studio agent; `ToolCallRequested` enforces the tool policy and streams a live trace to the panel |
 | **Platform** (generic bridge, structured messages, images) | any OpenAI-compatible provider; vision for sketches and photos |
-| **MCP Bundle — servers** | the site exposes `agent` and `control` servers, the editing guide as an MCP **prompt**, the outline as a **resource** |
+| **MCP Bundle — servers** | the site exposes `agent`, `control` and `guest` servers (three registries, three levels of trust), the editing guide as an MCP **prompt**, the outline as a **resource** |
 | **MCP Bundle — client** | the studio drives the site only through MCP |
 | **Symfony AI Mate** | the agent reads the app's logs and profiler, even when the app does not boot |
 | **Messenger, Scheduler, Workflow** | imports and events (`MediaImported`, `FormSubmitted`); daily sync of connected accounts; the proposal state machine |
