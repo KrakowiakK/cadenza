@@ -73,7 +73,7 @@ final class ImageSearch
                 'action' => 'query', 'format' => 'json', 'generator' => 'search', 'gsrnamespace' => 6,
                 'gsrsearch' => $query.' filetype:bitmap', 'gsrlimit' => min(50, $count * 4),
                 'prop' => 'imageinfo', 'iiprop' => 'url|extmetadata|size|mime', 'iiurlwidth' => 800,
-                'iiextmetadatafilter' => 'Artist|LicenseShortName|LicenseUrl|ObjectName',
+                'iiextmetadatafilter' => 'Artist|LicenseShortName|LicenseUrl|ObjectName|ImageDescription|Categories',
             ],
         ])->toArray();
 
@@ -89,6 +89,10 @@ final class ImageSearch
                 continue;
             }
             $meta = $info['extmetadata'] ?? [];
+            // A short query ("yoga room" → "room") finds anything with the word: the photo must be about what was asked.
+            if (!self::isAbout($query, $page['title'].' '.($meta['ObjectName']['value'] ?? '').' '.($meta['ImageDescription']['value'] ?? '').' '.($meta['Categories']['value'] ?? ''))) {
+                continue;
+            }
             $out[] = [
                 'id' => 'wm-'.$page['pageid'],
                 'thumb' => $info['thumburl'],
@@ -109,6 +113,31 @@ final class ImageSearch
         }
 
         return $out;
+    }
+
+    /**
+     * True when at least 60% of the words of the query (words of four letters or more, not generic ones such as "photo")
+     * appear, as whole words, in the text that describes the picture. "room" does not match "showroom".
+     */
+    public static function isAbout(string $query, string $described): bool
+    {
+        $generic = ['photo', 'photos', 'picture', 'pictures', 'image', 'images', 'with', 'from', 'that', 'this', 'very', 'beautiful', 'nice', 'good', 'high', 'quality', 'free', 'stock'];
+        $words = array_values(array_unique(array_filter(
+            preg_split('/[^\p{L}]+/u', mb_strtolower(strip_tags($query))) ?: [],
+            static fn (string $w): bool => mb_strlen($w) >= 4 && !\in_array($w, $generic, true),
+        )));
+        if ([] === $words) {
+            return true;
+        }
+        $haystack = ' '.mb_strtolower(html_entity_decode(strip_tags(str_replace(['_', '-', '|'], ' ', $described)))).' ';
+        $hits = 0;
+        foreach ($words as $word) {
+            if (1 === preg_match('/(?<![\p{L}])'.preg_quote($word, '/').'s?(?![\p{L}])/u', $haystack)) {
+                ++$hits;
+            }
+        }
+
+        return $hits >= max(1, (int) ceil(\count($words) * 0.6));
     }
 
     private function pexels(string $query, int $count, string $orientation): array
