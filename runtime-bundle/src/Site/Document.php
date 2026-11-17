@@ -140,7 +140,7 @@ final class Document
             $members[$page['path']] = 'members' === ($page['access'] ?? 'public');
         }
         // A page in another language than the site's uses that language's own menu, or one made of its pages.
-        $explicit = null === $language || $language === substr((string) ($doc['language'] ?? 'pl'), 0, 2)
+        $explicit = null === $language || $language === substr((string) ($doc['language'] ?? 'en'), 0, 2)
             ? ($doc['nav']['items'] ?? null)
             : ($doc['nav']['byLanguage'][$language] ?? null);
         $items = \is_array($explicit)
@@ -159,7 +159,7 @@ final class Document
      */
     public static function pageLanguage(array $doc, array $page): string
     {
-        return substr((string) ($page['lang'] ?? $doc['language'] ?? 'pl'), 0, 2);
+        return substr((string) ($page['lang'] ?? $doc['language'] ?? 'en'), 0, 2);
     }
 
     /**

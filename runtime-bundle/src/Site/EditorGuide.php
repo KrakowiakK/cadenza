@@ -42,7 +42,7 @@ final class EditorGuide
             - {"op": "node.remove", "id": "<node id>"}                                  (or "ids": [...])
             - {"op": "theme.update", "direction": "editorial"}   (best first step for a new site: choose a design direction)
             - {"op": "theme.update", "preset": "warm", "mode": "light", "fontHeading": "Fraunces", "fontBody": "Inter", "radius": "lg", "tokens": {"primary": "#b45309"}}
-            - {"op": "site.update", "name": "Café Aroma", "tagline": "...", "language": "pl", "announcement": {"text": "Closed on Monday", "href": null, "until": "2027-05-01"} or null, "footer": "...", "nav": [{"label": "Menu", "href": "/menu"}] or null for automatic}
+            - {"op": "site.update", "name": "Café Aroma", "tagline": "...", "language": "en", "announcement": {"text": "Closed on Monday", "href": null, "until": "2027-05-01"} or null, "footer": "...", "nav": [{"label": "Menu", "href": "/menu"}] or null for automatic}
             - {"op": "site.restore", "version": 14}   (the whole site as it was in published version 14 — to undo; the history is in site_overview)
             - {"op": "node.update", "id": "nab12c", "props": {"hidden": true}}   (any block: hide it for a while, visitors do not see it; false shows it again)
 
@@ -59,6 +59,9 @@ final class EditorGuide
             - Hero: "split" or "image" when there is a good photo, "typographic" when there is none, "collage" for
               several photos. Keep titles short and specific; one idea per section.
             - Real, specific copy in the language of the site; never lorem ipsum.
+            - On the first build of a site, always set its language with site.update ("language": a two-letter code, the language the
+              owner writes in): the site's own texts (filter chips, search, forms, countdowns, buttons) follow it, and without it they
+              default to English.
             - To link to a section, use its node id as an anchor: "#nabc123" on the same page, "/page#nabc123" elsewhere.
             - Images: image props accept only paths from the site's media library (/media/…); leave them empty until
               images are chosen. Use a "stub" node for anything that needs a capability that does not exist yet.
