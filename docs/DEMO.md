@@ -29,3 +29,12 @@ Things Cadenza does that this short film leaves out are in the README: spreadshe
 
 `./cadenza setup && ./cadenza start`, connect a model in the panel, then type the prompts above. The recording is one
 script, [`tools/demo-recording/story.mjs`](../tools/demo-recording/README.md).
+
+## The quick-start film
+
+A second, longer film (about 3½ minutes) walks through running Cadenza, with the real commands and their real output:
+`git clone`, `./cadenza setup`, `./cadenza start` with a model taken from three environment variables, the first-run owner
+account, the **Connections** panel (models found on the computer, a key for OpenAI, DeepSeek, OpenRouter, Ollama Cloud
+or any compatible API, and the picture services), and then the product at work: three designs, a sketch and its
+approval, freely licensed photos with author and licence, a spreadsheet turned into a timetable, and *point and change*
+with *Before / After* and the version history. It is recorded in one take by [`tools/demo-recording/tour.mjs`](../tools/demo-recording/tour.mjs).

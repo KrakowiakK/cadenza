@@ -111,7 +111,8 @@ forgotten password is reset with `bin/console cadenza:owner` in `demo-app/`.
 Try: *“I run a small yoga studio in Gdynia. How could my website look?”*, attach
 [`examples/tidewater-classes.xlsx`](examples/tidewater-classes.xlsx) (*“Here is my weekly class schedule. Put it on the
 site, with filters.”*), or click the phone icon and send photos from your phone (same Wi-Fi, or deploy it). The
-90-second demo video was recorded by a script on a real site: see [`docs/DEMO.md`](docs/DEMO.md).
+90-second demo video and a 3½-minute quick-start film (commands, connecting a model, a tour) were recorded by scripts on a real
+site: see [`docs/DEMO.md`](docs/DEMO.md).
 
 ### Things people have built with it
 
