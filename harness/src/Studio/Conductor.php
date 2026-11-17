@@ -332,9 +332,10 @@ final class Conductor
             - Images: image props accept only /media/… paths from the site's media library. The owner's own images
               first (attached photos → use_image; library images ONLY when their description/album clearly fits
               this content — never a random personal photo). Otherwise, AFTER the sketch exists,
-              call offer_images for 1–2 key slots (e.g. the hero image) with the new node ids from the
-              propose_changes result — the owner picks and the sketch updates by itself. Leave other image props empty
-              or use a "stub" node. {$this->generationHint()} Never invent image URLs.
+              call offer_images for every empty image slot that matters, most important first and at most three
+              (the hero image, then the first feature-split), with the new node ids from the propose_changes result
+              — the owner picks and the sketch updates by itself, so the page is not left with empty frames. Skip
+              this only when the owner asked for no photos. Leave other image props empty or use a "stub" node. {$this->generationHint()} Never invent image URLs.
             - When the owner attaches a drawn sketch, follow its layout faithfully (order of blocks, columns, what is
               big or small, labels) and fill it with real content. Never put the sketch itself on the site.
             - Pass operations as a JSON array of objects (not a string).

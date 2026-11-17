@@ -9,6 +9,7 @@ const I18N = {
         placeholderPicked: 'What should happen to the selection?',
         send: 'Send', open: 'Open panel', pick: 'Point at an element', picking: 'Click elements on the page, Esc to finish',
         newChat: 'New conversation', phoneView: 'On a phone', collapse: 'Collapse to bar', hide: 'Hide', show: 'Show Cadenza',
+        slow: 'a full page can take a minute or two',
         idle: 'Ready', thinking: 'Thinking', working: 'Working', waiting: 'Waiting for you',
         hello: 'Hi! I am Cadenza. Tell me what your site should be — or point at anything on the page and tell me what to change.',
         suggestions: ['A website for my café with a menu and opening hours', 'A portfolio for my travel photos', 'A page that explains photosynthesis for high school'],
@@ -49,6 +50,7 @@ const I18N = {
         placeholderPicked: 'Co zrobić z zaznaczeniem?',
         send: 'Wyślij', open: 'Otwórz panel', pick: 'Wskaż element', picking: 'Klikaj elementy na stronie, Esc kończy',
         newChat: 'Nowa rozmowa', phoneView: 'Na telefonie', collapse: 'Zwiń do paska', hide: 'Schowaj', show: 'Pokaż Cadenzę',
+        slow: 'cała strona potrafi zająć minutę lub dwie',
         idle: 'Gotowa', thinking: 'Myślę', working: 'Pracuję', waiting: 'Czekam na Ciebie',
         hello: 'Cześć! Jestem Cadenza. Opowiedz, jaka ma być Twoja strona — albo wskaż coś na stronie i powiedz, co zmienić.',
         suggestions: ['Strona mojej kawiarni z menu i godzinami otwarcia', 'Portfolio moich zdjęć z podróży', 'Strona, która wytłumaczy fotosyntezę na poziomie matury'],
@@ -338,7 +340,9 @@ class Studio {
 
     setStatus(kind, text = null) {
         const dot = { idle: 'bg-emerald-500', thinking: 'bg-violet-500 animate-pulse', working: 'bg-violet-500 animate-pulse', waiting: 'bg-amber-500 animate-pulse', error: 'bg-rose-500' }[kind] ?? 'bg-muted-foreground';
-        const label = escapeHtml(text ?? t(kind));
+        this.lastStatus = [kind, text];
+        const slow = this.slowHint && (kind === 'thinking' || kind === 'working') ? ` · ${t('slow')}` : '';
+        const label = escapeHtml(text ?? t(kind)) + escapeHtml(slow);
         this.el('status').innerHTML = `<span class="size-1.5 rounded-full ${dot}"></span>${label}`;
         const bar = this.el('bar-status');
         bar.innerHTML = `<span class="size-1.5 rounded-full ${dot}"></span>${label}`;
@@ -644,7 +648,10 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         this.renderAttachments();
         if (this.picking) this.togglePicker(false);
         this.busy = true;
+        this.slowHint = false;
         this.setStatus('thinking');
+        // a slow model (a free one, a long page) should not look like a hang
+        const slowTimer = setTimeout(() => { if (this.busy) { this.slowHint = true; this.setStatus(...(this.lastStatus ?? ['working'])); } }, 25000);
         const turn = this.addAssistant();
         const url = new URL(location.href);
 
@@ -667,6 +674,8 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
             box.classList.remove('hidden');
             box.innerHTML = `<span class="text-rose-600">${escapeHtml(e.message === 'Failed to fetch' ? t('harnessDown') : t('error') + ': ' + e.message)}</span>`;
         } finally {
+            clearTimeout(slowTimer);
+            this.slowHint = false;
             turn.part('thinking')?.remove();
             this.busy = false;
             this.refreshWaiting();
