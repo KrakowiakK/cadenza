@@ -27,6 +27,11 @@ body { font-family: var(--cz-font-body); }
     color: var(--muted-foreground);
 }
 
+/* Notes to the owner never reach a visitor: empty slots, placeholders, and a section that holds only placeholders. */
+.cz-visitor .cz-empty-slot,
+.cz-visitor .cz-node[data-node-type="stub"],
+.cz-visitor .cz-node[data-node-type="section"]:has(.cz-node[data-node-type="stub"]):not(:has(.cz-node:not([data-node-type="stub"]))) { display: none; }
+
 /* Placeholder (stub) */
 .cz-stub-shimmer {
     background: linear-gradient(100deg, transparent 20%, color-mix(in oklch, var(--foreground) 6%, transparent) 50%, transparent 80%);

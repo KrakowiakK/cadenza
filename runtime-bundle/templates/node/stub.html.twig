@@ -1,6 +1,11 @@
+{#- A placeholder is a note to the owner: visitors never see it (a section that holds nothing else is hidden too). -#}
+{%- if state.owner -%}
 {%- set heights = {sm: 'min-h-24', md: 'min-h-44', lg: 'min-h-72'} -%}
+{%- set ownerOnly = {pl: 'Tę ramkę widzisz tylko Ty. Odwiedzający nie zobaczą tu nic.', de: 'Diesen Rahmen sehen nur Sie. Besucher sehen hier nichts.'}[state.language] ?? 'Only you see this frame. Visitors see nothing here.' -%}
 <div class="cz-stub relative flex {{ heights[props.height] }} flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-dashed border-border bg-muted/40 p-6 text-center">
     <div class="cz-stub-shimmer absolute inset-0"></div>
     <div class="relative flex items-center gap-2 font-semibold">{{ cadenza_icon('sparkles', 'size-4 text-primary') }}{{ props.label }}</div>
     {%- if props.description %}<p class="relative max-w-md text-sm text-muted-foreground">{{ props.description }}</p>{% endif %}
+    <p class="relative text-xs text-muted-foreground/70">{{ ownerOnly }}</p>
 </div>
+{%- endif -%}
