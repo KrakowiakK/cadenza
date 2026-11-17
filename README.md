@@ -1,5 +1,7 @@
 # Cadenza — your Symfony app improvises
 
+[![tests](https://github.com/KrakowiakK/cadenza/actions/workflows/tests.yml/badge.svg)](https://github.com/KrakowiakK/cadenza/actions/workflows/tests.yml)
+
 **A living Symfony website that its non-technical owner shapes by talking to it.** Bring your material — a
 spreadsheet, the photos on your phone, a drawn sketch, or just an idea — and Cadenza proposes a page. Every change
 appears first as a **sketch on the live page**; nothing goes live until you approve it. Built for the
@@ -189,7 +191,7 @@ site: see [`docs/DEMO.md`](docs/DEMO.md).
 | “Check my site: is anything broken or missing?” | a real check (links, placeholders, descriptions, contact) and one sketch that fixes what needs no facts |
 | *(in Claude Code, after `./cadenza mcp`)* “Add a short FAQ before the contact form on my site, as a sketch.” | Claude Code reads the site over MCP and leaves a signed sketch; it appears in the open panel and waits for the owner |
 
-`./cadenza test` runs all test suites; `./cadenza mcp` prints how to connect your own agent; `./cadenza doctor` checks this computer; `./cadenza reset` starts the site over; `./cadenza stop`.
+`./cadenza test` runs all test suites (CI runs them, after `./cadenza setup` on a clean machine, on PHP 8.4 and 8.5); `./cadenza mcp` prints how to connect your own agent; `./cadenza doctor` checks this computer; `./cadenza reset` starts the site over; `./cadenza stop`.
 
 ## Architecture
 
