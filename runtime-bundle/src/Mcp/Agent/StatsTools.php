@@ -13,8 +13,10 @@ use Mcp\Schema\ToolAnnotations;
  */
 final class StatsTools
 {
-    public function __construct(private readonly SiteStats $stats)
-    {
+    public function __construct(
+        private readonly SiteStats $stats,
+        private readonly \Cadenza\Runtime\Ask\VisitorQuestions $questions,
+    ) {
     }
 
     /**
@@ -27,5 +29,14 @@ final class StatsTools
         $visits['days'] = array_values(array_filter($visits['days'], static fn (array $d): bool => $d['views'] > 0));
 
         return ['visits' => $visits, 'content' => $this->stats->content(), 'health' => $this->stats->health(), 'dashboard' => '/_cadenza/dashboard'];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[McpTool(name: 'visitor_questions', description: 'What visitors asked the site\'s assistant (the "ask" block): totals, the newest questions, and "missing": the ones the site\'s content could not answer. Those show what to add to the site.', annotations: new ToolAnnotations(readOnlyHint: true))]
+    public function visitorQuestions(int $limit = 30): array
+    {
+        return $this->questions->summary(max(1, min(100, $limit)));
     }
 }

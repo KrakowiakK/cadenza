@@ -28,6 +28,7 @@ final class DashboardController
         private readonly RenderState $state,
         private readonly Environment $twig,
         private readonly \Cadenza\Runtime\Account\Members $members,
+        private readonly \Cadenza\Runtime\Ask\VisitorQuestions $questions,
     ) {
     }
 
@@ -47,6 +48,8 @@ final class DashboardController
             'content' => $this->stats->content(),
             'forms' => $this->stats->forms(),
             'health' => $this->stats->health(),
+            'questions' => $this->questions->summary(8),
+            'askEnabled' => AskController::enabled($this->state->document),
             'members' => $this->members->all(),
             'membersPages' => array_values(array_filter($this->state->document['pages'], static fn (array $p): bool => 'members' === ($p['access'] ?? 'public'))),
         ]));

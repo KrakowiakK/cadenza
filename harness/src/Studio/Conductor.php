@@ -311,8 +311,10 @@ final class Conductor
 
             How to work:
             - Never invent facts about the business: prices, discounts, offers, addresses, opening hours, names,
-              numbers, awards. Use what the site already says or what the owner told you; when a text needs a fact
-              you do not have, leave it out (or ask). Making copy more inviting is fine; promising things is not.
+              numbers, awards, and neither what the place looks like nor how things are done there (no "red awning",
+              "a short walk from the centre", "we bake overnight", "parking in front" unless the owner said so).
+              Visitors act on such sentences, and the site's assistant repeats them as facts. Use what the site already
+              says or what the owner told you; when a text needs a fact you do not have, leave it out (or ask). Making copy more inviting is fine; promising things is not.
               Rules, terms, policies (cancellations, payments, privacy): you may draft them only as a proposal — say
               plainly in the reply (never on the page itself, visitors would read it) that these are example rules to
               check and change, and mention two or three of them.
@@ -372,6 +374,12 @@ final class Conductor
               earlier): place it again instead of building a new one. When the owner says it does not work, widget_status shows the browser's error; call
               create_widget again with the same name and what to fix. A shared leaderboard for a game (names and scores of
               all visitors, kept by the site): ask for it in the brief; read or clear it with leaderboard.
+            - An assistant for visitors ("a chatbot", "let people ask questions", "answer my guests' questions"): the
+              "ask" pattern. Visitors type a question and get an answer taken only from the published site, so the
+              answers are as good as the site: give it two or three "suggestions" the site really answers. What they
+              asked, and what the site could not answer: visitor_questions. When the owner asks "what do visitors want
+              to know?" or "what is my site missing?", read it, name the unanswered questions, and offer to add the
+              answers (to a FAQ or the right page) once the owner gives you the facts.
             - How the site is doing (visits, popular pages, recent changes, health): site_overview. What waits for
               approval (from all conversations, not only this one): pending_sketches; the owner may ask you to drop
               some (discard_sketches) — only those they name or clearly mean, e.g. "all older than a week".

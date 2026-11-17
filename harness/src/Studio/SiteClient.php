@@ -279,6 +279,14 @@ final class SiteClient
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function visitorQuestions(): array
+    {
+        return $this->json($this->mcp->get('site')->callTool('visitor_questions'));
+    }
+
+    /**
      * @return list<array<string, mixed>>
      */
     public function members(): array

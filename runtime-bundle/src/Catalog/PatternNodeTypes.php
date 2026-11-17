@@ -154,6 +154,11 @@ final class PatternNodeTypes implements NodeTypeProviderInterface
             ], 'default' => []],
         ]);
 
+        yield new NodeType('ask', 'Ask the site', 'Pattern: an assistant for visitors. They type a question in their own words ("Are you open on Sunday?", "Is there parking?", "Do you have anything vegan?") and get a short answer taken only from what this site says: its pages and collections, nothing invented. Questions the site could not answer are kept for the owner (visitor_questions) and show what the site is missing. One per site is enough; put it where people look for help: near the contact form, the FAQ, or at the end of the home page.', 'pattern', $head + [
+            'placeholder' => ['type' => 'string', 'default' => null, 'description' => 'hint inside the box, e.g. "Ask about opening hours, prices, parking…"'],
+            'suggestions' => ['type' => 'list', 'of' => 'string', 'default' => [], 'description' => 'two or three example questions the site can really answer, shown as chips'],
+        ]);
+
         yield new NodeType('form', 'Form', 'Pattern: a form visitors fill in — RSVP to a wedding or party, sign-up for a workshop or class, an order, a booking request, a contact message, a survey. Answers are stored on the site; the owner sees them on the page, downloads them as Excel and can ask you about them. With capacity the form counts places (peopleField = label of a number field like "Number of guests") and closes when full; with "limit" on a select/radio field every option (a date, a class, a slot) has its own places.', 'pattern', $head + [
             'fields' => ['type' => 'list', 'items' => [
                 'label' => ['type' => 'string', 'required' => true],

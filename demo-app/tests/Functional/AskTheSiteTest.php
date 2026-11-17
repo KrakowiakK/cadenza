@@ -1,0 +1,93 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Functional;
+
+use Cadenza\Runtime\Ask\VisitorQuestions;
+use Cadenza\Runtime\Draft\SiteManager;
+use Cadenza\Runtime\Site\Document;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\SchemaTool;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Response\MockResponse;
+
+/**
+ * The visitors' assistant: it answers only while the owner keeps an "ask" block on the site, the model gets the
+ * published text and nothing else, and what the site could not answer is kept for the owner.
+ */
+final class AskTheSiteTest extends WebTestCase
+{
+    public function testVisitorsAskAndTheOwnerLearnsWhatIsMissing(): void
+    {
+        $client = static::createClient();
+        $client->disableReboot();
+        $container = static::getContainer();
+        $em = $container->get(EntityManagerInterface::class);
+        $tool = new SchemaTool($em);
+        $tool->dropSchema($em->getMetadataFactory()->getAllMetadata());
+        $tool->createSchema($em->getMetadataFactory()->getAllMetadata());
+        foreach (['limiter.cadenza_ask' => '127.0.0.1', 'limiter.cadenza_ask_site' => 'site'] as $limiter => $key) {
+            $container->get($limiter)->create($key)->reset();
+        }
+
+        $sent = [];
+        $container->set('http_client', new MockHttpClient(static function (string $method, string $url, array $options) use (&$sent): MockResponse {
+            $body = json_decode((string) $options['body'], true);
+            $sent[] = ['url' => $url, 'body' => $body, 'headers' => $options['normalized_headers'] ?? []];
+
+            return new MockResponse((string) json_encode(str_contains($body['question'], 'Sunday')
+                ? ['answered' => true, 'answer' => 'No, we are closed on Sunday.']
+                : ['answered' => false, 'answer' => null]), ['response_headers' => ['content-type' => 'application/json']]);
+        }));
+
+        $site = $container->get(SiteManager::class);
+        $document = Document::empty('Hearth');
+        $document['pages'][] = ['id' => 'phome01', 'path' => '/', 'title' => 'Hearth', 'description' => null, 'nodes' => [
+            ['id' => 'ntext01', 'type' => 'text', 'props' => ['text' => 'Open Tuesday to Saturday. Closed on Sunday.']],
+        ]];
+        $document['pages'][] = ['id' => 'pteam01', 'path' => '/team', 'title' => 'Staff', 'description' => null, 'access' => 'members', 'nodes' => [
+            ['id' => 'ntext02', 'type' => 'text', 'props' => ['text' => 'The alarm code is 4711.']],
+        ]];
+        $site->initialise($document, 'First version');
+        $ask = static function (string $question) use ($client): array {
+            $client->request('POST', '/_cadenza/ask', [], [], ['CONTENT_TYPE' => 'application/json'], (string) json_encode(['question' => $question, 'path' => '/']));
+
+            return [$client->getResponse()->getStatusCode(), json_decode((string) $client->getResponse()->getContent(), true)];
+        };
+
+        // No "ask" block on the published site: the door does not exist, and no model is called.
+        self::assertSame(404, $ask('Are you open on Sunday?')[0]);
+        self::assertSame([], $sent);
+
+        $draft = $site->propose([['op' => 'node.insert', 'page' => '/', 'node' => ['type' => 'ask', 'props' => ['title' => 'Ask us', 'suggestions' => ['Are you open on Sunday?']]]]], 'An assistant')->draft;
+        $site->publish((int) $draft->getId());
+        $html = (string) $client->request('GET', '/')->html();
+        self::assertStringContainsString('data-cz-ask', $html);
+        self::assertStringContainsString('Are you open on Sunday?', $html);
+
+        self::assertSame(422, $ask('?')[0]);
+        [$status, $answer] = $ask('Are you open on Sunday?');
+        self::assertSame(200, $status);
+        self::assertSame('No, we are closed on Sunday.', $answer['answer']);
+        self::assertStringEndsWith('/api/answer', $sent[0]['url']);
+        self::assertStringContainsString('Closed on Sunday', $sent[0]['body']['knowledge']);
+        self::assertStringNotContainsString('4711', $sent[0]['body']['knowledge'], 'pages for invited people never reach the public assistant');
+
+        [, $nothing] = $ask('Is there parking?');
+        self::assertFalse($nothing['answered']);
+        self::assertNull($nothing['answer']);
+
+        $summary = $container->get(VisitorQuestions::class)->summary();
+        self::assertSame(2, $summary['total']);
+        self::assertSame(['Is there parking?'], array_column($summary['missing'], 'question'));
+
+        // A person asks a few questions; a script that asks dozens is stopped before it costs the owner money.
+        $last = 200;
+        for ($i = 0; $i < 8 && 200 === $last; ++$i) {
+            $last = $ask('Is there parking?')[0];
+        }
+        self::assertSame(429, $last);
+    }
+}

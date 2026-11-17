@@ -93,6 +93,53 @@ document.addEventListener('click', (e) => {
 });
 
 /*
+ * The visitors' assistant: a question in their own words, an answer taken only from what the site says.
+ */
+async function askSite(box, question) {
+    const thread = box.querySelector('[data-cz-ask-thread]');
+    const form = box.querySelector('form');
+    const input = form.querySelector('input');
+    const button = form.querySelector('[type=submit]');
+    const bubble = (text, mine) => {
+        const el = document.createElement('div');
+        el.className = mine
+            ? 'ml-auto max-w-[85%] rounded-[calc(var(--radius)*1.2)] bg-primary px-4 py-2.5 text-primary-foreground'
+            : 'cz-card mr-auto max-w-[92%] whitespace-pre-line px-5 py-4 leading-relaxed';
+        el.textContent = text;
+        thread.append(el);
+        return el;
+    };
+    bubble(question, true);
+    const answer = bubble(box.dataset.thinking, false);
+    answer.classList.add('animate-pulse', 'opacity-70');
+    input.value = '';
+    input.disabled = button.disabled = true;
+    let text = box.dataset.busy;
+    try {
+        const response = await fetch('/_cadenza/ask', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ question, path: location.pathname }) });
+        const result = await response.json().catch(() => ({}));
+        if (result.ok) text = result.answered ? result.answer : box.dataset.none;
+        else if (result.error === 'too_many') text = box.dataset.tooMany;
+        else if (result.error === 'off') text = box.dataset.off;
+    } catch {}
+    answer.classList.remove('animate-pulse', 'opacity-70');
+    answer.textContent = text;
+    input.disabled = button.disabled = false;
+    answer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+document.addEventListener('submit', (e) => {
+    const box = e.target.closest('[data-cz-ask]');
+    if (!box) return;
+    e.preventDefault();
+    const question = e.target.querySelector('input').value.trim();
+    if (question.length >= 3) askSite(box, question);
+});
+document.addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-cz-ask-suggestion]');
+    if (chip && !chip.closest('[data-cz-ask]').querySelector('input').disabled) askSite(chip.closest('[data-cz-ask]'), chip.textContent.trim());
+});
+
+/*
  * Forms: send without leaving the page, show what is missing next to the field, then the thank-you note.
  */
 const formMessages = {

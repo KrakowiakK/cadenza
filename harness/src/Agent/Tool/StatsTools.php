@@ -8,6 +8,7 @@ use App\Studio\SiteClient;
 use Symfony\AI\Agent\Toolbox\Attribute\AsTool;
 
 #[AsTool('site_overview', 'The owner\'s dashboard as numbers: visits (this week, the week before, per day, most visited pages), content, recent changes and whether the application is healthy. Use it when the owner asks how the site is doing, how many people visited, what changed lately, or whether everything works.', method: 'read')]
+#[AsTool('visitor_questions', 'What visitors asked the assistant on the site (the "ask" block), and above all the questions the site could not answer. Use it when the owner asks what visitors want to know, what is missing from the site, or what to put in a FAQ. Then offer to add the missing answers: ask the owner for the facts (never invent them) and sketch them into the page.', method: 'questions')]
 final class StatsTools
 {
     public function __construct(private readonly SiteClient $site)
@@ -32,6 +33,27 @@ final class StatsTools
             \sprintf('Health: %s; %d errors in logs in 24 h%s; jobs waiting %s, failed %s.', $h['status'], $h['errors'], $h['lastErrors'] ? ' (latest: '.$h['lastErrors'][0]['message'].')' : '', $h['queued'] ?? '?', $h['failed'] ?? '?'),
             'The owner can open the dashboard from the panel (grid icon) or at /_cadenza/dashboard.',
         ];
+
+        return implode("\n", $out);
+    }
+
+    public function questions(): string
+    {
+        $q = $this->site->visitorQuestions();
+        if (!isset($q['total'])) {
+            return 'Cannot read the visitors\' questions right now.';
+        }
+        if (0 === $q['total']) {
+            return 'No visitor has asked anything yet. (The assistant answers only where an "ask" block is on a published page.)';
+        }
+        $line = static fn (array $x): string => \sprintf('- "%s" (%s, on %s)', $x['question'], substr((string) $x['at'], 0, 10), $x['page']);
+        $out = [\sprintf('%d questions so far, %d in the last 7 days; the site could not answer %d of them.', $q['total'], $q['week'], $q['unanswered'])];
+        if ([] !== $q['missing']) {
+            $out[] = 'NOT ANSWERED by the site (what visitors look for and do not find):';
+            array_push($out, ...array_map($line, \array_slice($q['missing'], 0, 20)));
+        }
+        $out[] = 'Newest questions:';
+        array_push($out, ...array_map(static fn (array $x): string => $line($x).($x['answered'] ? '' : ' — no answer'), \array_slice($q['recent'], 0, 15)));
 
         return implode("\n", $out);
     }

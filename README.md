@@ -68,6 +68,13 @@ description is in [Quick start](#quick-start-5-minutes) and [Models](#models) be
     the form's own fields, stored, and announced as a `FormSubmitted` event (optional e-mail to the owner). The owner sees
     them on the page — only they do — downloads them as Excel, or simply asks: *“How many guests are coming, how many
     vegetarian meals, who has allergies?”*
+  - *An assistant for visitors.* *"Add an assistant that answers my guests' questions."* Visitors type a question in
+    their own words (in any language) and get a short answer in about a second, taken only from what the published site
+    says: the model receives that text and the question, no tools, nothing of the owner's, and pages for invited people
+    are left out. What the site could not answer is kept: the dashboard lists it, and *"What do visitors ask that my
+    site does not answer?"* gets the list from the agent, which then asks the owner for the facts and sketches them in.
+    The site learns from its visitors, and the owner still approves every word. Rate limits per visitor and per day
+    keep a script from spending the owner's model budget.
   - *Countdown* to an event with an *Add to calendar* file, and an *announcement bar* that hides itself after a date.
   - *Maps*: “our trips” drawn from the GPS of the owner's phone photos as a route in time order, or pins for addresses
     (venues, shops) located automatically.
@@ -123,6 +130,8 @@ description is in [Quick start](#quick-start-5-minutes) and [Models](#models) be
   a page down; a busy model hands over to a fallback model.
 
 ![Claude Code left a sketch over MCP: it waits in the panel, signed, for the owner to approve](docs/img/own-agent.jpg)
+
+![A visitor asks in their own words; the answer comes only from what the site says](docs/img/ask-the-site.jpg)
 
 ![A spreadsheet became a shop: filter chips, search, a page per product](docs/img/collection-grid.jpg)
 
@@ -207,7 +216,7 @@ script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in th
 | Piece | Used for |
 |---|---|
 | **Symfony AI Agent** + Toolbox events | the studio agent; `ToolCallRequested` enforces the tool policy and streams a live trace to the panel |
-| **Platform** (generic bridge, structured messages, images) | any OpenAI-compatible provider; vision for sketches and photos |
+| **Platform** (generic bridge, structured messages, images) | any OpenAI-compatible provider; vision for sketches and photos; one-shot calls without tools for translations and for the visitors' assistant |
 | **MCP Bundle — servers** | the site exposes `agent`, `control` and `guest` servers (three registries, three levels of trust), the editing guide as an MCP **prompt**, the outline as a **resource** |
 | **MCP Bundle — client** | the studio drives the site only through MCP |
 | **Symfony AI Mate** | the agent reads the app's logs and profiler, even when the app does not boot |
@@ -215,7 +224,7 @@ script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in th
 | **Security, Translation** | the owner's sign-in (form login, login throttling, remember-me, stateless CSRF), first-run setup; members' passwordless login links; texts in the site's language |
 | **Twig Sandbox, HtmlSanitizer** | blocks the agent writes itself: allow-listed Twig in an isolated environment, sanitised output |
 | **Panther, Process** | the agent tries the games and animations it wrote in a headless Chrome before the owner sees them |
-| **RateLimiter, Mailer** | visitors' forms: a sliding window per address against bots, an optional note to the owner |
+| **RateLimiter, Mailer** | visitors' forms and the visitors' assistant: a sliding window per address against bots, a daily budget of model calls, an optional note to the owner |
 | **UX Toolkit (shadcn), Twig/Live Components, Turbo, Icons** | patterns, the panel, View Transitions between versions |
 | **Doctrine, Uid, HttpClient, PhpSpreadsheet** | drafts and versions, media, collections; spreadsheets in (collections) and out (form answers) |
 | **AssetMapper (importmap)** | Leaflet for maps, loaded only on pages that have one; three.js, Chart.js, Matter.js for widgets, served to their sandbox by the site — no Node, no build step for JS |
@@ -350,6 +359,9 @@ examples/                sample files to try
 - One owner account per site (Symfony Security: form login with CSRF, throttling, remember-me); run behind HTTPS
   before exposing it. The studio talks to the site with a shared token kept in `.env.local`.
 - Instagram Login needs a Meta app and a Business/Creator account; the export ZIP works for everyone.
+- The visitors' assistant answers from the site's text as one prompt (about 24 000 characters): right for a small
+  site, not a search engine for a large one. It needs the studio running, each question is one model call, and the
+  questions are stored for the owner (they can contain what a visitor typed about themselves).
 - Maps use OpenStreetMap tiles and Nominatim (fine for a small site; a busy one should use its own tile/geocoding
   provider). Form answers can contain visitors' personal data: the agent reads them only when the owner asks.
 

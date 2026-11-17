@@ -1,0 +1,21 @@
+{#- The visitors' assistant: a question in their own words, an answer taken only from what the published site says. -#}
+{%- set L = {
+    pl: {placeholder: 'Zapytaj o cokolwiek, co dotyczy tej strony…', ask: 'Zapytaj', thinking: 'Szukam odpowiedzi na stronie…', none: 'Tego nie ma na tej stronie. Napisz do nas, chętnie odpowiemy.', busy: 'Asystent chwilowo nie odpowiada. Spróbuj za chwilę.', too_many: 'Za dużo pytań naraz. Spróbuj za kilka minut.', note: 'Odpowiedzi pochodzą tylko z treści tej strony.', sketch: 'Asystent zacznie odpowiadać po opublikowaniu szkicu.'},
+    de: {placeholder: 'Fragen Sie etwas zu dieser Website…', ask: 'Fragen', thinking: 'Ich suche die Antwort auf der Website…', none: 'Das steht nicht auf dieser Website. Schreiben Sie uns, wir antworten gern.', busy: 'Der Assistent antwortet gerade nicht. Bitte gleich noch einmal versuchen.', too_many: 'Zu viele Fragen auf einmal. Bitte in ein paar Minuten noch einmal.', note: 'Die Antworten stammen nur aus dem Inhalt dieser Website.', sketch: 'Der Assistent antwortet, sobald die Skizze veröffentlicht ist.'},
+}[cadenza_state().language] ?? {placeholder: 'Ask anything about this site…', ask: 'Ask', thinking: 'Looking for the answer on this site…', none: 'This site does not say. Send us a message and we will gladly answer.', busy: 'The assistant is not answering right now. Please try again in a moment.', too_many: 'Too many questions at once. Please try again in a few minutes.', note: 'Answers come only from what this site says.', sketch: 'The assistant starts answering once this sketch is published.'} -%}
+{% include '@CadenzaRuntime/node/_section_open.html.twig' %}
+<div class="mx-auto w-full max-w-2xl" data-cz-ask data-none="{{ L.none }}" data-busy="{{ L.busy }}" data-too-many="{{ L.too_many }}" data-thinking="{{ L.thinking }}" data-off="{{ L.sketch }}">
+    <form class="cz-card flex items-center gap-2 p-2 pl-5" data-turbo="false">
+        {{ cadenza_icon('sparkles', 'size-5 shrink-0 text-primary') }}
+        <input type="text" name="question" required minlength="3" maxlength="300" autocomplete="off" enterkeyhint="send" aria-label="{{ props.placeholder ?: L.placeholder }}" placeholder="{{ props.placeholder ?: L.placeholder }}" class="min-w-0 flex-1 bg-transparent py-3 text-base text-foreground outline-none placeholder:text-muted-foreground">
+        <twig:Button type="submit" class="cz-btn h-12 shrink-0 px-6 text-base">{{ L.ask }}</twig:Button>
+    </form>
+    {%- if props.suggestions %}
+    <div class="mt-4 flex flex-wrap justify-center gap-2">
+        {%- for q in props.suggestions %}<button type="button" data-cz-ask-suggestion class="rounded-full border border-current/15 px-4 py-2 text-sm opacity-80 transition hover:border-primary hover:text-primary hover:opacity-100">{{ q }}</button>{% endfor %}
+    </div>
+    {%- endif %}
+    <div data-cz-ask-thread class="mt-6 grid gap-4" aria-live="polite"></div>
+    <p class="mt-4 text-center text-xs opacity-50">{{ L.note }}</p>
+</div>
+{% include '@CadenzaRuntime/node/_section_close.html.twig' %}

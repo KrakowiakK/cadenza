@@ -75,7 +75,12 @@ final class CadenzaRuntimeBundle extends AbstractBundle
                 ],
             ],
             // Visitors' forms: a few answers per address in a while is plenty for a person, too few for a bot.
-            'rate_limiter' => ['cadenza_form' => ['policy' => 'sliding_window', 'limit' => 6, 'interval' => '10 minutes']],
+            'rate_limiter' => [
+                'cadenza_form' => ['policy' => 'sliding_window', 'limit' => 6, 'interval' => '10 minutes'],
+                // Questions to the visitors' assistant cost the owner a model call each: a person asks a few, a site gets a few hundred a day.
+                'cadenza_ask' => ['policy' => 'sliding_window', 'limit' => 8, 'interval' => '10 minutes'],
+                'cadenza_ask_site' => ['policy' => 'fixed_window', 'limit' => 400, 'interval' => '1 day'],
+            ],
         ]);
     }
 }
