@@ -125,13 +125,36 @@ final class SiteTools
                 'site.restore' => ($pl ? 'Powrót do wersji ' : 'Back to version ').($op['version'] ?? ''),
                 'node.remove' => $pl ? 'Usunięcie sekcji' : 'Removing a section',
                 'node.move' => $pl ? 'Nowa kolejność sekcji' : 'Sections reordered',
-                'node.insert' => $pl ? 'Nowa sekcja' : 'New section',
+                'node.insert' => ($pl ? 'Nowa sekcja' : 'New section').self::named($op['node'] ?? null, $pl),
                 default => $pl ? 'Zmiany w treści' : 'Content changes',
             };
         }
         $parts = array_values(array_unique($parts));
 
         return [] === $parts ? ($pl ? 'Zmiany na stronie' : 'Changes') : implode(', ', \array_slice($parts, 0, 3));
+    }
+
+    /**
+     * ": “Opening hours”" or ": a game" after "New section", when the new block says what it is.
+     */
+    private static function named(mixed $node, bool $pl): string
+    {
+        if (!\is_array($node)) {
+            return '';
+        }
+        $title = $node['props']['title'] ?? $node['label'] ?? null;
+        if (\is_string($title) && '' !== trim($title)) {
+            return ': „'.mb_substr(trim($title), 0, 60).'”';
+        }
+
+        return match ($node['type'] ?? '') {
+            'widget' => $pl ? ': gra albo animacja' : ': a game or animation',
+            'form' => $pl ? ': formularz' : ': a form',
+            'ask' => $pl ? ': asystent dla odwiedzających' : ': an assistant for visitors',
+            'faq' => ': FAQ',
+            'map' => $pl ? ': mapa' : ': a map',
+            default => '',
+        };
     }
 
     /**
