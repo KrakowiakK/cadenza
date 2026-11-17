@@ -1,0 +1,1 @@
+{ "name": "cadenza-demo-rec", "private": true, "type": "module", "dependencies": { "playwright-core": "1.57.0" } }

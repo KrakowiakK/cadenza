@@ -108,8 +108,10 @@ The first visit asks you to create the **owner account** (e-mail and password; p
 the site, or with the setup token). Then the Cadenza bar is at the bottom; later you sign in at `/_cadenza/login`, and a
 forgotten password is reset with `bin/console cadenza:owner` in `demo-app/`.
 
-Try: *“Jak mogłaby wyglądać strona mojego studia jogi?”*, attach [`examples/glina-cennik.xlsx`](examples/glina-cennik.xlsx)
-and ask for a shop, or click the phone icon and send photos from your phone (same Wi-Fi, or deploy it).
+Try: *“I run a small yoga studio in Gdynia. How could my website look?”*, attach
+[`examples/tidewater-classes.xlsx`](examples/tidewater-classes.xlsx) (*“Here is my weekly class schedule. Put it on the
+site, with filters.”*), or click the phone icon and send photos from your phone (same Wi-Fi, or deploy it). The
+90-second demo video was recorded by a script on a real site: see [`docs/DEMO.md`](docs/DEMO.md).
 
 ### Things people have built with it
 
