@@ -32,7 +32,7 @@ agent writes).
 3. **Say something** in the bar at the bottom: *"I run a small yoga studio in Gdynia. How could my website look?"* Free
    cloud models need 20–60 s for the three looks and a few minutes for a full page; paid or local fast models are quicker.
 
-Stuck? `./cadenza stop` and `./cadenza start` restart both servers; `./cadenza reset` starts the site over; the full
+Stuck? `./cadenza doctor` checks PHP, extensions, Composer, ports and Chrome in one go and says what to fix; `./cadenza stop` and `./cadenza start` restart both servers; `./cadenza reset` starts the site over; the full
 description is in [Quick start](#quick-start-5-minutes) and [Models](#models) below.
 
 ## What it does
