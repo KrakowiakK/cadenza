@@ -82,7 +82,7 @@ final class ChatController
                 $send('message', ['text' => $text]);
             } catch (\Throwable $e) {
                 $this->logger->error('Cadenza turn failed: {message}', ['message' => $e->getMessage(), 'exception' => $e]);
-                $send('error', ['message' => $e->getMessage()]);
+                $send('error', ['message' => self::explain($e->getMessage(), strtok($this->model, '?') ?: $this->model, $this->baseUrl)]);
             }
             $send('done', []);
         });
@@ -133,5 +133,22 @@ final class ChatController
         }
 
         return new JsonResponse(['id' => $conversation->getId(), 'turns' => $turns, 'records' => $records]);
+    }
+
+    /**
+     * What a failure of the model service means for the owner, and where to fix it — instead of a bare "404 Not Found".
+     */
+    public static function explain(string $message, string $model, string $baseUrl): string
+    {
+        $where = ' Open Connections (the plug icon at the top of this panel) to fix it.';
+
+        return match (true) {
+            1 === preg_match('/\b40[13]\b|unauthori[sz]ed|invalid.{0,12}key|forbidden/i', $message) => 'The model service refused the key.'.$where,
+            1 === preg_match('/\b404\b|not found/i', $message) => \sprintf('The model service does not know this address or model: "%s" at %s.', $model, $baseUrl).$where,
+            1 === preg_match('/\b402\b|insufficient|credit|balance|quota/i', $message) => 'The model service says the account has no credit left.'.$where,
+            1 === preg_match('/\b429\b|rate.?limit|too many/i', $message) => 'The model service says: too many requests. Free plans have daily limits — wait a minute, or connect another model in Connections (the plug icon).',
+            1 === preg_match('/\b50[0-4]\b|provider returned error|overloaded/i', $message) => \sprintf('The model service is failing right now (%s) — not something on your side. Try again in a moment; if it keeps failing, connect another model in Connections (the plug icon).', mb_substr($message, 0, 60)),
+            default => $message,
+        };
     }
 }

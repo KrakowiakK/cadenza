@@ -31,6 +31,8 @@ agent writes).
    `CADENZA_LLM_BASE_URL=https://api.deepseek.com CADENZA_LLM_MODEL=deepseek-flash CADENZA_LLM_API_KEY=… ./cadenza start`
 3. **Say something** in the bar at the bottom: *"I run a small yoga studio in Gdynia. How could my website look?"* Free
    cloud models need 20–60 s for the three looks and a few minutes for a full page; paid or local fast models are quicker.
+   Keep a look and the panel offers photos for the opening (from Wikimedia Commons; a free Pexels key in *Connections*
+   gives stock-quality ones).
 
 Stuck? `./cadenza doctor` checks PHP, extensions, Composer, ports and Chrome in one go and says what to fix; `./cadenza stop` and `./cadenza start` restart both servers; `./cadenza reset` starts the site over; the full
 description is in [Quick start](#quick-start-5-minutes) and [Models](#models) below.
@@ -225,8 +227,10 @@ can still be written by hand in `harness/.env.local`:
 | OpenRouter *(tested, free models)* | `https://openrouter.ai/api` | `nvidia/nemotron-3-ultra-550b-a55b:free?max_tokens=12000` |
 | LM Studio / Ollama, local *(LM Studio tested)* | `http://127.0.0.1:1234` | the loaded model |
 
-Also `CADENZA_LLM_API_KEY`, and optionally a fallback (`CADENZA_LLM_FALLBACK_*`, used when the main model is silent for
-75 s) and a vision model (`CADENZA_LLM_VISION_*`, used for messages with images). Model options travel in the model
+The address works with or without a trailing `/v1`. Also `CADENZA_LLM_API_KEY`, and optionally a fallback
+(`CADENZA_LLM_FALLBACK_*`, used when the main model is silent for 75 s or its service answers 429 / 5xx — free models
+are switched off upstream for minutes at a time, so the OpenRouter preset in *Connections* sets another free model as
+the fallback) and a vision model (`CADENZA_LLM_VISION_*`, used for messages with images). Model options travel in the model
 name's query string. Widgets: `CADENZA_CODE_MODEL` (the model that writes their code; default the main one) and
 `CADENZA_REVIEW_MODEL` (a model of the main API that looks at the screenshots of a widget under test, e.g.
 `gemma4:31b` on Ollama Cloud's free plan; default the vision model). Optional: `HUGGINGFACE_API_KEY` (image generation with FLUX), `PEXELS_API_KEY`,

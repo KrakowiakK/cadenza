@@ -40,7 +40,8 @@ final class Providers
             'free' => 'free models (:free), 50–1000 requests a day',
             'roles' => [
                 'main' => 'nvidia/nemotron-3-ultra-550b-a55b:free?max_tokens=12000',
-                'fallback' => 'nvidia/nemotron-3-ultra-550b-a55b:free?max_tokens=12000',
+                // another free model, from another queue: free models are switched off upstream for minutes at a time
+                'fallback' => 'nvidia/nemotron-3.5-super-vl:free?max_tokens=12000',
             ],
             'check' => '/v1/key',
         ],

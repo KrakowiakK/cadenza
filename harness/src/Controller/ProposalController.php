@@ -24,6 +24,7 @@ final class ProposalController
         private readonly SiteClient $site,
         private readonly WorkflowInterface $proposalStateMachine,
         private readonly EntityManagerInterface $em,
+        private readonly \App\Media\ImageOffers $offers,
     ) {
     }
 
@@ -53,7 +54,7 @@ final class ProposalController
         }
         $this->em->flush();
 
-        return null === $kept ? new JsonResponse(['error' => 'Unknown variant.'], 404) : new JsonResponse(['ok' => true, 'proposal' => $kept->toArray()]);
+        return null === $kept ? new JsonResponse(['error' => 'Unknown variant.'], 404) : new JsonResponse(['ok' => true, 'proposal' => $kept->toArray(), 'offer' => $this->offers->forProposal($kept->getId())]);
     }
 
     #[Route('/api/drafts/{draftId}/{decision}', requirements: ['draftId' => '\d+', 'decision' => 'approve|reject'], methods: ['POST'])]

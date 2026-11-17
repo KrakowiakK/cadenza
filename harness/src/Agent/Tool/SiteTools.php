@@ -26,6 +26,8 @@ final class SiteTools
         private readonly \Symfony\AI\Platform\PlatformInterface $platform,
         #[\Symfony\Component\DependencyInjection\Attribute\Autowire('%env(default:cadenza.review_model:vault:CADENZA_PROOFREAD_MODEL)%')]
         private readonly string $proofreadModel = '',
+        private readonly ?\App\Media\ImageSearch $images = null,
+        private readonly ?\App\Media\ImageOffers $offers = null,
     ) {
     }
 
@@ -127,8 +129,9 @@ final class SiteTools
      * @param list<mixed> $directions 2–3 of: minimal, editorial, warm, bold, elegant, fresh
      * @param list<mixed> $operations The page content written once (page.create with patterns…); omit to restyle the current site
      * @param string      $summary    One sentence about the content, in the owner's language
+     * @param string      $photo      What the opening photo should show, in English, 2–4 plain words (e.g. "yoga studio interior"); empty when the owner wants no photos
      */
-    public function variants(array $directions = [], array $operations = [], string $summary = ''): string
+    public function variants(array $directions = [], array $operations = [], string $summary = '', string $photo = ''): string
     {
         $summary = '' !== trim($summary) ? $summary : 'Propozycja strony';
         // Models express the directions in many shapes; take the known direction names in the order given.
@@ -157,6 +160,7 @@ final class SiteTools
             $proposal = $result['proposal'];
             $proposal->asVariant($group, $name);
             $this->proposals->flush();
+            $this->photosFor($proposal, $result['created'], self::HERO_FOR[$direction], trim($photo));
             $this->turn->proposals[] = $proposal;
             $made[] = $proposal->toArray();
         }
@@ -165,10 +169,58 @@ final class SiteTools
         }
         $this->turn->emit('variants', ['groupId' => $group, 'items' => $made]);
 
+        if ('' !== trim($photo)) {
+            return \sprintf('Showed %d variants side by side: %s. The owner picks one (or asks to mix them); photos for the opening are shown to them right after they pick — do not call offer_images for the opening now.%s', \count($made), implode(', ', array_column($made, 'variantName')), $errors ? "\nFailed: ".implode('; ', $errors) : '');
+        }
+
         return \sprintf('Showed %d variants side by side: %s. The owner picks one (or asks to mix them).%s', \count($made), implode(', ', array_column($made, 'variantName')), $errors ? "\nFailed: ".implode('; ', $errors) : '');
     }
 
     /** The hero layout that suits each direction best. */
+    /** @var array<string, list<array<string, mixed>>> photo candidates already found, by orientation and query */
+    private array $found = [];
+
+    /**
+     * Prepares the photos the owner chooses from once they keep this look, so no look is left with an empty frame.
+     *
+     * @param list<mixed> $created "id type "title"" lines of the nodes this proposal created
+     */
+    private function photosFor(\App\Entity\Proposal $proposal, array $created, string $hero, string $photo): void
+    {
+        if ('' === $photo || 'typographic' === $hero || null === $this->images || null === $this->offers) {
+            return;
+        }
+        $nodeId = null;
+        foreach ($created as $line) {
+            if (\is_string($line) && 1 === preg_match('/^(\S+) hero\b/', $line, $m)) {
+                $nodeId = $m[1];
+                break;
+            }
+        }
+        if (null === $nodeId) {
+            return;
+        }
+        $orientation = 'split' === $hero ? 'portrait' : 'landscape';
+        $key = $orientation.' '.$photo;
+        try {
+            $this->found[$key] ??= $this->images->search($photo, 8, $orientation);
+        } catch (\Throwable) {
+            $this->found[$key] = [];
+        }
+        if ([] === $this->found[$key]) {
+            return;
+        }
+        $this->offers->awaitProposal($proposal->getId(), $this->offers->create([
+            'nodeId' => $nodeId,
+            'prop' => 'collage' === $hero ? 'images' : 'image',
+            'label' => str_starts_with($this->turn->language, 'pl') ? 'Zdjęcie na otwarcie' : 'Opening photo',
+            'query' => $photo,
+            'draftId' => $proposal->getDraftId(),
+            'conversationId' => $this->turn->conversation?->getId(),
+            'candidates' => $this->found[$key],
+        ]));
+    }
+
     private const HERO_FOR = ['minimal' => 'typographic', 'editorial' => 'split', 'warm' => 'split', 'bold' => 'image', 'elegant' => 'image', 'fresh' => 'collage'];
 
     private const DIRECTION_NAMES = [

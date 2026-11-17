@@ -73,6 +73,16 @@ final class Proposals
     }
 
     /**
+     * What the open sketch of this draft is called, if there is one.
+     */
+    public function summaryOf(?int $draftId): ?string
+    {
+        $proposal = null === $draftId ? null : $this->proposals->byDraft($draftId);
+
+        return null !== $proposal && $proposal->isOpen() ? $proposal->getSummary() : null;
+    }
+
+    /**
      * @param list<array<string, mixed>> $operations
      *
      * @return array{proposal: ?Proposal, errors: list<string>, created: list<string>}

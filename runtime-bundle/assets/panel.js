@@ -24,6 +24,7 @@ const I18N = {
         uploading: 'Uploading…', chat: 'Conversation', history: 'History', dashboard: 'Dashboard', version: 'Version', current: 'current',
         preview: 'Preview', restore: 'Restore', restoreThis: 'Restore this version', close: 'Close', undo: 'Undo',
         startOver: 'Start over', startOverConfirm: 'Sure? Click again — history is kept.', restored: 'Restored — a new version was published.',
+        betterPhotos: 'From Wikimedia Commons. Stock-quality photos: add a free Pexels key', betterPhotosLink: 'in Connections',
         pickPhoto: 'Pick a photo', picked: 'In the sketch', noHistory: 'Nothing published yet.',
         pen: 'Pen', box: 'Box', text: 'Text', eraser: 'Eraser', clear: 'Clear', cancel: 'Cancel', useSketch: 'Add to message',
         sketchHint: 'Draw the layout: boxes for sections, words for what goes where. Cadenza will read it.', typeLabel: 'Type a label, Enter',
@@ -65,6 +66,7 @@ const I18N = {
         uploading: 'Wysyłam…', chat: 'Rozmowa', history: 'Historia', dashboard: 'Pulpit', version: 'Wersja', current: 'bieżąca',
         preview: 'Podgląd', restore: 'Przywróć', restoreThis: 'Przywróć tę wersję', close: 'Zamknij', undo: 'Cofnij',
         startOver: 'Zacznij od nowa', startOverConfirm: 'Na pewno? Kliknij jeszcze raz — historia zostaje.', restored: 'Przywrócono — opublikowano nową wersję.',
+        betterPhotos: 'Z Wikimedia Commons. Zdjęcia jak ze stocka: dodaj darmowy klucz Pexels', betterPhotosLink: 'w Połączeniach',
         pickPhoto: 'Wybierz zdjęcie', picked: 'W szkicu', noHistory: 'Nic jeszcze nie opublikowano.',
         pen: 'Ołówek', box: 'Ramka', text: 'Tekst', eraser: 'Gumka', clear: 'Wyczyść', cancel: 'Anuluj', useSketch: 'Dodaj do wiadomości',
         sketchHint: 'Narysuj układ: ramki to sekcje, słowa mówią, co gdzie ma być. Cadenza to odczyta.', typeLabel: 'Wpisz etykietę, Enter',
@@ -1053,7 +1055,7 @@ ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-30
                     this.pickedVariants.add(v.proposalId);
                     card.querySelectorAll('[data-variant]').forEach((other) => {
                         const mine = other === el;
-                        other.classList.toggle('opacity-40', !mine);
+                        other.hidden = !mine; // their drafts are discarded: a thumbnail of them would show an empty page
                         other.classList.toggle('ring-2', mine);
                         other.classList.toggle('ring-violet-500', mine);
                         other.querySelectorAll('button').forEach((b) => { b.disabled = true; });
@@ -1062,6 +1064,7 @@ ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-30
                     for (const p of this.proposals.values()) if (p.variantGroup === data.groupId && p.proposalId !== v.proposalId) p.status = 'rejected';
                     this.proposalCard(card.parentElement, { ...res.proposal, variantPicked: true });
                     await this.showSketch(res.proposal.draftId, res.proposal.focusPath);
+                    if (res.offer) this.choiceGrid(card.parentElement, res.offer); // photos for the look they kept
                 } catch (e) {
                     this.toast(t('error') + ': ' + e.message, 'error');
                 }
@@ -1344,6 +1347,11 @@ ${data.purpose ? `<div class="mt-0.5 text-xs text-muted-foreground">${escapeHtml
   <span class="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-1.5 pb-1 pt-4 text-[10px] text-white/90">${escapeHtml((c.author ?? '').replace(/\s+/g, ' ').slice(0, 40))}${c.license ? ' · ' + escapeHtml(c.license) : ''}</span>
   <span data-state class="absolute inset-0 hidden items-center justify-center bg-black/40 text-white"></span>
 </button>`).join('')}</div>`;
+        // Without a photo service connected the choice is what Commons has: say where better photos come from.
+        if (offer.candidates.every((c) => c.source === 'wikimedia')) {
+            card.insertAdjacentHTML('beforeend', `<p class="mt-2 text-[11px] leading-snug text-muted-foreground">${escapeHtml(t('betterPhotos'))} <button type="button" data-more-photos class="underline underline-offset-2 hover:text-foreground">${escapeHtml(t('betterPhotosLink'))}</button>.</p>`);
+            card.querySelector('[data-more-photos]').addEventListener('click', () => this.el('services').click());
+        }
         card.querySelectorAll('[data-candidate]').forEach((tile) => tile.addEventListener('click', () => this.pickCandidate(offer, tile, card)));
         container.append(card);
         this.scrollDown();

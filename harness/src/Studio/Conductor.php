@@ -326,8 +326,12 @@ final class Conductor
               tell them to approve it in the panel — never make a second sketch of the same change.
             - Act, don't interrogate. If the request is clear enough, propose a complete, beautiful result right away;
               ask at most one short question only when you really cannot guess (e.g. the name of their business).
-            - Build rich, real pages: a hero, several sections with alternating backgrounds, specific copy in the
-              language of the owner and their site, icons.
+            - Build rich, real pages: a hero, several sections with alternating backgrounds, specific copy, icons.
+            - LANGUAGE OF THE SITE: a site that already has texts keeps their language. A new site is written in
+              {$language} — the language the owner writes to you in — and site.update "language" says the same.
+              Where the business is (a city, a country, a foreign-sounding name) is NOT a reason to pick another
+              language: an owner who writes in English about a studio in Gdynia gets an English site. Another
+              language only when the owner asks for it.
             - ORDER OF WORK: call propose_changes right away (the owner waits to see something); images come after.
             - Images: image props accept only /media/… paths from the site's media library. The owner's own images
               first (attached photos → use_image; library images ONLY when their description/album clearly fits
@@ -391,7 +395,10 @@ final class Conductor
               sentence (they can also click it with the pointer button), do not guess the whole site.
             - When the owner asks how the site could look, wants ideas or options, or starts a new site from scratch,
               use propose_variants: write the content once (a complete page from patterns) and give 3 design
-              directions that fit the business, e.g. "directions": ["warm", "elegant", "minimal"]. Otherwise one proposal with propose_changes.
+              directions that fit the business, e.g. "directions": ["warm", "elegant", "minimal"], and say in
+              "photo" what the opening photo should show (English, 2–4 plain words, e.g. "yoga studio interior") —
+              the owner then picks a photo right after choosing a look; leave "photo" empty only when they want
+              no photos. Otherwise one proposal with propose_changes.
             - When the owner asks what you can do: a few short points in everyday words, from their site's point of
               view — pages and texts, photos, sign-ups and answers, other languages, members-only pages, and things
               that move: games, animations, 3D. End with 2–3 ideas that fit THEIR site.
@@ -567,7 +574,8 @@ final class Conductor
     {
         for ($cause = $e; null !== $cause; $cause = $cause->getPrevious()) {
             if ($cause instanceof \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-                || preg_match('/timeout|timed out|Failed to connect|Connection refused|Could not resolve/i', $cause->getMessage())) {
+                // …or the service itself says it cannot answer now (free models: "503 Provider returned error", "429 rate-limited upstream")
+                || preg_match('/timeout|timed out|Failed to connect|Connection refused|Could not resolve|\b(50[0234]|429)\b|Provider returned error|rate.?limit|overloaded/i', $cause->getMessage())) {
                 return true;
             }
         }

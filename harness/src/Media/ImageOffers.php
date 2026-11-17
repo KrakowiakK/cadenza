@@ -72,4 +72,32 @@ final class ImageOffers
         $item->set($offer)->expiresAfter(86400 * 3);
         $this->cacheApp->save($item);
     }
+
+    /**
+     * The photos to show when the owner keeps this proposal (one of several looks): remembered until they choose.
+     */
+    public function awaitProposal(string $proposalId, string $offerId): void
+    {
+        $item = $this->cacheApp->getItem('cz_offer_for_'.md5($proposalId));
+        $item->set($offerId)->expiresAfter(86400 * 3);
+        $this->cacheApp->save($item);
+    }
+
+    /**
+     * @return array<string, mixed>|null the offer waiting for this proposal, in the shape the panel shows
+     */
+    public function forProposal(string $proposalId): ?array
+    {
+        $item = $this->cacheApp->getItem('cz_offer_for_'.md5($proposalId));
+        $offer = $item->isHit() ? $this->offer((string) $item->get()) : null;
+        if (null === $offer) {
+            return null;
+        }
+
+        return [
+            'offerId' => $offer['id'],
+            'label' => $offer['label'],
+            'candidates' => array_map(static fn (array $r): array => array_intersect_key($r, array_flip(['id', 'thumb', 'title', 'author', 'license', 'source', 'width', 'height'])), $offer['candidates']),
+        ];
+    }
 }

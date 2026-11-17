@@ -68,7 +68,8 @@ final class ImagePlacer
                 $props['alt'] = $media['alt'];
             }
         }
-        $result = $this->proposals->propose($conversation, [['op' => 'node.update', 'id' => $nodeId, 'props' => $props]], $summary, $draftId);
+        // A photo added to a sketch does not rename it: "Warm: a page for the studio" stays, not "Opening photo".
+        $result = $this->proposals->propose($conversation, [['op' => 'node.update', 'id' => $nodeId, 'props' => $props]], $this->proposals->summaryOf($draftId) ?? $summary, $draftId);
 
         return ['proposal' => $result['proposal'], 'errors' => $result['errors']];
     }

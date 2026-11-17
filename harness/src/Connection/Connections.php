@@ -28,7 +28,7 @@ final class Connections
     {
         $roles = [];
         foreach (Providers::ROLES as $role => [$baseUrl, $key, $model]) {
-            $url = (string) $this->value($baseUrl);
+            $url = \App\Vault\VaultEnvVarProcessor::baseUrl((string) $this->value($baseUrl));
             $provider = '' !== $url ? Providers::byBaseUrl($url) : null;
             $roles[$role] = [
                 'provider' => $provider,
@@ -72,7 +72,7 @@ final class Connections
         if (null === $preset) {
             return ['ok' => false, 'error' => 'Unknown service.'];
         }
-        $baseUrl = rtrim($baseUrl ?: $preset['baseUrl'], '/');
+        $baseUrl = \App\Vault\VaultEnvVarProcessor::baseUrl($baseUrl ?: $preset['baseUrl']);
         if (!preg_match('~^https?://~', $baseUrl)) {
             return ['ok' => false, 'error' => 'The address must start with http:// or https://.'];
         }

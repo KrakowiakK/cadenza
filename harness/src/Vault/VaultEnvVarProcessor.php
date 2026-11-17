@@ -20,6 +20,22 @@ final class VaultEnvVarProcessor implements EnvVarProcessorInterface
 
     public function getEnv(string $prefix, string $name, \Closure $getEnv): mixed
     {
+        $value = $this->read($name, $getEnv);
+
+        return str_ends_with($name, '_BASE_URL') && \is_string($value) ? self::baseUrl($value) : $value;
+    }
+
+    /**
+     * The address of a model service the way the platform wants it: most people write "https://host/api/v1" (or paste the
+     * whole ".../v1/chat/completions"), the platform adds "/v1/..." itself.
+     */
+    public static function baseUrl(string $url): string
+    {
+        return preg_replace('~(/v1)?(/chat/completions)?/*$~', '', trim($url)) ?? $url;
+    }
+
+    private function read(string $name, \Closure $getEnv): mixed
+    {
         try {
             $value = $getEnv($name);
         } catch (EnvNotFoundException) {
