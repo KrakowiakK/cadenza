@@ -71,7 +71,7 @@ final class ImageSearch
             'headers' => ['User-Agent' => self::UA],
             'query' => [
                 'action' => 'query', 'format' => 'json', 'generator' => 'search', 'gsrnamespace' => 6,
-                'gsrsearch' => $query.' filetype:bitmap', 'gsrlimit' => min(50, $count * 4),
+                'gsrsearch' => $query.' filetype:bitmap', 'gsrlimit' => 50,
                 'prop' => 'imageinfo', 'iiprop' => 'url|extmetadata|size|mime', 'iiurlwidth' => 800,
                 'iiextmetadatafilter' => 'Artist|LicenseShortName|LicenseUrl|ObjectName|ImageDescription|Categories',
             ],
@@ -80,9 +80,11 @@ final class ImageSearch
         $pages = $data['query']['pages'] ?? [];
         uasort($pages, static fn (array $a, array $b): int => ($a['index'] ?? 0) <=> ($b['index'] ?? 0));
         $out = [];
+        $perAuthor = [];
         foreach ($pages as $page) {
             $info = $page['imageinfo'][0] ?? null;
-            if (null === $info || !\in_array($info['mime'] ?? '', ['image/jpeg', 'image/png', 'image/webp'], true) || ($info['width'] ?? 0) < 900) {
+            // Photographs are JPEGs here; a PNG on Commons is almost always a diagram, a logo or a screenshot.
+            if (null === $info || !\in_array($info['mime'] ?? '', ['image/jpeg', 'image/webp'], true) || ($info['width'] ?? 0) < 1100) {
                 continue;
             }
             if (!$this->fits($info['width'], $info['height'], $orientation)) {
@@ -91,6 +93,15 @@ final class ImageSearch
             $meta = $info['extmetadata'] ?? [];
             // A short query ("yoga room" → "room") finds anything with the word: the photo must be about what was asked.
             if (!self::isAbout($query, $page['title'].' '.($meta['ObjectName']['value'] ?? '').' '.($meta['ImageDescription']['value'] ?? '').' '.($meta['Categories']['value'] ?? ''))) {
+                continue;
+            }
+            // Commons is also an archive: scans of old books, engravings, maps and diagrams are not photos for a website.
+            if (1 === preg_match('~Internet Archive Book|Book illustration|British Library|engraving|lithograph|woodcut|etching|\bprints?\b|drawings?\b|manuscript|\bmaps?\b|diagram|\blogos?\b|coat of arms|postage stamp|scanned|PD-old|PD-Art|statuette|figurine|antiquit|Inventarnummer~i', ($meta['Categories']['value'] ?? '').' '.strip_tags((string) ($meta['Artist']['value'] ?? '')).' '.$page['title'])) {
+                continue;
+            }
+            // One photographer's series of the same subject is one choice, not four.
+            $author = mb_strtolower(trim(strip_tags((string) ($meta['Artist']['value'] ?? ''))));
+            if ('' !== $author && ($perAuthor[$author] = ($perAuthor[$author] ?? 0) + 1) > 2) {
                 continue;
             }
             $out[] = [
