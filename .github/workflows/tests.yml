@@ -24,3 +24,23 @@ jobs:
       - run: ./cadenza doctor || true
       - run: ./cadenza setup
       - run: ./cadenza test
+      # Then what a person does next: start it (PHP's built-in server, no Symfony CLI here) and knock on the doors.
+      - name: Start, open the site, connect over MCP as a guest agent
+        run: |
+          ./cadenza start
+          for i in $(seq 1 20); do curl -fsS -o /dev/null http://127.0.0.1:8010/robots.txt && break; sleep 1; done
+          curl -fsSL -o /dev/null -w 'site: %{http_code}\n' http://127.0.0.1:8010/
+          curl -fsS http://127.0.0.1:8010/robots.txt | grep -q 'Sitemap:'
+          curl -fsS http://127.0.0.1:8010/sitemap.xml | grep -q '<urlset'
+          curl -fsS http://127.0.0.1:8010/llms.txt | head -3
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8011/api/info)" = 401
+          config=$(cd demo-app && php bin/console cadenza:guest-agent http://127.0.0.1:8010 --json)
+          url=$(echo "$config" | jq -r '.mcpServers["cadenza-site"].url')
+          auth=$(echo "$config" | jq -r '.mcpServers["cadenza-site"].headers.Authorization')
+          init='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"ci","version":"1"}}}'
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$url" -H 'Content-Type: application/json' -d "$init")" = 401
+          curl -fsS -X POST "$url" -H "Authorization: $auth" -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d "$init" | grep -o 'cadenza-site-guest'
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "${url%guest}control" -H "Authorization: $auth" -H 'Content-Type: application/json' -d "$init")" = 401
+          ./cadenza stop
+      - if: failure()
+        run: tail -n 40 .run/*.log demo-app/var/log/*.log harness/var/log/*.log 2>/dev/null || true
