@@ -34,8 +34,12 @@ final class AskTheSiteTest extends WebTestCase
 
         $sent = [];
         $container->set('http_client', new MockHttpClient(static function (string $method, string $url, array $options) use (&$sent): MockResponse {
+            // The same client fetches icons that are not on disk yet (a clean machine): only calls to the studio count here.
+            if (!str_ends_with($url, '/api/answer')) {
+                return new MockResponse('{}', ['http_code' => 404]);
+            }
             $body = json_decode((string) $options['body'], true);
-            $sent[] = ['url' => $url, 'body' => $body, 'headers' => $options['normalized_headers'] ?? []];
+            $sent[] = ['url' => $url, 'body' => $body];
 
             return new MockResponse((string) json_encode(str_contains($body['question'], 'Sunday')
                 ? ['answered' => true, 'answer' => 'No, we are closed on Sunday.']

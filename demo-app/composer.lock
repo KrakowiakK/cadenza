@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b15b0bd964d641091994ead7945d7b66",
+    "content-hash": "42e02a2f91076764ab8fead74899db4d",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -64,11 +64,11 @@
         },
         {
             "name": "cadenza/runtime-bundle",
-            "version": "dev-deps-update",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "../runtime-bundle",
-                "reference": "fcddac8cd0f28ba97c7ea973f1cad18f949eb9ce"
+                "reference": "7284fca779e3f6f3cd96dbb9a22dfb486377e3a5"
             },
             "require": {
                 "doctrine/doctrine-bundle": "^2.13|^3.0",
@@ -126,7 +126,7 @@
         },
         {
             "name": "cadenza/source-instagram",
-            "version": "dev-deps-update",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "../library/sources/instagram",
@@ -1640,21 +1640,21 @@
         },
         {
             "name": "endroid/qr-code",
-            "version": "6.2.0",
+            "version": "6.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/endroid/qr-code.git",
-                "reference": "b2be4d6111c3da2ca37aa8583f7b3f5ce1f0b7c0"
+                "reference": "5fa534856ed95649d67c0eab0cabc03ab1d8e0e2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/endroid/qr-code/zipball/b2be4d6111c3da2ca37aa8583f7b3f5ce1f0b7c0",
-                "reference": "b2be4d6111c3da2ca37aa8583f7b3f5ce1f0b7c0",
+                "url": "https://api.github.com/repos/endroid/qr-code/zipball/5fa534856ed95649d67c0eab0cabc03ab1d8e0e2",
+                "reference": "5fa534856ed95649d67c0eab0cabc03ab1d8e0e2",
                 "shasum": ""
             },
             "require": {
                 "bacon/bacon-qr-code": "^3.0",
-                "php": "^8.5"
+                "php": "^8.4"
             },
             "require-dev": {
                 "endroid/quality": "dev-main",
@@ -1700,7 +1700,7 @@
             ],
             "support": {
                 "issues": "https://github.com/endroid/qr-code/issues",
-                "source": "https://github.com/endroid/qr-code/tree/6.2.0"
+                "source": "https://github.com/endroid/qr-code/tree/6.1.3"
             },
             "funding": [
                 {
@@ -1708,8 +1708,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-03T10:30:23+00:00",
-            "published-time": "2026-11-03T10:31:40+00:00"
+            "time": "2026-02-05T07:01:58+00:00",
+            "published-time": "2026-02-05T07:02:58+00:00"
         },
         {
             "name": "league/commonmark",
@@ -14150,5 +14150,8 @@
         "ext-iconv": "*"
     },
     "platform-dev": {},
+    "platform-overrides": {
+        "php": "8.4.1"
+    },
     "plugin-api-version": "2.11.0"
 }
