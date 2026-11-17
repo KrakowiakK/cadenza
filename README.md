@@ -111,8 +111,8 @@ description is in [Quick start](#quick-start-5-minutes) and [Models](#models) be
 - **Bring your own agent.** The site is an MCP server with three doors. The studio uses two (`agent`: read and draft;
   `control`: publish after the owner's click). The third, `guest`, is for an agent the owner already has: Claude Code,
   Claude Desktop, Cursor, anything that speaks MCP. *Connections* shows the line to paste (so does `./cadenza mcp`). The
-  guest gets a token of its own and five tools: read the outline, a page, a node, the editing guide, and
-  `draft_propose`. Its sketch shows up in the open panel within seconds, signed (*by Claude Code · MCP*), with the same
+  guest gets a token of its own and six tools: read the outline, a page, a node, the editing guide, `draft_propose`,
+  and `draft_status` to learn what the owner decided. Its sketch shows up in the open panel within seconds, signed (*by Claude Code · MCP*), with the same
   Before / After, Approve and Reject as any other. The guest token opens neither the other two servers nor the
   visitors' answers, the members or the keys, and a runaway client can leave at most twelve sketches waiting.
 - **A dashboard for the owner** (grid icon in the panel): visits counted without cookies or personal data, answers to

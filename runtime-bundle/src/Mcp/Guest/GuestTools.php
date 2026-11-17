@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Cadenza\Runtime\Mcp\Guest;
 
 use Cadenza\Runtime\Draft\SiteManager;
+use Cadenza\Runtime\Entity\SiteVersion;
 use Cadenza\Runtime\Mcp\Agent\SiteTools;
 use Cadenza\Runtime\Repository\SiteVersionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Mcp\Capability\Attribute\McpPrompt;
+use Mcp\Capability\Attribute\McpResource;
 use Mcp\Capability\Attribute\McpTool;
 use Mcp\Capability\Attribute\Schema;
 use Mcp\Schema\ToolAnnotations;
@@ -97,6 +99,30 @@ final class GuestTools
         }
 
         return $result;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[McpTool(name: 'draft_status', description: 'What the owner decided about a sketch you left: "waiting", "published" (with the version number) or "rejected".', annotations: new ToolAnnotations(readOnlyHint: true))]
+    public function status(int $draftId): array
+    {
+        $draft = $this->versions->find($draftId);
+        if (null === $draft || null === $draft->getAuthor()) {
+            return ['ok' => false, 'error' => 'No sketch of an outside agent has this id.'];
+        }
+
+        return match ($draft->getStatus()) {
+            SiteVersion::PUBLISHED => ['ok' => true, 'status' => 'published', 'version' => $draft->getNumber(), 'summary' => $draft->getSummary()],
+            SiteVersion::DISCARDED => ['ok' => true, 'status' => 'rejected', 'summary' => $draft->getSummary(), 'hint' => 'The owner turned it down. Ask them what to change before proposing again.'],
+            default => ['ok' => true, 'status' => 'waiting', 'summary' => $draft->getSummary(), 'hint' => 'The owner has not decided yet.'],
+        };
+    }
+
+    #[McpResource(uri: 'cadenza://site/outline', name: 'site-outline', description: 'Outline of the live site', mimeType: 'text/plain')]
+    public function outlineResource(): string
+    {
+        return $this->site->outline();
     }
 
     /**

@@ -66,9 +66,14 @@ final class GuestAgentTest extends WebTestCase
         self::assertSame('Claude b Code b', $draft->getAuthor(), 'the name is plain text');
         self::assertCount(1, $versions->drafts(40, true));
 
+        self::assertSame('waiting', $tools->status((int) $result['draftId'])['status']);
+
         // A draft of the studio is not the guest's to touch.
         $own = $site->propose([['op' => 'node.update', 'id' => 'nhero01', 'props' => ['title' => 'Studio']]], 'By the studio')->draft;
         self::assertFalse($tools->propose([['op' => 'node.update', 'id' => 'nhero01', 'props' => ['title' => 'Mine now']]], 'x', 'Guest', $own->getId())['ok']);
+
+        self::assertFalse($tools->status((int) $own->getId())['ok'], 'nor to ask about');
+        $site->discard((int) $own->getId());
 
         // The live site did not change, and a visitor sees neither the sketch nor the owner's placeholders.
         $client->request('GET', '/');
@@ -78,5 +83,9 @@ final class GuestAgentTest extends WebTestCase
         self::assertStringNotContainsString('Send me the hours', $html);
         self::assertStringContainsString('cz-visitor', $html);
         self::assertStringNotContainsString($guest, $html, 'tokens are for the owner\'s eyes');
+
+        // The owner approves: the guest learns it was published.
+        $site->publish((int) $result['draftId']);
+        self::assertSame('published', $tools->status((int) $result['draftId'])['status']);
     }
 }
