@@ -284,10 +284,9 @@ a.cz-card:hover, .cz-card-link:hover { transform: translateY(-3px); box-shadow: 
 .cz-article blockquote { border-left: 3px solid var(--primary); padding-left: 1em; font-style: italic; opacity: .85; margin: 1.2em 0; }
 .cz-article strong { font-weight: 650; }
 
-/* The open studio panel covers the right edge of a wide screen: the sketch bar (Approve, Reject) and the site's menu
-   move out from under it. */
-@media (min-width: 1280px) {
-    #cz-sketch-banner, body > header { transition: padding-right 0.35s cubic-bezier(.2,.8,.2,1); }
-    body:has(#cz-panel[data-state="open"]) #cz-sketch-banner,
-    body:has(#cz-panel[data-state="open"]) > header { padding-right: 452px; }
+/* On a wide screen the open studio panel docks beside the page instead of covering its right edge: the owner sees
+   the whole page, the sketch bar (Approve, Reject) and the site's menu while talking to the studio. */
+@media (min-width: 1600px) {
+    body { transition: padding-right 0.35s cubic-bezier(.2,.8,.2,1); }
+    body:has(#cz-panel[data-state="open"]):not(.cz-embed) { padding-right: 452px; }
 }
