@@ -29,6 +29,33 @@ final class Document
         ];
     }
 
+    /**
+     * The first picture of a page: what a link to it shows when shared.
+     *
+     * @param array<string, mixed> $page
+     */
+    public static function firstImage(array $page): ?string
+    {
+        $find = static function (array $nodes) use (&$find): ?string {
+            foreach ($nodes as $node) {
+                foreach (['image', 'backgroundImage', 'photo'] as $key) {
+                    if (\is_string($src = $node['props'][$key] ?? null) && str_starts_with($src, '/')) {
+                        return $src;
+                    }
+                }
+                foreach ($node['slots'] ?? [] as $children) {
+                    if (null !== $found = $find($children)) {
+                        return $found;
+                    }
+                }
+            }
+
+            return null;
+        };
+
+        return $find($page['nodes'] ?? []);
+    }
+
     public static function normalisePath(string $path): string
     {
         $path = '/'.trim(trim($path), '/');

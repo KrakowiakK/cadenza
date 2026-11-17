@@ -122,6 +122,10 @@ description is in [Quick start](#quick-start-5-minutes) and [Models](#models) be
   and `draft_status` to learn what the owner decided. Its sketch shows up in the open panel within seconds, signed (*by Claude Code · MCP*), with the same
   Before / After, Approve and Reject as any other. The guest token opens neither the other two servers nor the
   visitors' answers, the members or the keys, and a runaway client can leave at most twelve sketches waiting.
+- **Found by search engines and by AI assistants.** Every published page carries a description, a canonical address
+  and a share preview (Open Graph, with the page's first photo); `/sitemap.xml` and `/robots.txt` follow the site by
+  themselves; and `/llms.txt` gives the whole published site as plain text for AI assistants, the same text the
+  visitors' assistant answers from. Pages for invited people are in none of them.
 - **A dashboard for the owner** (grid icon in the panel): visits counted without cookies or personal data, answers to
   forms with places taken, recent changes, content, and the application's health — errors in the logs, whether the
   background worker is alive, jobs waiting or failed, imports, connected accounts. The agent reads the same numbers:

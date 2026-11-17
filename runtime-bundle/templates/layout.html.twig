@@ -10,6 +10,18 @@
     <link rel="icon" href="data:image/svg+xml,{{ ('<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'><rect width=\'64\' height=\'64\' rx=\'16\' fill=\'#0f172a\'/><text x=\'32\' y=\'44\' font-family=\'Georgia,serif\' font-size=\'36\' text-anchor=\'middle\' fill=\'#fff\'>' ~ initial|e ~ '</text></svg>')|url_encode }}">
     <title>{% block title %}{% set pt = page is defined and page ? page.title|default('') : '' %}{{ pt and doc.name|lower not in pt|lower ? pt ~ ' · ' ~ doc.name : (pt ?: doc.name) }}{% endblock %}</title>
     {%- if page is defined and page and page.description|default('') %}<meta name="description" content="{{ page.description }}">{% endif %}
+    {#- What a link to this page shows when it is shared (Open Graph), and where the machine-readable copy is. -#}
+    {%- if page is defined and page and not state.isSketch %}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ doc.name }}">
+    <meta property="og:title" content="{{ page.title|default(doc.name) }}">
+    {%- if page.description|default(doc.tagline|default('')) %}<meta property="og:description" content="{{ page.description|default(doc.tagline) }}">{% endif %}
+    <meta property="og:url" content="{{ app.request.schemeAndHttpHost ~ app.request.pathInfo }}">
+    {%- set shareImage = cadenza_page_image(page) %}
+    {%- if shareImage %}<meta property="og:image" content="{{ app.request.schemeAndHttpHost ~ shareImage }}"><meta name="twitter:card" content="summary_large_image">{% endif %}
+    <link rel="canonical" href="{{ app.request.schemeAndHttpHost ~ app.request.pathInfo }}">
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="This site as plain text for AI assistants">
+    {%- endif %}
     <meta name="view-transition" content="same-origin">
     <meta name="turbo-refresh-method" content="morph">
     <link rel="preconnect" href="https://fonts.googleapis.com">

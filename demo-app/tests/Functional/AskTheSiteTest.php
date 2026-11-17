@@ -83,6 +83,18 @@ final class AskTheSiteTest extends WebTestCase
         self::assertSame(2, $summary['total']);
         self::assertSame(['Is there parking?'], array_column($summary['missing'], 'question'));
 
+        // The same text is what the site tells machines: llms.txt and the sitemap follow it, without the members' pages.
+        $client->request('GET', '/llms.txt');
+        $llms = (string) $client->getResponse()->getContent();
+        self::assertStringContainsString('# Hearth', $llms);
+        self::assertStringContainsString('Closed on Sunday', $llms);
+        self::assertStringNotContainsString('4711', $llms);
+        $client->request('GET', '/sitemap.xml');
+        self::assertStringContainsString('<loc>http://localhost/</loc>', (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString('/team', (string) $client->getResponse()->getContent());
+        $client->request('GET', '/robots.txt');
+        self::assertStringContainsString('Disallow: /_cadenza/', (string) $client->getResponse()->getContent());
+
         // A person asks a few questions; a script that asks dozens is stopped before it costs the owner money.
         $last = 200;
         for ($i = 0; $i < 8 && 200 === $last; ++$i) {
