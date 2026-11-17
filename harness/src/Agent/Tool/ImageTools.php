@@ -27,7 +27,7 @@ final class ImageTools
     }
 
     /**
-     * @param string $query       What the photo should show, in English, e.g. "cozy coffee shop interior"
+     * @param string $query       Two or three English words for what is SEEN in the photo, with the site's subject, e.g. "coffee shop interior", "yoga class"; not the name of a section ("contact", "workshop")
      * @param int    $count       How many candidates (1-10)
      * @param string $orientation landscape, portrait, square or any
      */
@@ -43,7 +43,7 @@ final class ImageTools
     }
 
     /**
-     * @param string $query       What the photo should show, in English
+     * @param string $query       Two or three English words for what is SEEN in the photo, always with the site's subject: "yoga class", "sourdough bread", "ceramic vases". Never the name of the section ("workshop", "sign-up", "contact", "about us" find crowds and offices)
      * @param string $nodeId      Node that gets the image (from the sketch you proposed)
      * @param string $prop        Image prop of the node: "image" (hero, card), "src" (image), "backgroundImage" (section) or "images" (gallery, appends)
      * @param string $label       Short label for the owner, in their language, e.g. "Zdjęcie w nagłówku"
