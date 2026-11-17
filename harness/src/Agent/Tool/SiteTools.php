@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Agent\Tool;
 
-use App\Studio\InventedReviews;
+use App\Studio\InventedFacts;
 use App\Studio\Proposals;
 use App\Studio\SiteClient;
 use App\Studio\Turn;
@@ -45,9 +45,9 @@ final class SiteTools
             return \sprintf('Nothing was saved: %s %s a tool of its own, not an operation. Call %s directly first; then call propose_changes with page and node operations only (e.g. a collection-grid node showing the collection).', implode(', ', $tools), 1 === \count($tools) ? 'is' : 'are', implode(' / ', $tools));
         }
         // Reviews the owner never gave do not reach a sketch, whatever the model was told.
-        [$operations, $invented] = InventedReviews::strip(Proposals::normalise($operations), $this->turn->conversation);
+        [$operations, $invented, $prices] = InventedFacts::strip(Proposals::normalise($operations), $this->turn->conversation, fn (): string => $this->site->siteText());
         if ([] === $operations) {
-            return 'Nothing was saved. '.self::REVIEWS_NOTE;
+            return 'Nothing was saved. '.($invented > 0 ? self::REVIEWS_NOTE : self::PRICES_NOTE);
         }
         // A model sometimes writes the summary in Polish for an English-speaking owner: the generated one is always in the owner's language.
         if (!str_starts_with($this->turn->language, 'pl') && 1 === preg_match('/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/u', $summary)) {
@@ -90,7 +90,7 @@ final class SiteTools
             $proposal->getFocusPath(),
             json_encode($proposal->toArray()['changes']),
             implode('; ', \array_slice($result['created'], 0, 40)) ?: 'nothing new',
-        ).($invented > 0 ? "\n".self::REVIEWS_NOTE : '');
+        ).($invented > 0 ? "\n".self::REVIEWS_NOTE : '').($prices > 0 ? "\n".self::PRICES_NOTE : '');
     }
 
     /**
@@ -183,7 +183,7 @@ final class SiteTools
         if (\count($found) < 2) {
             return 'The site rejected the variants: give 2–3 design directions, e.g. "directions": ["warm", "elegant", "minimal"].';
         }
-        [$operations, $invented] = InventedReviews::strip(Proposals::normalise($operations), $this->turn->conversation);
+        [$operations, $invented, $prices] = InventedFacts::strip(Proposals::normalise($operations), $this->turn->conversation, fn (): string => $this->site->siteText());
         $group = strtolower((string) new \Symfony\Component\Uid\Ulid());
         $names = self::DIRECTION_NAMES[str_starts_with($this->turn->language, 'pl') ? 'pl' : 'en'];
         $made = [];
@@ -213,10 +213,10 @@ final class SiteTools
         $this->turn->emit('variants', ['groupId' => $group, 'items' => $made]);
 
         if ('' !== trim($photo)) {
-            return \sprintf('Showed %d variants side by side: %s. The owner picks one (or asks to mix them); photos for the opening are shown to them right after they pick — do not call offer_images for the opening now.%s', \count($made), implode(', ', array_column($made, 'variantName')), $errors ? "\nFailed: ".implode('; ', $errors) : '').($invented > 0 ? "\n".self::REVIEWS_NOTE : '');
+            return \sprintf('Showed %d variants side by side: %s. The owner picks one (or asks to mix them); photos for the opening are shown to them right after they pick — do not call offer_images for the opening now.%s', \count($made), implode(', ', array_column($made, 'variantName')), $errors ? "\nFailed: ".implode('; ', $errors) : '').($invented > 0 ? "\n".self::REVIEWS_NOTE : '').($prices > 0 ? "\n".self::PRICES_NOTE : '');
         }
 
-        return \sprintf('Showed %d variants side by side: %s. The owner picks one (or asks to mix them).%s', \count($made), implode(', ', array_column($made, 'variantName')), $errors ? "\nFailed: ".implode('; ', $errors) : '').($invented > 0 ? "\n".self::REVIEWS_NOTE : '');
+        return \sprintf('Showed %d variants side by side: %s. The owner picks one (or asks to mix them).%s', \count($made), implode(', ', array_column($made, 'variantName')), $errors ? "\nFailed: ".implode('; ', $errors) : '').($invented > 0 ? "\n".self::REVIEWS_NOTE : '').($prices > 0 ? "\n".self::PRICES_NOTE : '');
     }
 
     /** The hero layout that suits each direction best. */
@@ -269,6 +269,8 @@ final class SiteTools
     }
 
     private const REVIEWS_NOTE = 'IMPORTANT: the testimonials block you wrote was REMOVED by the site and is NOT in the sketch (a site shows only reviews its owner gave, word for word; none were given in this conversation). In your reply do not say the sketch has testimonials, quotes or placeholder reviews. Say only this about it: when the owner sends real words from real people, you will add a "what people say" section.';
+
+    private const PRICES_NOTE = 'IMPORTANT: prices you wrote that the owner never gave were REMOVED by the site (items stay, without a price; a price list with no given price is gone). Do not say the sketch shows prices. Ask the owner for the real ones.';
 
     private const HERO_FOR = ['minimal' => 'typographic', 'editorial' => 'split', 'warm' => 'split', 'bold' => 'image', 'elegant' => 'image', 'fresh' => 'collage'];
 

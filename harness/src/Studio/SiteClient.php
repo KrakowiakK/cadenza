@@ -279,6 +279,14 @@ final class SiteClient
     }
 
     /**
+     * Everything the published site says, as plain text.
+     */
+    public function siteText(): string
+    {
+        return $this->text($this->mcp->get('site')->callTool('site_text'));
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function review(): array

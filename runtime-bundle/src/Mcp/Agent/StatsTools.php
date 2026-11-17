@@ -18,6 +18,7 @@ final class StatsTools
         private readonly \Cadenza\Runtime\Ask\VisitorQuestions $questions,
         private readonly \Cadenza\Runtime\Draft\SiteManager $site,
         private readonly \Cadenza\Runtime\Collection\Collections $collections,
+        private readonly \Cadenza\Runtime\Ask\SiteKnowledge $knowledge,
     ) {
     }
 
@@ -51,5 +52,11 @@ final class StatsTools
         $findings = \Cadenza\Runtime\Site\Review::of($this->site->document(), array_map(static fn ($c): string => $c->getSlug(), $this->collections->all()));
 
         return ['findings' => $findings, 'unansweredQuestions' => $this->questions->summary(5)['unanswered']];
+    }
+
+    #[McpTool(name: 'site_text', description: 'Everything the published site says, as plain text (the same text the visitors\' assistant answers from and /llms.txt serves): pages, facts such as prices and hours, records of collections. Pages for invited people are left out.', annotations: new ToolAnnotations(readOnlyHint: true))]
+    public function siteText(): string
+    {
+        return $this->knowledge->text();
     }
 }

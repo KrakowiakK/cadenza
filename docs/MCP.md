@@ -9,7 +9,7 @@ tokens, so it holds whatever a model is told.
  Claude Code, Cursor,    │  /_cadenza/mcp/guest    read 4 · sketch 1 · ask 1   │   guest token (derived, shown to
  Claude Desktop, any ───▶│  cadenza-site-guest                                 │   the owner in Connections)
  MCP client              │                                                     │
-                         │  /_cadenza/mcp/agent    36 tools: read, drafts,     │
+                         │  /_cadenza/mcp/agent    37 tools: read, drafts,     │
  Cadenza Studio ────────▶│  cadenza-site           collections, media, forms…  │   shared token (.env.local)
  (harness/, MCP client)  │                                                     │
                          │  /_cadenza/mcp/control  publish, discard, restore   │   shared token, used only after
@@ -75,7 +75,7 @@ Cadenza Studio (`harness/`) is a Symfony AI agent whose tools are thin wrappers 
 - forms and members: `forms_list`, `form_answers`, `members_list`, `members_add`
 - blocks and widgets the agent writes: `block_define`, `blocks_list`, `widget_define`, `widgets_list`, `widget_code`,
   `widget_libraries`, `widget_scores`
-- the site about itself: `site_stats`, `site_review` (a check without a model: dead links, placeholders, missing
+- the site about itself: `site_text` (everything the published site says, as plain text), `site_stats`, `site_review` (a check without a model: dead links, placeholders, missing
   descriptions), `visitor_questions` (what visitors asked the assistant and the site could not answer)
 
 ## 3. `control`: the owner's decisions
