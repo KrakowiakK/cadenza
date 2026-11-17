@@ -110,7 +110,7 @@ rec.mark('review2'); await approve(); rec.mark('approved2'); await rec.wait(2200
 // ── 5. a spreadsheet becomes a timetable ──────────────────────────────────────────────────────────────
 if (!(await inView(box()))) { await rec.click(page.locator('button[title^="Open"]').first(), { ms: 800 }); await rec.wait(800); }
 rec.mark('attach');
-const [chooser] = await Promise.all([page.waitForEvent('filechooser'), rec.click(page.locator('button[title="Attach photos"]').first(), { ms: 800 })]);
+const [chooser] = await Promise.all([page.waitForEvent('filechooser'), rec.click(page.locator('button[title^="Attach"]').first(), { ms: 800 })]);
 await chooser.setFiles(XLSX); await rec.wait(600);
 rec.mark('type3');
 await say('Here is my class schedule. Make a timetable with filters. No photos.');
