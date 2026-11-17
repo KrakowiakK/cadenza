@@ -177,7 +177,11 @@ final class OperationApplierTest extends TestCase
         self::assertStringContainsString('nabout (heading)', $wrong->errors[0]);
 
         self::assertTrue($this->applier->apply($doc, [['op' => 'site.update', 'nav' => [['label' => 'O mnie', 'href' => '/#nabout'], ['label' => 'Blog', 'href' => '/blog']]]])->isValid());
-        self::assertFalse($this->applier->apply($doc, [['op' => 'node.insert', 'page' => '/', 'node' => ['type' => 'button', 'props' => ['label' => 'Go', 'href' => '#nowhere']]]])->isValid());
+        // A button of a new block that names a section nobody knows is no reason to refuse the page: its link is
+        // emptied here, and LinkRepair points it at the section it most likely means when the sketch is saved.
+        $button = $this->applier->apply($doc, [['op' => 'node.insert', 'page' => '/', 'node' => ['id' => 'ngo', 'type' => 'button', 'props' => ['label' => 'Go', 'href' => '#nowhere']]]]);
+        self::assertTrue($button->isValid(), implode(' ', $button->errors));
+        self::assertSame('#', Document::findNode($button->document, 'ngo')['props']['href']);
     }
 
     public function testLanguageNextToAMenuNamesTheMenusLanguage(): void

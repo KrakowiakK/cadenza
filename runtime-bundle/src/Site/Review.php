@@ -22,6 +22,9 @@ final class Review
         $paths = array_map(static fn (array $p): string => Document::normalisePath((string) $p['path']), $document['pages'] ?? []);
         $ids = array_flip(Document::ids($document));
         $contact = false;
+        if ([] === ($document['pages'] ?? []) || [] === array_filter($document['pages'], static fn (array $p): bool => [] !== ($p['nodes'] ?? []))) {
+            return [['kind' => 'empty', 'page' => '/', 'node' => null, 'problem' => 'The site has no content yet: there is nothing to check.', 'fix' => 'Ask the owner what the site is for and sketch a first page.']];
+        }
         if (\in_array(trim((string) ($document['name'] ?? '')), ['', 'My site', 'Moja strona'], true) && [] !== ($document['pages'] ?? [])) {
             $findings[] = ['kind' => 'name', 'page' => '/', 'node' => null, 'problem' => 'The site has no name yet (the header and the browser tab say "My site").', 'fix' => 'Ask the owner for the name, then site.update "name".'];
         }

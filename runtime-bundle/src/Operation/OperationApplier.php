@@ -101,6 +101,10 @@ final class OperationApplier
                             return;
                         }
                     }
+                    // No section of that name. A model cannot know the ids of blocks it is only now creating, so this
+                    // is no reason to refuse its whole page: the link falls back to the page it names, or to "#",
+                    // which LinkRepair then points at the section the button most likely means.
+                    $v = '' !== ($m[1] ?? '') ? $m[1] : '#';
                 });
 
                 return $node;
