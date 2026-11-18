@@ -157,7 +157,7 @@ final class ChatController
         $where = ' Open Connections (the plug icon at the top of this panel) to fix it.';
 
         return match (true) {
-            1 === preg_match('/\b40[13]\b|unauthori[sz]ed|invalid.{0,12}key|forbidden/i', $message) => 'The model service refused the key.'.$where,
+            1 === preg_match('/\b40[13]\b|unauthori[sz]ed|authentication fail|invalid.{0,12}(api.?)?(key|token)|(missing|no).{0,12}api.?key|forbidden/i', $message) => 'The model service refused the key.'.$where,
             1 === preg_match('/\b404\b|not found/i', $message) => \sprintf('The model service does not know this address or model: "%s" at %s.', $model, $baseUrl).$where,
             1 === preg_match('/\b402\b|insufficient|credit|balance|quota/i', $message) => 'The model service says the account has no credit left.'.$where,
             1 === preg_match('/\b429\b|rate.?limit|too many/i', $message) => 'The model service says: too many requests. Free plans have daily limits — wait a minute, or connect another model in Connections (the plug icon).',

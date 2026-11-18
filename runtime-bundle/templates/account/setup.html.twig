@@ -6,9 +6,9 @@
 {% set body %}
 <form method="post" data-turbo="false" class="grid gap-4">
     {%- if error %}<p class="rounded-lg bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive" role="alert">{{ ('account.error.' ~ error)|trans({}, 'cadenza', lang) }}</p>{% endif %}
-    <label class="grid gap-1.5 text-sm font-medium">{{ ('account.name'|trans({}, 'cadenza', lang)) }}<input type="text" name="name" autocomplete="name" class="{{ field }}"></label>
+    <label class="grid gap-1.5 text-sm font-medium">{{ ('account.name'|trans({}, 'cadenza', lang)) }}<input type="text" name="name" value="{{ name|default('') }}" autocomplete="name" class="{{ field }}"></label>
     <label class="grid gap-1.5 text-sm font-medium">{{ ('account.email'|trans({}, 'cadenza', lang)) }}<input type="email" name="email" value="{{ email }}" autocomplete="username" required autofocus class="{{ field }}"></label>
-    <label class="grid gap-1.5 text-sm font-medium">{{ ('account.password'|trans({}, 'cadenza', lang)) }}<input type="password" name="password" minlength="10" autocomplete="new-password" required class="{{ field }}"></label>
+    <label class="grid gap-1.5 text-sm font-medium">{{ ('account.password'|trans({}, 'cadenza', lang)) }}<input type="password" name="password" minlength="10" autocomplete="new-password" required aria-describedby="cz-password-hint" class="{{ field }}"><span id="cz-password-hint" class="text-xs font-normal text-muted-foreground">{{ {pl: 'Co najmniej 10 znaków.', de: 'Mindestens 10 Zeichen.'}[lang] ?? 'At least 10 characters.' }}</span></label>
     <label class="grid gap-1.5 text-sm font-medium">{{ ('account.repeat'|trans({}, 'cadenza', lang)) }}<input type="password" name="repeat" minlength="10" autocomplete="new-password" required class="{{ field }}"></label>
     <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
     <twig:Button type="submit" class="h-11 w-full text-base">{{ ('account.create'|trans({}, 'cadenza', lang)) }}</twig:Button>

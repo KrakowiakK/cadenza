@@ -284,9 +284,16 @@ a.cz-card:hover, .cz-card-link:hover { transform: translateY(-3px); box-shadow: 
 .cz-article blockquote { border-left: 3px solid var(--primary); padding-left: 1em; font-style: italic; opacity: .85; margin: 1.2em 0; }
 .cz-article strong { font-weight: 650; }
 
-/* On a wide screen the open studio panel docks beside the page instead of covering its right edge: the owner sees
-   the whole page, the sketch bar (Approve, Reject) and the site's menu while talking to the studio. */
-@media (min-width: 1600px) {
+/* On a laptop or wider screen the open studio panel docks beside the page instead of covering its right edge: the
+   owner sees the whole page, the sketch bar (Approve, Reject) and the site's menu while talking to the studio. The
+   page is then as wide as on a smaller screen, which is how it will look there. Narrower than a laptop, the panel
+   lies over the page as before. */
+@media (min-width: 1280px) {
     body { transition: padding-right 0.35s cubic-bezier(.2,.8,.2,1); }
-    body:has(#cz-panel[data-state="open"]):not(.cz-embed) { padding-right: 452px; }
+    body:has(#cz-panel[data-state="open"]:not([data-wide])):not(.cz-embed) { padding-right: 412px; }
+    #cz-panel:not([data-wide]) .cz-sheet { width: 400px; }
+}
+@media (min-width: 1600px) {
+    body:has(#cz-panel[data-state="open"]:not([data-wide])):not(.cz-embed) { padding-right: 452px; }
+    #cz-panel:not([data-wide]) .cz-sheet { width: 440px; }
 }

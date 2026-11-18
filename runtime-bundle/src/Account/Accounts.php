@@ -49,8 +49,22 @@ final class Accounts
     {
         return array_values(array_filter([
             mb_strlen($password) < self::MIN_PASSWORD ? 'too_short' : null,
-            null !== $email && '' !== $email && str_contains(mb_strtolower($password), mb_strtolower(strstr($email, '@', true) ?: $email)) ? 'like_email' : null,
+            self::likeEmail($password, $email) ? 'like_email' : null,
         ]));
+    }
+
+    /**
+     * A password built around the e-mail's name is a guess away. A short name inside a long password is not: "jury" in a
+     * twenty-character password is fine, "anna.kowalska" or a password that is mostly the name is not.
+     */
+    private static function likeEmail(string $password, ?string $email): bool
+    {
+        $local = mb_strtolower((string) (strstr((string) $email, '@', true) ?: $email));
+        if ('' === $local || !str_contains(mb_strtolower($password), $local)) {
+            return false;
+        }
+
+        return mb_strlen($local) >= 6 || mb_strlen($local) * 2 > mb_strlen($password);
     }
 
     public function createOwner(string $email, string $password, ?string $name = null): Account

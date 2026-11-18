@@ -95,7 +95,7 @@ final class AccountController
             }
         }
 
-        return $this->render('@CadenzaRuntime/account/setup.html.twig', ['email' => $email, 'error' => $error], $error ? 422 : 200);
+        return $this->render('@CadenzaRuntime/account/setup.html.twig', ['email' => $email, 'name' => trim((string) $request->request->get('name', '')), 'error' => $error], $error ? 422 : 200);
     }
 
     #[Route('/_cadenza/account/password', name: 'cadenza_password', methods: ['POST'])]

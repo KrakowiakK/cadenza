@@ -22,6 +22,10 @@ final class VaultEnvVarProcessor implements EnvVarProcessorInterface
     {
         $value = $this->read($name, $getEnv);
 
+        if (str_ends_with($name, '_MODEL') && \is_string($value)) {
+            return self::model($value);
+        }
+
         return str_ends_with($name, '_BASE_URL') && \is_string($value) ? self::baseUrl($value) : $value;
     }
 
@@ -32,6 +36,21 @@ final class VaultEnvVarProcessor implements EnvVarProcessorInterface
     public static function baseUrl(string $url): string
     {
         return preg_replace('~(/v1)?(/chat/completions)?/*$~', '', trim($url)) ?? $url;
+    }
+
+    /**
+     * A model name the way the agent needs it: a whole page travels in one tool call, and services that default to a
+     * few thousand output tokens cut it mid-JSON ("malformed arguments"). A plain name gets a roomy limit; a name that
+     * sets its own is left alone.
+     */
+    public static function model(string $model): string
+    {
+        $model = trim($model);
+        if ('' === $model || 1 === preg_match('/[?&]max_(completion_)?tokens=/', $model)) {
+            return $model;
+        }
+
+        return $model.(str_contains($model, '?') ? '&' : '?').'max_tokens=12000';
     }
 
     private function read(string $name, \Closure $getEnv): mixed

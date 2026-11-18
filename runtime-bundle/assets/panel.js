@@ -10,6 +10,7 @@ const I18N = {
         send: 'Send', open: 'Open panel', pick: 'Point at an element', picking: 'Click elements on the page, Esc to finish',
         newChat: 'New conversation', phoneView: 'On a phone', collapse: 'Collapse to bar', hide: 'Hide', show: 'Show Cadenza',
         slow: 'a full page can take a minute or two',
+        noModel: 'No model yet', connectFirst: 'Connect a model first: pick one in Connections, it takes a minute.',
         idle: 'Ready', thinking: 'Thinking', working: 'Working', waiting: 'Waiting for you',
         hello: 'Hi! I am Cadenza. Tell me what your site should be — or point at anything on the page and tell me what to change.',
         suggestions: ['A website for my café with a menu and opening hours', 'A portfolio for my travel photos', 'A page that explains photosynthesis for high school'],
@@ -53,6 +54,7 @@ const I18N = {
         send: 'Wyślij', open: 'Otwórz panel', pick: 'Wskaż element', picking: 'Klikaj elementy na stronie, Esc kończy',
         newChat: 'Nowa rozmowa', phoneView: 'Na telefonie', collapse: 'Zwiń do paska', hide: 'Schowaj', show: 'Pokaż Cadenzę',
         slow: 'cała strona potrafi zająć minutę lub dwie',
+        noModel: 'Brak modelu', connectFirst: 'Najpierw połącz model: wybierz go w Połączeniach, to zajmuje minutę.',
         idle: 'Gotowa', thinking: 'Myślę', working: 'Pracuję', waiting: 'Czekam na Ciebie',
         hello: 'Cześć! Jestem Cadenza. Opowiedz, jaka ma być Twoja strona — albo wskaż coś na stronie i powiedz, co zmienić.',
         suggestions: ['Strona mojej kawiarni z menu i godzinami otwarcia', 'Portfolio moich zdjęć z podróży', 'Strona, która wytłumaczy fotosyntezę na poziomie matury'],
@@ -603,6 +605,9 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
 
     showModel(model) {
         const el = this.el('model');
+        // Without a connected model the configured default is only a name: say so instead of "Ready · some model".
+        if (this.modelReady === false) { el.textContent = ''; el.title = ''; this.setStatus('waiting', t('noModel')); return; }
+        if (this.lastStatus?.[1] === t('noModel')) this.setStatus('idle');
         el.textContent = '· ' + model;
         el.title = model;
     }
@@ -625,7 +630,7 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
 
     async loadHistory() {
         this.prefillFromLink();
-        this.api('/api/info').then((info) => { this.showModel(info.model); if (info.ready === false) { this.setState('open'); this.servicesCard(); } }).catch(() => {});
+        this.api('/api/info').then((info) => { this.modelReady = info.ready !== false; this.showModel(info.model); if (!this.modelReady) { this.setState('open'); this.servicesCard(null, true); } }).catch(() => {});
         if (!this.conversationId) { this.welcome(); this.setStatus('idle'); this.otherSketches(); return; }
         try {
             const data = await this.api(`/api/conversations/${encodeURIComponent(this.conversationId)}`);
@@ -675,6 +680,14 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
     }
 
     async send(text, { event = null } = {}) {
+        if (this.modelReady === false && !event) {
+            // Nothing can answer yet: keep the owner's words in the box and show where a model is connected.
+            if (text) { this.input.value = text; this.autosize(); }
+            this.setState('open');
+            this.toast(t('connectFirst'), 'error');
+            this.servicesCard(null, true);
+            return;
+        }
         if (this.busy) { if (event) setTimeout(() => this.send(text, { event }), 1500); return; }
         if (this.attachments.some((a) => a.uploading)) { this.toast(t('uploading')); return; }
         const selection = this.selection.map(({ id, label, type }) => ({ id, label, type }));
@@ -1116,7 +1129,7 @@ ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-30
      * Connections: the model the studio thinks with and the services behind pictures — what is connected, what this
      * computer already has (one click), and a key pasted for the rest. Keys go to the studio's vault and never back.
      */
-    async servicesCard(focus = null) {
+    async servicesCard(focus = null, fromTop = false) {
         if (this.showingHistory) this.toggleHistory();
         this.messages.querySelector('[data-cz-services]')?.remove();
         const card = document.createElement('div');
@@ -1128,6 +1141,8 @@ ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-30
         let s;
         try { s = await this.api('/api/services'); } catch (e) { card.innerHTML += `<p class="mt-2 text-rose-600">${escapeHtml(e.message)}</p>`; return; }
         this.renderServices(card, s, focus);
+        // Opened because no model is connected: start at the card's top, where the model is chosen, not at its end.
+        if (fromTop) setTimeout(() => { this.messages.scrollTop = Math.max(0, card.offsetTop - 8); }, 350);
     }
 
     renderServices(card, s, focus = null) {
@@ -1204,7 +1219,7 @@ ${GUEST_MCP ? `<div class="mt-3 text-xs font-semibold uppercase tracking-wider t
                 const data = await res.json();
                 if (!data.ok) { card.querySelectorAll('button').forEach((b) => { b.disabled = false; }); message(data.error ?? t('connectFailed'), false); return; }
                 this.toast(t('connectedNow'));
-                this.api('/api/info').then((info) => this.showModel(info.model)).catch(() => {});
+                this.api('/api/info').then((info) => { this.modelReady = info.ready !== false; this.showModel(info.model); }).catch(() => {});
                 const fresh = await this.api('/api/services');
                 this.renderServices(card, fresh);
                 if (data.warning) message(data.warning, false); else message(t('connectedNow'), true);

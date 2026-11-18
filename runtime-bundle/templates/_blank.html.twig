@@ -4,8 +4,16 @@
     <div class="relative mx-auto max-w-2xl px-6 text-center">
         {%- if missing|default(false) %}
             <p class="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">404</p>
+            {%- if cadenza_state().owner %}
             <h1 class="cz-heading mt-3 text-4xl font-bold tracking-tight">{{ headline }}</h1>
             <p class="mt-4 text-lg text-muted-foreground">{{ 'blank.missing'|trans({}, 'cadenza', lang) }}</p>
+            {%- else %}
+            {#- A visitor followed an old or mistyped link: plain words and a way back, not the path as a headline. -#}
+            {%- set nf = {pl: ['Nie ma takiej strony', 'Adres mógł się zmienić albo zawiera literówkę.', 'Wróć na stronę główną'], de: ['Diese Seite gibt es nicht', 'Die Adresse hat sich vielleicht geändert oder enthält einen Tippfehler.', 'Zur Startseite']}[lang] ?? ['Page not found', 'The address may have changed, or there is a typo in it.', 'Back to the home page'] %}
+            <h1 class="cz-heading mt-3 text-4xl font-bold tracking-tight">{{ nf[0] }}</h1>
+            <p class="mt-4 text-lg text-muted-foreground">{{ nf[1] }}</p>
+            <p class="mt-8"><a href="/" class="cz-btn inline-flex items-center rounded-lg bg-primary px-5 py-2.5 font-medium text-primary-foreground">{{ nf[2] }}</a></p>
+            {%- endif %}
         {%- else %}
             <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Cadenza</p>
             <h1 class="cz-heading mt-3 text-4xl font-bold tracking-tight md:text-5xl">{{ headline|default('blank.title'|trans({}, 'cadenza', lang)) }}</h1>

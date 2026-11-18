@@ -169,7 +169,7 @@ doctor() {
         else maybe "port $port is free (the $name is not running: ./cadenza start)"; fi
     done
     [ -d "$APP/vendor" ] && [ -d "$STUDIO/vendor" ] && ok "dependencies installed" || maybe "dependencies not installed yet: ./cadenza setup"
-    if [ -d "$STUDIO/vendor" ] && (cd "$STUDIO" && vendor/bin/bdi detect drivers >/dev/null 2>&1); then ok "Chrome found (widgets are tried in a browser)"; else maybe "Chrome not found: optional, widgets are then not tried before you see them"; fi
+    if [ -d "$STUDIO/vendor" ] && (cd "$STUDIO" && vendor/bin/bdi detect drivers >/dev/null 2>&1); then ok "Chrome found (widgets are tried in a browser)"; elif [ ! -d "$STUDIO/vendor" ]; then maybe "Chrome: checked after ./cadenza setup (optional, to try the widgets the agent writes)"; else maybe "Chrome not found: optional, widgets are then not tried before you see them"; fi
     if [ -n "${CADENZA_LLM_API_KEY:-}" ] || grep -q '^CADENZA_LLM_API_KEY=.\+' "$STUDIO/.env.local" 2>/dev/null; then ok "model key in the environment"; else maybe "no model key in the environment: connect one in the panel (Connections) after start"; fi
     echo
     if [ "$bad" = 0 ]; then bold "All good."; else fail "Fix the ✗ lines above, then run ./cadenza setup."; fi

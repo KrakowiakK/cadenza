@@ -26,6 +26,7 @@ final class Conductor
 
     private bool $useFallback = false;
     private bool $useVision = false;
+    private bool $askedAgain = false;
 
     public function __construct(
         #[Autowire(service: 'ai.agent.studio')]
@@ -349,6 +350,8 @@ final class Conductor
             - THE SITE'S NAME: while the site is still called "My site", name it in the same sketch (site.update
               "name"): the business's name when the owner gave one, otherwise a plain one made of their own words
               ("Yoga studio in Gdynia"), never an invented brand. It shows in the header and the browser tab.
+              When the owner gave no name, say so in one short sentence of your answer and ask for it ("I called
+              it 'Café' for now — what is your place called?"): the name is the first thing visitors read.
             - ORDER OF WORK: call propose_changes right away (the owner waits to see something); images come after.
             - Images: image props accept only /media/… paths from the site's media library. The owner's own images
               first (attached photos → use_image; library images ONLY when their description/album clearly fits
@@ -562,6 +565,21 @@ final class Conductor
             return $this->useVision
                 ? $this->visionAgent->call($bag, self::options($this->visionModel))->asText()
                 : $this->agent->call($bag, self::options($this->model))->asText();
+        } catch (\Symfony\AI\Platform\Exception\MalformedToolCallException $e) {
+            // The model's tool call arrived broken (cut off, or not JSON): ask once more, and if it happens again say so
+            // in the owner's words instead of showing the parser's.
+            $pl = 'pl' === ($context['language'] ?? 'en');
+            $this->logger?->warning('Malformed tool call: {message}', ['message' => $e->getMessage()]);
+            if (!$this->askedAgain) {
+                $this->askedAgain = true;
+                $this->turn->emit('status', ['text' => $pl ? 'Odpowiedź modelu przyszła uszkodzona — pytam jeszcze raz' : 'The model\'s answer arrived broken — asking again']);
+
+                return $this->callAgent($bag, $context);
+            }
+
+            return [] !== $this->turn->proposals
+                ? ($pl ? 'Część zmian jest w szkicu — zajrzyj do panelu. Resztę model dwa razy oddał uszkodzoną; poproś o nią osobno, w mniejszym kroku.' : 'Part of it is in the sketch — have a look in the panel. The model sent the rest back broken twice; ask for it separately, in a smaller step.')
+                : ($pl ? 'Model dwa razy oddał uszkodzoną odpowiedź, więc nic nie zmieniłem. Spróbuj poprosić o mniejszy krok — albo połącz mocniejszy model w Połączeniach.' : 'The model sent a broken answer twice, so I changed nothing. Try asking for a smaller step — or connect a stronger model in Connections.');
         } catch (\Symfony\AI\Agent\Exception\MaxIterationsExceededException) {
             // A model that does not stop when told to (small local ones) runs out of tool calls: the owner hears what
             // came of the turn instead of an error.
