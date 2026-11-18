@@ -61,6 +61,7 @@ final class CadenzaRuntimeBundle extends AbstractBundle
         }
         $builder->setParameter('env(CADENZA_ASK_PER_DAY)', '400');
         $builder->setParameter('env(CADENZA_GUEST_SKETCH_HOURS)', '0');
+        $builder->setParameter('env(CADENZA_DEMO_URL)', '');
         $builder->prependExtensionConfig('framework', [
             'asset_mapper' => ['paths' => [$this->getPath().'/assets' => '@cadenza/runtime']],
             'messenger' => [

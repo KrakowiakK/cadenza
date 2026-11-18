@@ -34,13 +34,16 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
         private readonly \Cadenza\Runtime\Block\CustomBlocks $customBlocks,
         private readonly \Cadenza\Runtime\Widget\Widgets $widgets,
         private readonly ?IconRendererInterface $icons = null,
+        /** A public demo says what it is: the address of the project, shown to visitors in a small note. Empty = no note. */
+        #[Autowire('%env(CADENZA_DEMO_URL)%')]
+        private readonly string $demoUrl = '',
         private readonly ?\Psr\Log\LoggerInterface $logger = null,
     ) {
     }
 
     public function getGlobals(): array
     {
-        return ['cadenza_harness_url' => $this->harnessUrl, 'cadenza_token' => $this->token, 'cadenza_guest_token' => \Cadenza\Runtime\EventSubscriber\McpGuardSubscriber::guestToken($this->token)];
+        return ['cadenza_harness_url' => $this->harnessUrl, 'cadenza_token' => $this->token, 'cadenza_guest_token' => \Cadenza\Runtime\EventSubscriber\McpGuardSubscriber::guestToken($this->token), 'cadenza_demo_url' => $this->demoUrl];
     }
 
     public function getFilters(): array

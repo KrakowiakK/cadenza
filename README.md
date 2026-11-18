@@ -57,7 +57,9 @@ agent writes).
    paste a key for Ollama Cloud, OpenRouter (both have free plans), OpenAI, DeepSeek or any OpenAI-compatible API.
    Prefer the environment? Start it with three variables instead, for example:
    `CADENZA_LLM_BASE_URL=https://api.deepseek.com CADENZA_LLM_MODEL=deepseek-flash CADENZA_LLM_API_KEY=… ./cadenza start`
-3. **Say something** in the bar at the bottom: *"I run a small yoga studio in Gdynia. How could my website look?"* Free
+   **No API key at all?** Skip to step 4: Claude Code, Cursor or any MCP client can build the first page over MCP
+   (a dental practice's home page took Claude Code 21 seconds in our test), and approving its sketch needs no model.
+3. **Say something** in the bar at the bottom: *"I repair bicycles in Leeds. How could the website of my workshop look?"* (or your café, your band, your school's chess club) Free
    cloud models need 20–60 s for the three looks and a few minutes for a full page; paid or local fast models are quicker.
    Keep a look and the panel offers photos for the opening (from Wikimedia Commons; a free Pexels key in *Connections*
    gives stock-quality ones).

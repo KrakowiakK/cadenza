@@ -105,5 +105,18 @@
         </div>
     </footer>
     {%- if state.owner and not state.embed %}{% include '@CadenzaRuntime/panel/_panel.html.twig' %}{% endif %}
+{#- A public demo says what it is: a small note for visitors with what to try and where the project lives. -#}
+{%- if cadenza_demo_url and not state.owner and not state.embed and not state.isSketch %}
+<aside id="cz-demo-note" class="cz-ui fixed bottom-3 left-3 z-40 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-black/10 bg-white/95 px-4 py-3 text-[13px] leading-snug text-neutral-800 shadow-xl backdrop-blur" style="font-family: ui-sans-serif, system-ui, sans-serif">
+    <button type="button" aria-label="Close" onclick="this.parentElement.remove()" class="absolute right-2 top-1.5 text-neutral-400 hover:text-neutral-700">&times;</button>
+    <p class="pr-5 font-semibold">This site was built by talking to it.</p>
+    <p class="mt-0.5 text-neutral-600">A live demo of <a href="{{ cadenza_demo_url }}" class="font-medium underline">Cadenza</a>: a Symfony AI agent proposed every section as a sketch, a person approved it.</p>
+    <p class="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-medium">
+        <a href="#cz-ask" onclick="var a=document.querySelector('[data-cz-ask]');if(a){a.scrollIntoView({behavior:'smooth',block:'center'});a.querySelector('input').focus({preventScroll:true});return false}" class="underline">Ask the site a question</a>
+        <a href="{{ cadenza_demo_url }}#try-it-now-without-installing" class="underline">Connect your own agent (MCP)</a>
+        <a href="{{ cadenza_demo_url }}" class="underline">Source</a>
+    </p>
+</aside>
+{%- endif %}
 </body>
 </html>

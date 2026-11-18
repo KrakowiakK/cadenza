@@ -10,6 +10,7 @@ const I18N = {
         send: 'Send', open: 'Open panel', pick: 'Point at an element', picking: 'Click elements on the page, Esc to finish',
         newChat: 'New conversation', phoneView: 'On a phone', collapse: 'Collapse to bar', hide: 'Hide', show: 'Show Cadenza',
         slow: 'a full page can take a minute or two',
+        stageTitle: 'Pick the look you like', stageHint: 'The same content in each. You can change anything afterwards.',
         noModel: 'No model yet', connectFirst: 'Connect a model first: pick one in Connections, it takes a minute.',
         idle: 'Ready', thinking: 'Thinking', working: 'Working', waiting: 'Waiting for you',
         hello: 'Hi! I am Cadenza. Tell me what your site should be — or point at anything on the page and tell me what to change.',
@@ -35,16 +36,16 @@ const I18N = {
         connectedOk: 'Connected', connectFailed: 'Connection failed',
         fromPhone: 'Photos from your phone', scanQr: 'Scan with your phone camera and pick photos from the gallery.', waitingPhone: 'Waiting for the phone…',
         phoneOpened: 'Phone connected — pick photos', receiving: 'Receiving', photos: 'photos', phoneDone: 'Photos received',
-        ownAgent: 'Your own agent (MCP)', ownAgentHint: 'Claude Code, Claude Desktop, Cursor: any MCP client can read this site and leave sketches. It cannot publish. Its sketches wait here for your decision.', copy: 'Copy', copied: 'Copied', otherClients: 'Other clients (JSON)', leftSketch: 'left a sketch for you', by: 'by',
+        ownAgent: 'Your own agent (MCP)', ownAgentHint: 'Claude Code, Claude Desktop, Cursor: any MCP client can read this site and build on it, from a first page to a small fix, with no API key here. It leaves sketches and cannot publish: they wait in this panel for your decision.', copy: 'Copy', copied: 'Copied', otherClients: 'Other clients (JSON)', leftSketch: 'left a sketch for you', by: 'by',
         variants: 'Variants', choose: 'Choose this one', chosen: 'Chosen', open: 'Open',
         retry: 'Try again', modelBusy: 'The model did not answer in time.', fallbackUsed: 'Main model busy — answered by the fallback model',
         services: 'Connections', servicesHint: 'What Cadenza uses to think and to find pictures. Keys stay encrypted on this computer.',
-        modelNow: 'Model', notConnected: 'No model connected yet — pick one below, it takes a minute.', foundHere: 'Found on this computer',
+        modelNow: 'Model', notConnected: 'No model connected yet — pick one below, it takes a minute. No API key? Claude Code, Cursor or another agent of yours can build the site instead: see “Your own agent” at the end of this card.', foundHere: 'Found on this computer',
         useThis: 'Use', pasteKey: 'Or connect with a key', keyPlaceholder: 'Paste the API key', connect: 'Connect', whereKey: 'Where do I get a key?',
         featureServices: 'Pictures', disconnect: 'Disconnect', connecting: 'Checking…', noModels: 'no models yet — download one first',
         chooseModel: 'Model', baseUrl: 'API address (https://…)', modelName: 'Model name', keyInEnv: 'key already set on this computer',
         runningHere: 'running on this computer', signedInPlan: 'signed in with your plan', signedInKey: 'signed in', notSignedIn: 'installed, not signed in',
-        subscriptionUse: 'can write games and widgets with your plan', connectedNow: 'Connected', fromEnvironment: 'from the start script', fromVault: 'saved in Cadenza', fromDotenv: 'from a .env file',
+        subscriptionUse: 'writes games here; to build the site with it, use “Your own agent” below', connectedNow: 'Connected', fromEnvironment: 'from the start script', fromVault: 'saved in Cadenza', fromDotenv: 'from a .env file',
         freePlan: 'free plan', localModel: 'on this computer', useForGames: 'Write games with it', writesGames: 'writes your games and widgets', stopUsing: 'Stop',
         instagramPhone: 'Your Instagram photos are in your phone\'s gallery — the fastest way:', exportAll: 'Everything from Instagram at once (export)', openExport: 'Open Instagram export',
     },
@@ -54,6 +55,7 @@ const I18N = {
         send: 'Wyślij', open: 'Otwórz panel', pick: 'Wskaż element', picking: 'Klikaj elementy na stronie, Esc kończy',
         newChat: 'Nowa rozmowa', phoneView: 'Na telefonie', collapse: 'Zwiń do paska', hide: 'Schowaj', show: 'Pokaż Cadenzę',
         slow: 'cała strona potrafi zająć minutę lub dwie',
+        stageTitle: 'Wybierz wygląd, który Ci się podoba', stageHint: 'W każdym ta sama treść. Wszystko można potem zmienić.',
         noModel: 'Brak modelu', connectFirst: 'Najpierw połącz model: wybierz go w Połączeniach, to zajmuje minutę.',
         idle: 'Gotowa', thinking: 'Myślę', working: 'Pracuję', waiting: 'Czekam na Ciebie',
         hello: 'Cześć! Jestem Cadenza. Opowiedz, jaka ma być Twoja strona — albo wskaż coś na stronie i powiedz, co zmienić.',
@@ -79,16 +81,16 @@ const I18N = {
         connectedOk: 'Połączono', connectFailed: 'Nie udało się połączyć',
         fromPhone: 'Zdjęcia z telefonu', scanQr: 'Zeskanuj aparatem telefonu i wybierz zdjęcia z galerii.', waitingPhone: 'Czekam na telefon…',
         phoneOpened: 'Telefon połączony — wybierz zdjęcia', receiving: 'Odbieram', photos: 'zdjęć', phoneDone: 'Odebrano zdjęcia',
-        ownAgent: 'Twój własny agent (MCP)', ownAgentHint: 'Claude Code, Claude Desktop, Cursor: każdy klient MCP może czytać tę stronę i zostawiać szkice. Nie może publikować. Jego szkice czekają tutaj na Twoją decyzję.', copy: 'Kopiuj', copied: 'Skopiowano', otherClients: 'Inne klienty (JSON)', leftSketch: 'zostawił(a) dla Ciebie szkic', by: 'od',
+        ownAgent: 'Twój własny agent (MCP)', ownAgentHint: 'Claude Code, Claude Desktop, Cursor: każdy klient MCP może czytać tę stronę i ją budować, od pierwszej podstrony po drobną poprawkę, bez klucza API tutaj. Zostawia szkice i nie może publikować: czekają w tym panelu na Twoją decyzję.', copy: 'Kopiuj', copied: 'Skopiowano', otherClients: 'Inne klienty (JSON)', leftSketch: 'zostawił(a) dla Ciebie szkic', by: 'od',
         variants: 'Warianty', choose: 'Wybieram ten', chosen: 'Wybrany', open: 'Otwórz',
         retry: 'Spróbuj ponownie', modelBusy: 'Model nie odpowiedział na czas.', fallbackUsed: 'Główny model zajęty — odpowiada model zapasowy',
         services: 'Połączenia', servicesHint: 'Z czego Cadenza korzysta, żeby myśleć i szukać zdjęć. Klucze zostają zaszyfrowane na tym komputerze.',
-        modelNow: 'Model', notConnected: 'Nie ma jeszcze połączonego modelu — wybierz jeden poniżej, to chwila.', foundHere: 'Znalezione na tym komputerze',
+        modelNow: 'Model', notConnected: 'Nie ma jeszcze połączonego modelu — wybierz jeden poniżej, to chwila. Nie masz klucza API? Stronę może zbudować Twój własny agent (Claude Code, Cursor): zobacz „Twój własny agent” na końcu tej karty.', foundHere: 'Znalezione na tym komputerze',
         useThis: 'Użyj', pasteKey: 'Albo połącz kluczem', keyPlaceholder: 'Wklej klucz API', connect: 'Połącz', whereKey: 'Skąd wziąć klucz?',
         featureServices: 'Zdjęcia', disconnect: 'Odłącz', connecting: 'Sprawdzam…', noModels: 'brak modeli — najpierw pobierz jakiś',
         chooseModel: 'Model', baseUrl: 'Adres API (https://…)', modelName: 'Nazwa modelu', keyInEnv: 'klucz jest już na tym komputerze',
         runningHere: 'działa na tym komputerze', signedInPlan: 'zalogowane Twoim planem', signedInKey: 'zalogowane', notSignedIn: 'zainstalowane, niezalogowane',
-        subscriptionUse: 'może pisać gry i widżety w ramach Twojego planu', connectedNow: 'Połączono', fromEnvironment: 'ze skryptu startowego', fromVault: 'zapisane w Cadenzie', fromDotenv: 'z pliku .env',
+        subscriptionUse: 'pisze tu gry; by budować nim stronę, użyj sekcji „Twój własny agent” poniżej', connectedNow: 'Połączono', fromEnvironment: 'ze skryptu startowego', fromVault: 'zapisane w Cadenzie', fromDotenv: 'z pliku .env',
         freePlan: 'darmowy plan', localModel: 'na tym komputerze', useForGames: 'Pisz nią gry', writesGames: 'pisze Twoje gry i widżety', stopUsing: 'Wyłącz',
         instagramPhone: 'Twoje zdjęcia z Instagrama są w galerii telefonu — najszybciej tak:', exportAll: 'Wszystko z Instagrama naraz (eksport)', openExport: 'Otwórz eksport Instagrama',
     },
@@ -695,6 +697,8 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         if (!text) text = attachments.some((a) => a.kind === 'sketch') ? t('sketchPrompt') : '';
         if (event) this.addNote(text);
         else this.addUser(text, selection, attachments);
+        // The phone preview answered the last question; the next one is about the page again.
+        if (this.phoneOpen) this.phoneView(false);
         this.lastRequest = { text, event, attachments };
         this.clearSelection();
         this.attachments = [];
@@ -1074,6 +1078,9 @@ ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-30
 
     variantsCard(container, data) {
         this.pickedVariants ??= new Set();
+        // The looks are shown here: the card of sketches waiting elsewhere must not list them a second time.
+        for (const v of data.items) if (!this.proposals.has(v.proposalId)) this.proposals.set(v.proposalId, v);
+        this.otherSketches();
         const card = document.createElement('div');
         card.className = 'cz-msg -mx-1 flex flex-col gap-3';
         card.innerHTML = `<div class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">${t('variants')}</div>` + data.items.map((v) => {
@@ -1103,6 +1110,7 @@ ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-30
             el.querySelector('[data-do="open"]').addEventListener('click', () => this.showSketch(v.draftId, v.focusPath));
             el.querySelector('[data-do="pick"]').addEventListener('click', async () => {
                 try {
+                    document.getElementById('cz-stage')?.remove();
                     const res = await this.api(`/api/variants/${encodeURIComponent(data.groupId)}/pick`, { proposalId: v.proposalId });
                     this.pickedVariants.add(v.proposalId);
                     card.querySelectorAll('[data-variant]').forEach((other) => {
@@ -1122,7 +1130,57 @@ ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-30
                 }
             });
         }
+        this.variantsStage(data, card);
         this.scrollDown();
+    }
+
+    /**
+     * The looks, large and side by side where the page is: the moment the owner chooses deserves more than three
+     * thumbnails in the panel. Beside a docked panel only (a laptop or wider); the cards in the panel stay as they are.
+     */
+    variantsStage(data, card) {
+        document.getElementById('cz-stage')?.remove();
+        const items = data.items.filter((v) => !this.pickedVariants.has(v.proposalId));
+        if (items.length < 2 || innerWidth < 1280 || store.get('stage') === data.groupId) return;
+        const stage = document.createElement('div');
+        stage.id = 'cz-stage';
+        stage.className = 'cz-ui fixed inset-y-0 left-0 z-40 flex flex-col bg-background/95 text-foreground backdrop-blur';
+        stage.innerHTML = `<div class="flex items-center justify-between gap-4 px-8 pb-4 pt-6">
+  <div><div class="text-xl font-semibold">${t('stageTitle')}</div><div class="text-sm text-muted-foreground">${t('stageHint')}</div></div>
+  <button type="button" data-do="close" title="${t('hide')}" class="flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('x')}</button>
+</div>
+<div class="grid min-h-0 flex-1 gap-5 px-8 pb-8" style="grid-template-columns: repeat(${items.length}, minmax(0, 1fr))">${items.map((v) => {
+            const url = new URL(v.focusPath || '/', location.origin);
+            url.searchParams.set('cz_draft', v.draftId);
+            url.searchParams.set('cz_embed', '1');
+            return `<div data-stage-variant="${escapeHtml(v.proposalId)}" class="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl">
+  <div data-frame class="relative min-h-0 flex-1 overflow-hidden bg-muted">
+    <iframe src="${escapeHtml(url.pathname + url.search)}" tabindex="-1" class="pointer-events-none absolute left-0 top-0 w-[1280px] origin-top-left border-0"></iframe>
+  </div>
+  <div class="flex items-center gap-2 border-t border-border p-4">
+    <div class="min-w-0 flex-1 truncate text-base font-semibold">${escapeHtml(v.variantName ?? '')}</div>
+    <button type="button" data-do="open" title="${t('open')}" class="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border hover:bg-muted">${icon('eye', 'size-4')}</button>
+    <button type="button" data-do="pick" class="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-lg bg-foreground px-3 py-2 text-sm font-semibold text-background">${icon('check', 'size-4')}${t('choose')}</button>
+  </div>
+</div>`;
+        }).join('')}</div>`;
+        document.body.append(stage);
+        // Each preview is the page at 1280 px, scaled to its column and as tall as the column shows.
+        const fit = () => stage.querySelectorAll('[data-frame]').forEach((box) => {
+            const scale = box.clientWidth / 1280;
+            const frame = box.querySelector('iframe');
+            frame.style.transform = `scale(${scale})`;
+            frame.style.height = `${Math.ceil(box.clientHeight / scale)}px`;
+        });
+        requestAnimationFrame(fit);
+        new ResizeObserver(fit).observe(stage);
+        stage.querySelector('[data-do="close"]').addEventListener('click', () => { store.set('stage', data.groupId); stage.remove(); });
+        for (const v of items) {
+            const el = stage.querySelector(`[data-stage-variant="${CSS.escape(v.proposalId)}"]`);
+            const inPanel = (action) => card.querySelector(`[data-variant="${CSS.escape(v.proposalId)}"] [data-do="${action}"]`)?.click();
+            el.querySelector('[data-do="pick"]').addEventListener('click', () => inPanel('pick'));
+            el.querySelector('[data-do="open"]').addEventListener('click', () => { stage.remove(); inPanel('open'); });
+        }
     }
 
     /**

@@ -303,3 +303,9 @@ a.cz-card:hover, .cz-card-link:hover { transform: translateY(-3px); box-shadow: 
     #cz-panel .cz-sheet > header button { width: 1.75rem; height: 1.75rem; }
     #cz-panel .cz-sheet > header { gap: 0.125rem; padding-left: 0.75rem; padding-right: 0.5rem; }
 }
+/* The looks to choose from fill the page's place, beside the docked panel. */
+#cz-stage { right: 0; }
+@media (min-width: 1280px) { body:has(#cz-panel[data-state="open"]) #cz-stage { right: 412px; } }
+@media (min-width: 1600px) { body:has(#cz-panel[data-state="open"]) #cz-stage { right: 452px; } }
+/* The composer's hint stays on one line in the narrower panel. */
+#cz-panel textarea[data-cz="input"]::placeholder { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
