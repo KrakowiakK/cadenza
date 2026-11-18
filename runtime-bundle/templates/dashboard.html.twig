@@ -140,8 +140,8 @@
 
     {#- What visitors asked the assistant: the unanswered ones are what the site is missing -#}
     {%- if askEnabled or questions.total %}
-    {%- set q = pl ? {title: 'Pytania odwiedzających', sub: 'Asystent odpowiada tylko z treści strony. Pytania bez odpowiedzi pokazują, czego na stronie brakuje.', none: 'Nikt jeszcze o nic nie zapytał.', missing: 'Bez odpowiedzi na stronie', recent: 'Ostatnie pytania', total: 'pytań', week: 'w tym tygodniu', noAnswer: 'bez odpowiedzi', hint: 'Powiedz w panelu: „dodaj odpowiedzi na te pytania”.', allAnswered: 'Strona odpowiedziała na wszystkie pytania.'}
-        : {title: 'Questions from visitors', sub: 'The assistant answers only from what the site says. Unanswered questions show what the site is missing.', none: 'Nobody has asked anything yet.', missing: 'Not answered by the site', recent: 'Latest questions', total: 'questions', week: 'this week', noAnswer: 'no answer', hint: 'Say in the panel: “add answers to these questions”.', allAnswered: 'The site answered every question.'} -%}
+    {%- set q = pl ? {title: 'Pytania odwiedzających', sub: 'Asystent odpowiada tylko z treści strony. Pytania bez odpowiedzi pokazują, czego na stronie brakuje.', none: 'Nikt jeszcze o nic nie zapytał.', missing: 'Bez odpowiedzi na stronie', recent: 'Ostatnie pytania', total: 'pytań', week: 'w tym tygodniu', noAnswer: 'bez odpowiedzi', hint: 'Kliknij pytanie, dopisz odpowiedź i wyślij: agent doda ją do strony jako szkic.', answer: 'Odpowiedz na stronie', say: 'Odwiedzający pytają: „%q%”. Strona na to nie odpowiada. Dodaj odpowiedź do strony jako szkic. Odpowiedź: ', allAnswered: 'Strona odpowiedziała na wszystkie pytania.'}
+        : {title: 'Questions from visitors', sub: 'The assistant answers only from what the site says. Unanswered questions show what the site is missing.', none: 'Nobody has asked anything yet.', missing: 'Not answered by the site', recent: 'Latest questions', total: 'questions', week: 'this week', noAnswer: 'no answer', hint: 'Click a question, add the answer and send it: the agent puts it on the site as a sketch.', answer: 'Answer it on the site', say: 'Visitors ask: “%q%”. The site does not answer it. Add the answer to the site as a sketch. The answer: ', allAnswered: 'The site answered every question.'} -%}
     <div class="mt-4 {{ card }}">
         <div class="flex flex-wrap items-baseline justify-between gap-2">
             <h2 class="font-semibold">{{ q.title }}</h2>
@@ -155,7 +155,7 @@
                 <h3 class="text-sm font-medium">{{ q.missing }} · {{ questions.unanswered }}</h3>
                 {%- if questions.missing is empty %}<p class="mt-2 text-sm text-muted-foreground">{{ q.allAnswered }}</p>
                 {%- else %}
-                <ul class="mt-2 space-y-1.5 text-sm">{% for x in questions.missing %}<li class="flex gap-2"><span class="text-amber-600">?</span><span>{{ x.question }}</span></li>{% endfor %}</ul>
+                <ul class="mt-2 space-y-1.5 text-sm">{% for x in questions.missing %}<li class="flex gap-2"><span class="text-amber-600">?</span><a data-turbo="false" href="/?cz_say={{ q.say|replace({'%q%': x.question})|url_encode }}" title="{{ q.answer }}" class="group min-w-0 flex-1 hover:underline">{{ x.question }} <span class="whitespace-nowrap text-xs text-amber-700 opacity-70 group-hover:opacity-100">{{ q.answer }} →</span></a></li>{% endfor %}</ul>
                 <p class="mt-3 text-xs text-muted-foreground">{{ q.hint }}</p>
                 {%- endif %}
             </div>

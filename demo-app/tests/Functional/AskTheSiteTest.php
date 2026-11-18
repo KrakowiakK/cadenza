@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Functional;
 
 use Cadenza\Runtime\Ask\VisitorQuestions;
+use Cadenza\Runtime\Entity\Account;
 use Cadenza\Runtime\Draft\SiteManager;
 use Cadenza\Runtime\Site\Document;
 use Doctrine\ORM\EntityManagerInterface;
@@ -105,5 +106,19 @@ final class AskTheSiteTest extends WebTestCase
             $last = $ask('Is there parking?')[0];
         }
         self::assertSame(429, $last);
+
+        // The owner's dashboard turns every unanswered question into a link that opens the panel with the question
+        // written out, ready for the owner's answer.
+        $owner = new Account('owner@example.com', [Account::OWNER]);
+        $em->persist($owner);
+        $em->flush();
+        $client->loginUser($owner);
+        $crawler = $client->request('GET', '/_cadenza/dashboard');
+        self::assertResponseIsSuccessful();
+        $link = $crawler->filter('a[href*="cz_say="]')->first();
+        self::assertStringContainsString('Is there parking?', $link->text());
+        parse_str((string) parse_url((string) $link->attr('href'), \PHP_URL_QUERY), $query);
+        self::assertStringStartsWith('Visitors ask: “Is there parking?”', $query['cz_say']);
+        self::assertStringEndsWith('The answer: ', $query['cz_say']);
     }
 }

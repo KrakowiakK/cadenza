@@ -607,7 +607,24 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         el.title = model;
     }
 
+    /**
+     * A link from the dashboard ("answer this question on the site") arrives as ?cz_say=…: the text is put into the
+     * composer for the owner to finish and send. Nothing is sent by a link alone.
+     */
+    prefillFromLink() {
+        const url = new URL(location.href);
+        const say = (url.searchParams.get('cz_say') ?? '').slice(0, 600);
+        if (!say) return;
+        url.searchParams.delete('cz_say');
+        history.replaceState(history.state, '', url.pathname + url.search + url.hash);
+        this.setState('open');
+        this.input.value = say;
+        this.autosize();
+        setTimeout(() => { this.input.focus(); this.input.setSelectionRange(say.length, say.length); }, 300);
+    }
+
     async loadHistory() {
+        this.prefillFromLink();
         this.api('/api/info').then((info) => { this.showModel(info.model); if (info.ready === false) { this.setState('open'); this.servicesCard(); } }).catch(() => {});
         if (!this.conversationId) { this.welcome(); this.setStatus('idle'); this.otherSketches(); return; }
         try {

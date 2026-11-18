@@ -75,8 +75,10 @@ description is in [Quick start](#quick-start-5-minutes) and [Models](#models) be
   - *An assistant for visitors.* *"Add an assistant that answers my guests' questions."* Visitors type a question in
     their own words (in any language) and get a short answer in about a second, taken only from what the published site
     says: the model receives that text and the question, no tools, nothing of the owner's, and pages for invited people
-    are left out. What the site could not answer is kept: the dashboard lists it, and *"What do visitors ask that my
-    site does not answer?"* gets the list from the agent, which then asks the owner for the facts and sketches them in.
+    are left out. What the site could not answer is kept: the dashboard lists it, and each unanswered question is a
+    link that opens the panel with the question written out; the owner types the answer and the agent puts it on the
+    site as a sketch (seven seconds in our test). *"What do visitors ask that my site does not answer?"* gets the same
+    list from the agent in the conversation.
     The site learns from its visitors, and the owner still approves every word. Rate limits per visitor and per day
     keep a script from spending the owner's model budget.
   - *Countdown* to an event with an *Add to calendar* file, and an *announcement bar* that hides itself after a date.
@@ -232,6 +234,18 @@ More: [docs/MCP.md](docs/MCP.md) (the three MCP servers, their tools, and what a
 script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in the betas).
 
 ## What Symfony AI and MCP unlocked
+
+Three things in Cadenza exist only because of them:
+
+- **Trust drawn as servers, not as a prompt.** The MCP Bundle lets one Symfony app expose several servers with separate
+  registries. That turned "the agent may propose but not publish" from a sentence in a system prompt into a fact of the
+  deployment: three endpoints, three tokens, and a tool that is simply absent where it must not be called.
+- **The owner's own agent, for free.** Because the studio already drove the site only through MCP, opening it to Claude
+  Code or Cursor took a third, narrower server and no new protocol: a foreign agent's sketch lands in the same review
+  flow as the studio's.
+- **One agent loop, any model.** Symfony AI's Agent, Toolbox events and the generic Platform bridge let the same 37
+  tools run on a paid API, a free model, or a model on the owner's own computer, with the policy ("sketch first",
+  budgets, a live trace) in event listeners instead of in each tool.
 
 | Piece | Used for |
 |---|---|
