@@ -13,6 +13,9 @@ The README has the short list; this is the long one.
   bento, steps, timeline, team, pricing, testimonials, logos, visit us, quiz, form, countdown, map, collection
   grid/table, call to action)
   and six **design directions** (minimal, editorial, warm, bold, elegant, fresh) built on UX Toolkit's shadcn kit.
+  Each direction composes the page its own way (opening, type scale, backgrounds, picture shapes, header, footer
+  signature, motion) in plain CSS on the patterns' hooks, so the look never depends on what the model writes; the
+  three looks offered side by side always come from different families (`SiteTools::contrasting`).
 - **Your data, not lorem ipsum.**
   - *Spreadsheet → shop/catalogue*: columns are analysed (price, category, image, date…), rows become records with
     their own pages, shown as cards with filter chips and search or as a sortable table.

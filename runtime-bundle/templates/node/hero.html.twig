@@ -10,6 +10,17 @@
 {%- set actions -%}
     {%- if node.slots.actions|default([]) is not empty %}<div class="mt-10 flex flex-wrap gap-3 {{ centered ? 'justify-center' : '' }}">{{ cadenza_slot(node, 'actions') }}</div>{% endif %}
 {%- endset -%}
+{#- What a design direction paints behind and around the opening (cadenza.css, [data-cz-style] .cz-hero-art): light,
+    lines, shapes, a strip of the site's own name. Decoration only: no words but the ones the owner gave. -#}
+{%- set siteName = cadenza_state().document.name|default('') -%}
+{#- A long headline is set smaller: the scale of a look is meant for a few words. -#}
+{%- set long = props.title|default('')|length > 44 ? ' cz-long cz-longer' : (props.title|default('')|length > 26 ? ' cz-long' : '') -%}
+{%- set art -%}
+<div class="cz-hero-art" aria-hidden="true" data-site="{{ siteName }}"><i></i><i></i><i></i></div>
+{%- endset -%}
+{%- set strip -%}
+<div class="cz-hero-strip" aria-hidden="true"><div>{% for i in 1..8 %}<span>{{ siteName }}</span><span>{{ props.eyebrow ?: props.title }}</span>{% endfor %}</div></div>
+{%- endset -%}
 {%- set text -%}
     {%- if props.eyebrow %}<p class="cz-eyebrow mb-5 {{ variant == 'image' ? '!text-white/85' : '' }}">{{ props.eyebrow }}</p>{% endif %}
     <h1 class="cz-display {{ variant == 'typographic' ? 'text-5xl md:text-8xl' : 'text-4xl md:text-7xl' }}">{{ props.title }}</h1>
@@ -18,17 +29,17 @@
 {%- endset -%}
 
 {%- if variant == 'image' and props.image %}
-<section class="relative overflow-hidden text-white {{ heights[props.height] }}">
+<section class="cz-hero{{ long }} cz-hero--image relative overflow-hidden text-white {{ heights[props.height] }}">{{ art }}
     <img fetchpriority="high" decoding="async" src="{{ props.image }}" alt="" class="absolute inset-0 h-full w-full scale-105 object-cover" style="animation: cz-hero-zoom 18s ease-out both">
     <div class="absolute inset-0 bg-gradient-to-b from-black/25 via-black/35 to-black/70"></div>
     <div class="relative mx-auto w-full max-w-6xl px-6 {{ centered ? 'text-center' : '' }}"><div class="{{ centered ? 'mx-auto max-w-4xl' : 'max-w-3xl' }}">{{ text }}</div></div>
 </section>
 {%- elseif variant == 'split' %}
-<section class="relative overflow-hidden {{ heights[props.height] }}">
+<section class="cz-hero{{ long }} cz-hero--split relative overflow-hidden {{ heights[props.height] }}">{{ art }}
     <div class="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 md:grid-cols-[1.1fr_1fr]">
         <div>{{ text }}</div>
-        <div class="relative">
-            <div class="absolute -inset-4 -z-10 rounded-[calc(var(--radius)*2)] bg-primary/10 blur-2xl"></div>
+        <div class="cz-hero-media relative">
+            <div class="cz-hero-glow absolute -inset-4 -z-10 rounded-[calc(var(--radius)*2)] bg-primary/10 blur-2xl"></div>
             {%- if heroWidget and not props.image %}{% include '@CadenzaRuntime/node/_widget_frame.html.twig' with {widget: heroWidget, name: props.widget, class: 'aspect-[4/5] w-full'} %}
             {%- elseif props.image %}<img fetchpriority="high" decoding="async" src="{{ props.image }}" alt="" class="cz-img aspect-[4/5] w-full object-cover shadow-2xl md:aspect-[4/5]">
             {%- else %}<div class="cz-img flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 border-2 border-dashed border-current/15 bg-muted/60 text-muted-foreground">{{ cadenza_icon('image-plus', 'size-9 opacity-50') }}<span class="max-w-[16rem] px-4 text-center text-sm">Photo goes here. Ask the studio to find one, or leave it out and the page uses text only.</span></div>{% endif %}
@@ -37,7 +48,7 @@
 </section>
 {%- elseif variant == 'collage' %}
 {%- set imgs = props.images|default([])|merge(props.image ? [props.image] : [])|slice(0, 3) -%}
-<section class="relative overflow-hidden {{ heights[props.height] }}">
+<section class="cz-hero{{ long }} cz-hero--collage relative overflow-hidden {{ heights[props.height] }}">{{ art }}
     <div class="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 md:grid-cols-2">
         <div>{{ text }}</div>
         <div class="relative h-[26rem] md:h-[32rem]">
@@ -50,9 +61,10 @@
     </div>
 </section>
 {%- else %}
-<section class="relative overflow-hidden {{ heights[props.height] }}">
+<section class="cz-hero{{ long }} cz-hero--type relative overflow-hidden {{ heights[props.height] }}">{{ art }}
     {%- if heroWidget %}{% include '@CadenzaRuntime/node/_widget_frame.html.twig' with {widget: heroWidget, name: props.widget, class: '', decorative: true} %}{% endif %}
-    <div class="pointer-events-none absolute -top-40 left-1/2 h-[36rem] w-[60rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"></div>
+    <div class="cz-hero-glow pointer-events-none absolute -top-40 left-1/2 h-[36rem] w-[60rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"></div>
     <div class="relative mx-auto w-full max-w-6xl px-6 {{ centered ? 'text-center' : '' }}"><div class="{{ centered ? 'mx-auto max-w-5xl' : 'max-w-4xl' }}">{{ text }}</div></div>
 </section>
 {%- endif %}
+{{ strip }}

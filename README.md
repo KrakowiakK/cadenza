@@ -82,8 +82,12 @@ test suites. A forgotten owner password is reset with `bin/console cadenza:owner
 - **Sketches, not surprises.** Every change is a draft on the real page with *Before / After*; only *Approve*
   publishes. Every published state is a version to preview and restore, and *"undo that"* is exactly the version
   before.
-- **Three looks to choose from.** Content written once, three design directions as live thumbnails. Pages are built
-  from designed section patterns and six design directions on UX Toolkit's shadcn kit.
+- **Three looks to choose from, and they really differ.** Content written once, three design directions as live
+  thumbnails. A direction is art direction, not a palette: its own opening, scale of type, backgrounds, shapes and
+  motion (a dark stage with a running strip, a magazine cover, a framed invitation…), all on UX Toolkit's shadcn kit.
+  The three offered always come from different families.
+
+  ![The same bakery in the six design directions](docs/img/looks.jpg)
 - **Your data, not lorem ipsum.** A spreadsheet becomes a catalogue or timetable with filters; photos arrive from a
   phone by QR code; free photos come with author and licence.
 - **A site that answers back.** Forms with limited places, a visitors' assistant that answers only from what the site

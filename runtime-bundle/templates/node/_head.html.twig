@@ -1,5 +1,5 @@
 {%- if props.eyebrow or props.title or props.intro %}
-<div class="mb-12 md:mb-16 {{ props.align|default('center') == 'center' ? 'mx-auto max-w-3xl text-center' : 'max-w-3xl' }}">
+<div class="cz-head mb-12 md:mb-16 {{ props.align|default('center') == 'center' ? 'mx-auto max-w-3xl text-center' : 'max-w-3xl' }}">
     {%- if props.eyebrow %}<p class="cz-eyebrow mb-4">{{ props.eyebrow }}</p>{% endif %}
     {%- if props.title %}<h2 class="cz-display text-3xl md:text-5xl">{{ props.title }}</h2>{% endif %}
     {%- if props.intro %}<p class="cz-lead mt-5 text-lg opacity-75">{{ props.intro|cadenza_inline }}</p>{% endif %}

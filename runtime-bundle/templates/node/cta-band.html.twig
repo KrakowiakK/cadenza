@@ -3,7 +3,7 @@
     {%- if props.secondaryLabel %}<twig:Button as="a" href="{{ props.secondaryHref }}" variant="{{ props.variant == 'band' ? 'ghost' : 'outline' }}" class="cz-btn h-12 px-7 text-base {{ props.variant == 'band' ? 'text-primary-foreground hover:bg-white/10' : '' }}">{{ props.secondaryLabel }}</twig:Button>{% endif %}
 {%- endset -%}
 {%- if props.variant == 'band' %}
-<section class="cz-section bg-primary text-primary-foreground">
+<section class="cz-section cz-cta bg-primary text-primary-foreground" data-cz-bg="primary">
     <div class="mx-auto max-w-4xl px-6 text-center">
         <h2 class="cz-display text-3xl md:text-5xl">{{ props.title }}</h2>
         {%- if props.text %}<p class="cz-lead mx-auto mt-5 max-w-2xl text-lg opacity-85">{{ props.text|nl2br }}</p>{% endif %}

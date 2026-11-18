@@ -393,3 +393,15 @@ const counters = () => {
 };
 document.addEventListener('turbo:load', counters);
 if (document.readyState !== 'loading') counters(); else document.addEventListener('DOMContentLoaded', counters);
+
+// The opening picture drifts a little slower than the page: depth without a library, off when motion is unwelcome.
+(() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || document.body.classList.contains('cz-embed')) return;
+    let queued = false;
+    const move = () => {
+        queued = false;
+        const y = Math.min(scrollY, innerHeight);
+        document.querySelectorAll('.cz-hero-media, .cz-hero-art').forEach((el) => { el.style.translate = `0 ${(el.classList.contains('cz-hero-art') ? 0.28 : -0.07) * y}px`; });
+    };
+    addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(move); } }, { passive: true });
+})();

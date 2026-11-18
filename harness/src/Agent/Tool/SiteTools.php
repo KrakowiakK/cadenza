@@ -176,6 +176,37 @@ final class SiteTools
         };
     }
 
+    /** Looks that share a family: side by side they would read as one look in two colours. */
+    private const FAMILIES = ['bold' => 'stage', 'editorial' => 'print', 'elegant' => 'print', 'warm' => 'soft', 'fresh' => 'soft', 'minimal' => 'quiet'];
+
+    /**
+     * Three looks worth choosing between: the model's own picks in its order, but a second look from a family
+     * already shown gives way to one from a family that is not, and two picks are filled up to three.
+     *
+     * @param list<string> $directions known direction names
+     *
+     * @return list<string>
+     */
+    public static function contrasting(array $directions): array
+    {
+        $kept = [];
+        $families = [];
+        foreach ($directions as $direction) {
+            if (\count($kept) < 3 && !isset($families[self::FAMILIES[$direction]])) {
+                $kept[] = $direction;
+                $families[self::FAMILIES[$direction]] = true;
+            }
+        }
+        foreach (['bold', 'editorial', 'warm', 'minimal'] as $direction) {
+            if (\count($kept) < 3 && !isset($families[self::FAMILIES[$direction]])) {
+                $kept[] = $direction;
+                $families[self::FAMILIES[$direction]] = true;
+            }
+        }
+
+        return $kept;
+    }
+
     /**
      * @param list<mixed> $directions 2–3 of: minimal, editorial, warm, bold, elegant, fresh
      * @param list<mixed> $operations The page content written once (page.create with patterns…); omit to restyle the current site
@@ -206,6 +237,7 @@ final class SiteTools
         if (\count($found) < 2) {
             return 'The site rejected the variants: give 2–3 design directions, e.g. "directions": ["warm", "elegant", "minimal"].';
         }
+        $found = self::contrasting($found);
         [$operations, $invented, $prices] = InventedFacts::strip(Proposals::normalise($operations), $this->turn->conversation, fn (): string => $this->site->siteText());
         [$operations] = \App\Studio\OpeningClaims::strip($operations, $this->turn->conversation, fn (): string => $this->site->siteText());
         $group = strtolower((string) new \Symfony\Component\Uid\Ulid());
