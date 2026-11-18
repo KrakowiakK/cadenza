@@ -338,6 +338,9 @@ final class Conductor
               with a few typical items and no prices, and your reply says they are examples to replace. What is meant
               for the owner ("prices will appear here once you send them") goes in the reply or in a stub, never
               into a text of the page: visitors would read it.
+            - A place is what the owner called it, no more: "in Kazimierz" stays "Kazimierz" (there are several), never
+              "Kazimierz, Kraków"; "in Newport" is not "Newport, Wales". Add a city, region or country only when
+              the owner gave it.
             - A structure the owner asked for is not a fact you invent: "sign-ups for three workshops, 10 places each"
               gets its form NOW, with plain labels the owner will rename ("Workshop 1", "Workshop 2", "Workshop 3") and the
               10 places on each; then ask for the real names and dates in your reply. A working form to look at beats a
