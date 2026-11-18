@@ -54,7 +54,8 @@ final class SpreadsheetReader
             foreach ($columns as $column) {
                 $values = array_values(array_filter(array_column($rows, $column['key']), static fn (mixed $v): bool => null !== $v && '' !== trim((string) $v)));
                 $described[] = $column + [
-                    'type' => self::guessType($column['header'], $values),
+                    'type' => $type = self::guessType($column['header'], $values),
+                ] + ('price' === $type && null !== ($money = self::moneyOf($values)) ? ['money' => $money] : []) + [
                     'distinct' => \count(array_unique(array_map('strval', $values))),
                     'samples' => array_map(static fn (mixed $v): string => mb_substr((string) $v, 0, 60), \array_slice(array_values(array_unique(array_map('strval', $values))), 0, 4)),
                 ];
@@ -79,7 +80,7 @@ final class SpreadsheetReader
             $all(static fn (string $v): bool => (bool) preg_match('~^https?://\S+\.(jpe?g|png|webp|gif)(\?\S*)?$~i', $v)) || preg_match('/(zdj|foto|photo|image|obraz)/u', $h) && $all(static fn (string $v): bool => str_starts_with($v, 'http')) => 'image',
             $all(static fn (string $v): bool => (bool) preg_match('~^https?://~i', $v)) => 'url',
             $all(static fn (string $v): bool => (bool) filter_var($v, \FILTER_VALIDATE_EMAIL)) => 'email',
-            preg_match('/(cena|price|koszt|cost|kwota|amount|zł|pln|eur)/u', $h) && $all(static fn (string $v): bool => (bool) preg_match('/^[\d\s.,]+\s*(zł|pln|€|eur|\$|usd)?$/iu', $v)) => 'price',
+            preg_match('/(cena|price|koszt|cost|kwota|amount|zł|pln|eur)/u', $h) && $all(static fn (string $v): bool => (bool) preg_match('/^(£|€|\$)?\s*[\d\s.,]+\s*(zł|pln|€|eur|\$|usd|£|gbp|chf|kr|kč)?$/iu', $v)) => 'price',
             $all(static fn (string $v): bool => is_numeric(str_replace([' ', ','], ['', '.'], $v))) => 'number',
             $all(static fn (string $v): bool => (bool) preg_match('/^(tak|nie|yes|no|true|false|0|1|x)$/iu', $v)) => 'bool',
             $all(static fn (string $v): bool => false !== strtotime($v) && (bool) preg_match('/\d{4}|\d{1,2}[.\/-]\d{1,2}/', $v)) => 'date',
@@ -87,6 +88,27 @@ final class SpreadsheetReader
             max(array_map('mb_strlen', $strings)) > 120 => 'longtext',
             default => 'text',
         };
+    }
+
+    /**
+     * How the owner writes money in this column: the currency, on which side of the number, and the decimal mark
+     * ("£4.80", "4,80 €", "89 zł"). The site shows prices the way the spreadsheet did.
+     *
+     * @param list<mixed> $values
+     *
+     * @return array{symbol: string, before: bool, decimal: string}|null
+     */
+    public static function moneyOf(array $values): ?array
+    {
+        foreach ($values as $value) {
+            if (1 === preg_match('/^(?<before>£|€|\$)?\s*(?<number>[\d\s.,]+?)\s*(?<after>zł|pln|€|eur|\$|usd|£|gbp|chf|kr|kč)?$/iu', trim((string) $value), $m) && '' !== ($m['before'].($m['after'] ?? ''))) {
+                $decimal = 1 === preg_match('/,\d{1,2}$/', $m['number']) ? ',' : '.';
+
+                return ['symbol' => '' !== $m['before'] ? $m['before'] : $m['after'], 'before' => '' !== $m['before'], 'decimal' => $decimal];
+            }
+        }
+
+        return null;
     }
 
     public static function normalise(string $type, mixed $value): mixed

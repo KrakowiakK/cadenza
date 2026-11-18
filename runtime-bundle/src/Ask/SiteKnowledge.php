@@ -121,7 +121,7 @@ final class SiteKnowledge
                     if (\in_array($field['type'], ['image', 'url'], true) || null === $value || '' === $value || !\is_scalar($value)) {
                         continue;
                     }
-                    $row[$field['label'] ?? $field['key']] = \is_string($value) ? mb_substr($value, 0, 300) : Collections::format($field['type'], $value);
+                    $row[$field['label'] ?? $field['key']] = \is_string($value) ? mb_substr($value, 0, 300) : Collections::format($field['type'], $value, $field, (string) ($this->site->document()['language'] ?? 'en'));
                 }
                 if ([] !== $row) {
                     $rows[] = $row;

@@ -48,10 +48,10 @@
                         {%- for key in props.fields %}
                             {%- set f = c.field(key) -%}
                             {%- if f and r.get(key) is not null and key != c.titleField %}
-                                {%- if f.type == 'price' %}<p class="cz-price mt-auto pt-3 text-lg font-semibold text-primary">{{ cadenza_format(f.type, r.get(key)) }}</p>
+                                {%- if f.type == 'price' %}<p class="cz-price mt-auto pt-3 text-lg font-semibold text-primary">{{ cadenza_format(f.type, r.get(key), f) }}</p>
                                 {%- elseif f.type == 'bool' %}{% if r.get(key) %}<p class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">{{ cadenza_icon('check', 'size-3.5') }}{{ f.label }}</p>{% endif %}
                                 {%- elseif f.type == 'category' %}<p class="mt-2"><span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{{ r.get(key) }}</span></p>
-                                {%- else %}<p class="mt-2 text-sm opacity-70">{{ cadenza_format(f.type, r.get(key))|length > 140 ? cadenza_format(f.type, r.get(key))|slice(0, 140) ~ '…' : cadenza_format(f.type, r.get(key)) }}</p>{% endif %}
+                                {%- else %}<p class="mt-2 text-sm opacity-70">{{ cadenza_format(f.type, r.get(key), f)|length > 140 ? cadenza_format(f.type, r.get(key), f)|slice(0, 140) ~ '…' : cadenza_format(f.type, r.get(key), f) }}</p>{% endif %}
                             {%- endif %}
                         {%- endfor %}
                     </div>

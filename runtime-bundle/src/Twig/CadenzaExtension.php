@@ -76,7 +76,7 @@ final class CadenzaExtension extends AbstractExtension implements GlobalsInterfa
             new TwigFunction('cadenza_collection', fn (string $slug): ?\Cadenza\Runtime\Entity\Collection => $this->collections->get($slug)),
             new TwigFunction('cadenza_records', fn (\Cadenza\Runtime\Entity\Collection $c, int $limit = 500, ?string $sort = null, string $order = 'asc'): array => $this->collections->records($c, $limit, $this->state->owner && !$this->state->showBefore && !$this->state->embed, $sort, $order)),
             new TwigFunction('cadenza_categories', fn (\Cadenza\Runtime\Entity\Collection $c, string $field): array => $this->collections->categories($c, $field)),
-            new TwigFunction('cadenza_format', static fn (string $type, mixed $value): string => Collections::format($type, $value)),
+            new TwigFunction('cadenza_format', fn (string $type, mixed $value, ?array $field = null): string => Collections::format($type, $value, $field, $this->state->language())),
             new TwigFunction('cadenza_form_stats', fn (array $node): ?array => null !== $this->forms->published($node['id']) ? $this->forms->stats($node) : null),
             // Also in a sketch: a new form shows its places (nobody has answered it yet).
             new TwigFunction('cadenza_option_places', fn (array $node): array => $this->forms->optionPlaces($node)),

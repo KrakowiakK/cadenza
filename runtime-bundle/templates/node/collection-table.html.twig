@@ -20,7 +20,7 @@
                                     {%- if key == c.titleField %}<a href="/{{ c.slug }}/{{ r.slug }}" class="font-medium hover:underline">{{ r.title }}</a>
                                     {%- elseif f.type == 'image' and r.get(key) %}<img loading="lazy" decoding="async" src="{{ r.get(key) }}" alt="" class="size-10 rounded object-cover">
                                     {%- elseif f.type == 'url' and r.get(key) %}<a href="{{ r.get(key) }}" class="text-primary hover:underline" target="_blank" rel="noopener">↗</a>
-                                    {%- else %}{{ cadenza_format(f.type, r.get(key)) }}{% endif -%}
+                                    {%- else %}{{ cadenza_format(f.type, r.get(key), f) }}{% endif -%}
                                 </td>
                             {%- endif %}{% endfor %}
                         </tr>

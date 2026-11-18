@@ -27,7 +27,7 @@
                     {%- for f in collection.fields %}
                         {%- set v = record.get(f.key) -%}
                         {%- if f.key not in [collection.titleField, collection.imageField, dateField.key|default('')] and f.type != 'longtext' and v is not null and v != '' %}
-                            <div><dt class="opacity-60">{{ f.label }}</dt><dd class="font-medium">{% if f.type == 'url' %}<a href="{{ v }}" class="text-primary hover:underline" target="_blank" rel="noopener">{{ v|length > 40 ? v|slice(0, 40) ~ '…' : v }}</a>{% else %}{{ cadenza_format(f.type, v) }}{% endif %}</dd></div>
+                            <div><dt class="opacity-60">{{ f.label }}</dt><dd class="font-medium">{% if f.type == 'url' %}<a href="{{ v }}" class="text-primary hover:underline" target="_blank" rel="noopener">{{ v|length > 40 ? v|slice(0, 40) ~ '…' : v }}</a>{% else %}{{ cadenza_format(f.type, v, f) }}{% endif %}</dd></div>
                         {%- endif %}
                     {%- endfor %}
                 </dl>
@@ -40,7 +40,7 @@
                 {%- for f in collection.fields %}
                     {%- set v = record.get(f.key) -%}
                     {%- if f.key != collection.titleField and f.key != collection.imageField and v is not null and v != '' %}
-                        {%- if f.type == 'price' %}<p class="cz-price mt-6 text-3xl font-semibold text-primary">{{ cadenza_format(f.type, v) }}</p>
+                        {%- if f.type == 'price' %}<p class="cz-price mt-6 text-3xl font-semibold text-primary">{{ cadenza_format(f.type, v, f) }}</p>
                         {%- elseif f.type == 'longtext' %}<div class="cz-prose mt-6 text-lg leading-relaxed opacity-80">{{ v|markdown_to_html }}</div>
                         {%- endif %}
                     {%- endif %}
@@ -49,7 +49,7 @@
                     {%- for f in collection.fields %}
                         {%- set v = record.get(f.key) -%}
                         {%- if f.key not in [collection.titleField, collection.imageField] and f.type not in ['price', 'longtext'] and v is not null and v != '' %}
-                            <div class="flex justify-between gap-6 py-3"><dt class="opacity-60">{{ f.label }}</dt><dd class="text-right font-medium">{% if f.type == 'url' %}<a href="{{ v }}" class="text-primary hover:underline" target="_blank" rel="noopener">{{ v|length > 40 ? v|slice(0, 40) ~ '…' : v }}</a>{% else %}{{ cadenza_format(f.type, v) }}{% endif %}</dd></div>
+                            <div class="flex justify-between gap-6 py-3"><dt class="opacity-60">{{ f.label }}</dt><dd class="text-right font-medium">{% if f.type == 'url' %}<a href="{{ v }}" class="text-primary hover:underline" target="_blank" rel="noopener">{{ v|length > 40 ? v|slice(0, 40) ~ '…' : v }}</a>{% else %}{{ cadenza_format(f.type, v, f) }}{% endif %}</dd></div>
                         {%- endif %}
                     {%- endfor %}
                 </dl>

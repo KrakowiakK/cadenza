@@ -232,7 +232,8 @@ final class Collections
                 throw new \InvalidArgumentException(\sprintf('No column "%s"; columns: %s.', $field['column'] ?? '', implode(', ', array_column($sheet['columns'], 'header'))));
             }
             $type = \in_array($field['type'] ?? null, Collection::TYPES, true) ? $field['type'] : $column['type'];
-            $chosen[] = ['source' => $column['key'], 'key' => $field['key'] ?? $column['key'], 'label' => $field['label'] ?? $column['header'], 'type' => $type];
+            $chosen[] = ['source' => $column['key'], 'key' => $field['key'] ?? $column['key'], 'label' => $field['label'] ?? $column['header'], 'type' => $type]
+                + ('price' === $type && null !== ($money = $column['money'] ?? SpreadsheetReader::moneyOf(array_column($sheet['rows'], $column['key']))) ? ['money' => $money] : []);
         }
 
         $keys = array_column($chosen, 'key');
@@ -244,7 +245,7 @@ final class Collections
             $this->em->remove($existing);
             $this->em->flush();
         }
-        $collection = new Collection($slug, $name, array_map(static fn (array $f): array => ['key' => $f['key'], 'label' => $f['label'], 'type' => $f['type']], $chosen), $titleField, $imageField);
+        $collection = new Collection($slug, $name, array_map(static fn (array $f): array => ['key' => $f['key'], 'label' => $f['label'], 'type' => $f['type']] + (isset($f['money']) ? ['money' => $f['money']] : []), $chosen), $titleField, $imageField);
         $this->em->persist($collection);
 
         $slugger = new AsciiSlugger();
@@ -288,11 +289,26 @@ final class Collections
         return array_keys($values);
     }
 
-    public static function format(string $type, mixed $value): string
+    /**
+     * @param array<string, mixed>|null $field the field's definition: a price knows the currency the owner wrote it in
+     */
+    public static function format(string $type, mixed $value, ?array $field = null, string $language = 'pl'): string
     {
+        if ('price' === $type && is_numeric($value)) {
+            $decimals = fmod((float) $value, 1.0) > 0 ? 2 : 0;
+            $money = \is_array($field['money'] ?? null) ? $field['money'] : null;
+            if (null !== $money) {
+                $number = number_format((float) $value, $decimals, (string) ($money['decimal'] ?? '.'), ',' === ($money['decimal'] ?? '.') || !($money['before'] ?? false) ? ' ' : ',');
+
+                return ($money['before'] ?? false) ? $money['symbol'].$number : $number.' '.$money['symbol'];
+            }
+
+            // No currency known (a price typed in a chat): złoty on a Polish site, the bare number elsewhere.
+            return 'pl' === $language ? number_format((float) $value, $decimals, ',', ' ').' zł' : number_format((float) $value, $decimals, '.', ',');
+        }
+
         return match (true) {
             null === $value => '',
-            'price' === $type && is_numeric($value) => number_format((float) $value, fmod((float) $value, 1.0) > 0 ? 2 : 0, ',', ' ').' zł',
             'number' === $type && is_numeric($value) => rtrim(rtrim(number_format((float) $value, 2, ',', ' '), '0'), ','),
             'bool' === $type => $value ? '✓' : '—',
             'date' === $type && false !== ($t = strtotime((string) $value)) => date('d.m.Y', $t),
