@@ -1,6 +1,7 @@
 // The quick-start tour, ONE continuous take: first run (owner account) → Connections → describe → photos → spreadsheet → point.
 //   . ./env.sh && ./reset-env-fresh.sh && node story3.mjs
 import fs from 'node:fs';
+import { spawn } from 'node:child_process';
 import { openRecorder, waitIdle, buildVideo } from './lib.mjs';
 
 const OUT = process.env.OUT || 'out/take-tour';
@@ -12,6 +13,7 @@ const bar = () => page.locator('input[placeholder^="Tell me what to change"]').f
 const box = () => page.locator('textarea[placeholder^="Tell me"], textarea[placeholder^="What should"]').first();
 const inView = async l => { const bb = await l.boundingBox().catch(() => null); return !!bb && bb.x >= 0 && bb.x + bb.width <= 1920; };
 const TYPE = { delay: 42 };
+const PROMPT_CC = 'Add a short FAQ with three questions to my yoga studio website, as a sketch. Put it near the end of the home page. Sign it as Claude Code. Write everything, the summary too, in English, and keep the summary to one short sentence. Do not add any note about the sketch to the page itself.';
 async function smoothIntoView(loc) { await loc.evaluate(el => el.scrollIntoView({ behavior: 'smooth', block: 'center' })); await page.waitForTimeout(650); }
 async function say(text) { const t = (await inView(box())) ? box() : bar(); await rec.type(t, text, TYPE); await rec.wait(350); await page.keyboard.press('Enter'); }
 async function panelButton(name) {
@@ -83,14 +85,14 @@ const lastGrid = () => page.getByText('PICK A PHOTO').last().locator('xpath=ance
 async function findYoga() {
   const imgs = lastGrid().locator('img');
   const nImgs = Math.min(await imgs.count(), 8);
-  for (let i = 0; i < nImgs; i++) {
-    const buf = await imgs.nth(i).screenshot({ type: 'jpeg', quality: 70 });
-    const r = await fetch('http://127.0.0.1:1242/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'gemma-4-26b-a4b-it', max_tokens: 6, reasoning_effort: 'none', messages: [{ role: 'user', content: [{ type: 'text', text: 'Does this photo show a person practising yoga, or a calm bright room suited to yoga? Answer YES or NO only.' }, { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + buf.toString('base64') } }] }] }) });
-    const j = await r.json(); const a = String(j.choices?.[0]?.message?.content || '').trim().toUpperCase();
-    console.log('candidate', i, a);
-    if (a.startsWith('YES')) return i;
-  }
-  return -1;
+  const dir = `${process.cwd()}/${OUT}/cand`; fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
+  for (let i = 0; i < nImgs; i++) fs.writeFileSync(`${dir}/cand-${i}.jpg`, await imgs.nth(i).screenshot({ type: 'jpeg', quality: 70 }));
+  rec.mark('judge0' + (findYoga.n = (findYoga.n || 0) + 1));
+  const out = await new Promise(res => { const p = spawn('claude', ['-p', `Read the image files cand-0.jpg to cand-${nImgs - 1}.jpg in the current directory. Which is the first one that shows a person practising yoga, or a calm bright room clearly suited to yoga? Reply with that number only, or -1 if none does.`, '--allowedTools', 'Read', '--model', 'haiku'], { stdio: ['ignore', 'pipe', 'pipe'], cwd: dir }); let o = ''; p.stdout.on('data', d => { o += d; }); p.on('close', () => res(o)); });
+  rec.mark('judge1' + findYoga.n);
+  console.log('judge says', out.trim().slice(0, 80));
+  const m = out.match(/-?\d+/); const k = m ? Number(m[0]) : -1;
+  return k >= 0 && k < nImgs ? k : -1;
 }
 let pickIdx = await findYoga();
 if (pickIdx < 0) { // a natural correction, kept in the film: she asks for different photos
@@ -134,7 +136,68 @@ await rec.click(page.getByRole('button', { name: 'Before', exact: true }).first(
 await rec.click(page.getByRole('button', { name: 'After', exact: true }).first(), { ms: 600 }); rec.mark('after'); await rec.wait(1300);
 rec.mark('review5'); await approve(); rec.mark('approved5'); await rec.wait(1500);
 rec.mark('history'); await rec.click(page.locator('button[title="History"]').first(), { ms: 800 }); await rec.wait(2000);
-rec.mark('end'); await rec.wait(700); await guardEnglish('6');
+await guardEnglish('6');
+const backToChat = async () => { await rec.click(page.locator('button[title="Conversation"], button[title="Chat"]').first(), { ms: 800 }).catch(async () => { await rec.click(page.locator('button[title="Connections"]').first(), { ms: 800 }); }); await rec.wait(700); };
+const openPanel = async () => { if (!(await inView(box()))) { await rec.click(page.locator('button[title^="Open"]').first(), { ms: 800 }); await rec.wait(800); } };
+
+// ── 7. her own agent, over the site's guest MCP server ────────────────────────────────────────────────
+rec.mark('own');
+await rec.click(page.locator('[data-cz="tab-history"]').first(), { ms: 800 }); await rec.wait(500);
+await rec.click(page.locator('button[title="Connections"]').first(), { ms: 900 }); await rec.wait(1200);
+await smoothIntoView(page.locator('[data-copy="claude"]').first()); await rec.wait(600);
+rec.mark('own_cmd'); await rec.wait(2600); await shot('t-own');
+await rec.click(page.locator('[data-copy="claude"]').first(), { ms: 800 }); rec.mark('own_copy'); await rec.wait(1500);
+await backToChat();
+rec.mark('agent');
+const t0 = Date.now();
+const cc = spawn('claude', ['-p', PROMPT_CC, '--mcp-config', process.env.MCPCFG, '--strict-mcp-config', '--allowedTools', 'mcp__cadenza-site__site_outline,mcp__cadenza-site__page_tree,mcp__cadenza-site__node_get,mcp__cadenza-site__editor_guide,mcp__cadenza-site__draft_propose', '--model', 'sonnet'], { stdio: ['ignore', 'pipe', 'pipe'], cwd: process.env.CCDIR });
+let ccOut = ''; cc.stdout.on('data', d => { ccOut += d; }); cc.stderr.on('data', d => { ccOut += d; });
+await rec.wait(1200);
+rec.mark('agent_wait');
+const row = page.locator('[data-other-sketches] li [data-do="show"]').first();
+await row.waitFor({ state: 'visible', timeout: 120000 });
+console.log('claude code took', Math.round((Date.now() - t0) / 1000), 's', ccOut.slice(0, 300));
+rec.mark('arrived'); await smoothIntoView(row).catch(() => {}); await rec.wait(1700); await shot('t-arrived');
+if (!/Claude Code/.test(await page.locator('[data-other-sketches]').innerText())) throw new Error('the sketch is not signed by Claude Code');
+await rec.click(row, { ms: 800, pause: 250 });
+rec.mark('sketch9'); await rec.wait(3000); await shot('t-agent-sketch');
+rec.mark('review9');
+await rec.click(page.locator('[data-other-sketches] li [data-do="approve"]').first(), { ms: 900, pause: 250 });
+rec.mark('approved9'); await rec.wait(2200); await guardEnglish('7');
+
+// ── 8. an assistant for visitors: answers only from what the published site says ────────────────────
+await openPanel();
+rec.mark('type6'); await say('Add an assistant that answers my visitors\' questions.');
+rec.mark('sent6'); await rec.wait(2500); await waitIdle(page, { log: true });
+rec.mark('sketch6'); await rec.wait(600);
+{ const b = await panelButton('Show sketch'); if (b && !(await page.locator('[data-cz-ask]').count())) { await smoothIntoView(b); await rec.click(b, { ms: 800, pause: 250 }); await rec.wait(1500); } }
+const ask = page.locator('[data-cz-ask]').first();
+if (!(await ask.count())) throw new Error('no assistant block in the sketch');
+await smoothIntoView(ask); await rec.wait(1600); await shot('t-ask-sketch');
+rec.mark('review6'); await approve(); rec.mark('approved6'); await rec.wait(2200); await guardEnglish('8');
+const askInput = page.locator('[data-cz-ask] input[name=question]').first();
+await smoothIntoView(askInput); await rec.wait(500);
+async function question(q, mark) {
+  rec.mark(`ask${mark}`);
+  await rec.type(askInput, q, TYPE); await rec.wait(300); await page.keyboard.press('Enter');
+  rec.mark(`asked${mark}`);
+  await rec.wait(400);
+  await page.waitForFunction(() => !document.querySelector('[data-cz-ask] input[name=question]').disabled, null, { timeout: 60000 });
+  rec.mark(`answer${mark}`);
+  await smoothIntoView(page.locator('[data-cz-ask-thread] > div').last()).catch(() => {});
+  const a = await page.locator('[data-cz-ask-thread] > div').last().innerText(); console.log('Q:', q, '\nA:', a);
+  return a;
+}
+const a1 = await question('Which class is good for a beginner?', 1); await rec.wait(3200); await shot('t-answer1');
+if (/does not say|not answering|Too many/i.test(a1)) throw new Error('the assistant did not answer the first question');
+await question('Is there parking nearby?', 2); await rec.wait(3000); await shot('t-answer2'); await guardEnglish('8b');
+
+// ── 9. check my site ──────────────────────────────────────────────────────────────────────────────────
+await openPanel();
+rec.mark('type7'); await say('Check my site.');
+rec.mark('sent7'); await rec.wait(2500); await waitIdle(page, { log: true });
+rec.mark('checked'); await rec.wait(3800); await shot('t-checked');
+rec.mark('end'); await rec.wait(900); await guardEnglish('9');
 
 await rec.finish();
 const r = buildVideo(OUT);

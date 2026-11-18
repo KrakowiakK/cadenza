@@ -2,6 +2,7 @@
 // where the viewer must read. Later only the waits for the model are fast-forwarded (build-demo.mjs).
 //   . ./env.sh && ./reset-env.sh && node story2.mjs        (run-story2.sh retries a failed guard)
 import fs from 'node:fs';
+import { spawn } from 'node:child_process';
 import { openRecorder, waitIdle, buildVideo } from './lib.mjs';
 
 const cred = Object.fromEntries(fs.readFileSync(process.env.CRED, 'utf8').trim().split('\n').map(l => l.split(/=(.*)/s).slice(0, 2)));
@@ -15,6 +16,7 @@ const bar = () => page.locator('input[placeholder^="Tell me what to change"]').f
 const box = () => page.locator('textarea[placeholder^="Tell me"], textarea[placeholder^="What should"]').first();
 const inView = async l => { const bb = await l.boundingBox().catch(() => null); return !!bb && bb.x >= 0 && bb.x + bb.width <= 1920; };
 const TYPE = { delay: 42 };
+const PROMPT_CC = 'Add a short FAQ with three questions to my yoga studio website, as a sketch. Put it near the end of the home page. Sign it as Claude Code. Write everything, the summary too, in English, and keep the summary to one short sentence. Do not add any note about the sketch to the page itself.';
 
 async function smoothIntoView(loc) {
   await loc.evaluate(el => el.scrollIntoView({ behavior: 'smooth', block: 'center' }));
@@ -104,9 +106,25 @@ await rec.click(page.getByRole('button', { name: 'Before', exact: true }).first(
 await rec.click(page.getByRole('button', { name: 'After', exact: true }).first(), { ms: 600 }); rec.mark('after'); await rec.wait(1300);
 rec.mark('review5'); await approve(); rec.mark('approved5'); await rec.wait(1500);
 rec.mark('history'); await rec.click(page.locator('button[title="History"]').first(), { ms: 800 }); await rec.wait(2000); await shot('5-history');
-rec.mark('end'); await rec.wait(700);
 await guardEnglish('3');
 
+// ── 3. another agent (a real Claude Code, over the site's guest MCP server) leaves a sketch; it cannot publish ──────
+rec.mark('agent');
+const t0 = Date.now();
+const cc = spawn('claude', ['-p', PROMPT_CC, '--mcp-config', process.env.MCPCFG, '--strict-mcp-config', '--allowedTools', 'mcp__cadenza-site__site_outline,mcp__cadenza-site__page_tree,mcp__cadenza-site__node_get,mcp__cadenza-site__editor_guide,mcp__cadenza-site__draft_propose', '--model', 'sonnet'], { stdio: ['ignore', 'pipe', 'pipe'], cwd: process.env.CCDIR });
+let ccOut = ''; cc.stdout.on('data', d => { ccOut += d; }); cc.stderr.on('data', d => { ccOut += d; });
+await rec.click(page.locator('[data-cz="tab-history"]').first(), { ms: 800 }); await rec.wait(600);
+rec.mark('agent_wait');
+const row = page.locator('[data-other-sketches] li [data-do="show"]').first();
+await row.waitFor({ state: 'visible', timeout: 120000 });
+console.log('claude code took', Math.round((Date.now() - t0) / 1000), 's', ccOut.slice(0, 300));
+rec.mark('arrived'); await rec.wait(1700); await shot('9-arrived');
+const who = await page.locator('[data-other-sketches]').innerText();
+if (!/Claude Code/.test(who)) throw new Error('the sketch is not signed by Claude Code: ' + who.slice(0, 120));
+await rec.click(row, { ms: 800, pause: 250 });
+rec.mark('sketch9'); await rec.wait(2600); await shot('9-sketch');
+rec.mark('end'); await rec.wait(900);
+await guardEnglish('9');
 
 await rec.finish();
 const r = buildVideo(OUT);

@@ -30,7 +30,7 @@ const CURSOR_JS = `
   make();
 })();`;
 
-export async function openRecorder({ outDir, base = 'http://127.0.0.1:8010', cred }) {
+export async function openRecorder({ outDir, base = 'http://127.0.0.1:8010', cred, login = true }) {
   fs.rmSync(outDir, { recursive: true, force: true });
   fs.mkdirSync(path.join(outDir, 'frames'), { recursive: true });
   const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1920,1080'] });
@@ -38,12 +38,14 @@ export async function openRecorder({ outDir, base = 'http://127.0.0.1:8010', cre
   await ctx.addInitScript(CURSOR_JS);
   const page = await ctx.newPage();
 
-  // sign in before recording starts
-  await page.goto(base + '/_cadenza/login');
-  await page.fill('input[name=_username]', cred.email);
-  await page.fill('input[name=_password]', cred.password);
-  await page.click('button[type=submit]');
-  await page.waitForLoadState('networkidle');
+  // sign in before recording starts (not on a first run: the recording shows the owner account being created)
+  if (login) {
+    await page.goto(base + '/_cadenza/login');
+    await page.fill('input[name=_username]', cred.email);
+    await page.fill('input[name=_password]', cred.password);
+    await page.click('button[type=submit]');
+    await page.waitForLoadState('networkidle');
+  }
 
   const state = { mouse: { x: W / 2, y: H / 2 }, frames: [], markers: [], n: 0, started: 0 };
   const cdp = await ctx.newCDPSession(page);
