@@ -558,3 +558,5 @@ a.cz-card:hover, .cz-card-link:hover { transform: translateY(-3px); box-shadow: 
 @media (max-width: 640px) { [data-cz-style="editorial"] .cz-hero-art::after { display: none; } [data-cz-style="editorial"] .cz-hero { padding-top: 5.5rem; } }
 [data-cz-style] .cz-hero.cz-long h1.cz-display { font-size: clamp(2.3rem, calc(var(--cz-hero-fluid, 6.4vw) * .64), calc(var(--cz-hero-max, 6rem) * .66)); line-height: 1; }
 [data-cz-style] .cz-hero.cz-longer h1.cz-display { font-size: clamp(2.1rem, calc(var(--cz-hero-fluid, 6.4vw) * .5), calc(var(--cz-hero-max, 6rem) * .52)); line-height: 1.02; }
+/* The name set large signs a finished page; a page of one section (a blank canvas, a notice) goes without it. */
+body:not(:has(main > .cz-node ~ .cz-node)) .cz-wordmark { display: none; }
