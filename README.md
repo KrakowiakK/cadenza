@@ -255,7 +255,8 @@ library/sources/instagram — first block package (Composer, cadenza.json manife
 
 More: [docs/MCP.md](docs/MCP.md) (the three MCP servers, their tools, and what a guest agent cannot do),
 [PROJECT_SPEC.md](PROJECT_SPEC.md) (vision and design, in Polish), [docs/DEMO.md](docs/DEMO.md) (90-second demo
-script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in the betas).
+script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in the betas: six reports filed upstream,
+[symfony/ai#2983](https://github.com/symfony/ai/issues/2983)–[#2987](https://github.com/symfony/ai/issues/2987) and [symfony/recipes#1630](https://github.com/symfony/recipes/issues/1630)).
 
 ## What Symfony AI and MCP unlocked
 
