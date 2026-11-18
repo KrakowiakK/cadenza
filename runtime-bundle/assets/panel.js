@@ -1157,8 +1157,8 @@ ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-30
   <div data-frame class="relative min-h-0 flex-1 overflow-hidden bg-muted">
     <iframe src="${escapeHtml(url.pathname + url.search)}" tabindex="-1" class="pointer-events-none absolute left-0 top-0 w-[1280px] origin-top-left border-0"></iframe>
   </div>
-  <div class="flex items-center gap-2 border-t border-border p-4">
-    <div class="min-w-0 flex-1 truncate text-base font-semibold">${escapeHtml(v.variantName ?? '')}</div>
+  <div class="flex flex-wrap items-center justify-end gap-2 border-t border-border p-4">
+    <div class="min-w-[6rem] flex-1 text-base font-semibold">${escapeHtml(v.variantName ?? '')}</div>
     <button type="button" data-do="open" title="${t('open')}" class="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border hover:bg-muted">${icon('eye', 'size-4')}</button>
     <button type="button" data-do="pick" class="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-lg bg-foreground px-3 py-2 text-sm font-semibold text-background">${icon('check', 'size-4')}${t('choose')}</button>
   </div>

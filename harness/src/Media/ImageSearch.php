@@ -44,13 +44,17 @@ final class ImageSearch
         // Commons wants every word to match: models ask for "Tatras mountain peaks alpine ridge beautiful weather".
         // Fewer words until there are enough photos: all of them, the first four, the first two.
         $words = preg_split('/\s+/', trim($query)) ?: [$query];
-        foreach (array_unique([implode(' ', $words), implode(' ', \array_slice($words, 0, 4)), implode(' ', \array_slice($words, 0, 2))]) as $terms) {
+        $queries = array_unique([implode(' ', $words), implode(' ', \array_slice($words, 0, 4)), implode(' ', \array_slice($words, 0, 2))]);
+        // Photos the Commons community assessed (featured, quality, valued) first: an archive of everything has
+        // blurred snapshots next to very good photographs, and the assessed ones are the good ones. Then the rest.
+        // (Only for the whole query: with fewer words an assessed photo of something else would come first.)
+        foreach ([[$queries[0], true], ...array_map(static fn (string $q): array => [$q, false], $queries)] as [$terms, $assessed]) {
             if (\count($results) >= $count) {
                 break;
             }
             try {
                 $seen = array_column($results, 'id');
-                foreach ($this->wikimedia($terms, $count - \count($results), $orientation) as $found) {
+                foreach ($this->wikimedia($terms, $count - \count($results), $orientation, $assessed) as $found) {
                     if (!\in_array($found['id'], $seen, true)) {
                         $results[] = $found;
                     }
@@ -64,14 +68,14 @@ final class ImageSearch
         return \array_slice($results, 0, $count);
     }
 
-    private function wikimedia(string $query, int $count, string $orientation): array
+    private function wikimedia(string $query, int $count, string $orientation, bool $assessed = false): array
     {
         $data = $this->http->request('GET', 'https://commons.wikimedia.org/w/api.php', [
             'timeout' => 15,
             'headers' => ['User-Agent' => self::UA],
             'query' => [
                 'action' => 'query', 'format' => 'json', 'generator' => 'search', 'gsrnamespace' => 6,
-                'gsrsearch' => $query.' filetype:bitmap', 'gsrlimit' => 50,
+                'gsrsearch' => $query.' filetype:bitmap'.($assessed ? ' haswbstatement:P6731' : ''), 'gsrlimit' => 50,
                 'prop' => 'imageinfo', 'iiprop' => 'url|extmetadata|size|mime', 'iiurlwidth' => 800,
                 'iiextmetadatafilter' => 'Artist|LicenseShortName|LicenseUrl|ObjectName|ImageDescription|Categories',
             ],

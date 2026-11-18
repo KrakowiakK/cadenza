@@ -187,6 +187,11 @@ final class SiteTools
         if (!$pl && 1 === preg_match('/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/u', $summary)) {
             $summary = '';
         }
+        // Each look becomes a sketch of its own, named by this summary: "Three versions of the site…" would then be
+        // the name of one page. Such a summary gives way to the plain one.
+        if (1 === preg_match('/\b(three|two|3|2|several|trzy|dwie|kilka)\b.{0,24}(look|version|variant|design|wersj|wariant|wygląd|propozycj)/iu', $summary)) {
+            $summary = '';
+        }
         $summary = '' !== trim($summary) ? $summary : ($pl ? 'Propozycja strony' : 'A first look at your site');
         // Models express the directions in many shapes; take the known direction names in the order given.
         preg_match_all('/\b('.implode('|', array_keys(self::HERO_FOR)).')\b/', json_encode($directions) ?: '', $m);

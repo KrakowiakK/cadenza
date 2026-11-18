@@ -12,7 +12,7 @@ leave sketches but never publish. Visitors get an assistant that answers only fr
 > *Cadenza*: the passage of a concerto where the soloist improvises freely — on top of a solid structure.
 > Here the owner improvises; Symfony is the structure.
 
-![Three looks of the same content, as live thumbnails, side by side](docs/img/variants.jpg)
+![Three looks of the same content, side by side where the page will be: a folk band chooses one](docs/img/variants.jpg)
 
 ## Try it now, without installing
 
