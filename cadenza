@@ -182,6 +182,9 @@ case "${1:-}" in
     stop) stop ;;
     test) tests ;;
     mcp) (cd "$APP" && php bin/console cadenza:guest-agent "http://127.0.0.1:$APP_PORT") ;;
-    reset) (cd "$APP" && printf 'yes\n' | php bin/console cadenza:reset "My site" --hard) ;;
+    reset)
+        (cd "$APP" && printf 'yes\n' | php bin/console cadenza:reset "My site" --hard)
+        # The studio forgets the conversations and sketches of the site that is gone (connected models and keys stay).
+        (cd "$STUDIO" && php bin/console doctrine:schema:drop --force --full-database --quiet && php bin/console doctrine:migrations:migrate --no-interaction --quiet --allow-no-migration) ;;
     *) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

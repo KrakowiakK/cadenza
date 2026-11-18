@@ -116,7 +116,17 @@ final class SiteClient
      */
     public function outsideDrafts(): array
     {
-        $result = $this->mcp->get('control')->callTool('drafts_waiting', ['outsideOnly' => true]);
+        return array_values(array_filter($this->waitingDrafts(), static fn (array $draft): bool => '' !== (string) ($draft['author'] ?? '')));
+    }
+
+    /**
+     * Every sketch the site itself still holds: the studio's own and the ones outside agents left.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function waitingDrafts(): array
+    {
+        $result = $this->mcp->get('control')->callTool('drafts_waiting', []);
         $data = \is_array($result->structuredContent) ? $result->structuredContent : json_decode($this->text($result), true);
 
         return array_values(array_filter(\is_array($data) ? ($data['result'] ?? $data) : [], '\is_array'));

@@ -108,13 +108,17 @@ final class ChatController
     public function sketches(): JsonResponse
     {
         $open = $this->proposals->allOpen();
-        $items = array_map(static fn ($p): array => $p->toArray() + ['at' => $p->getCreatedAt()->format(\DATE_ATOM)], \array_slice($open, 0, 40));
         // Sketches an agent the owner brought along left over MCP: they wait here like the studio's own.
         try {
-            $outside = $this->site->outsideDrafts();
+            $waiting = $this->site->waitingDrafts();
+            // A sketch the site no longer holds (the site was reset, or restored from a backup) is not waiting.
+            $held = array_map(static fn (array $draft): int => (int) $draft['draftId'], $waiting);
+            $open = array_values(array_filter($open, static fn ($p): bool => \in_array($p->getDraftId(), $held, true)));
+            $outside = array_values(array_filter($waiting, static fn (array $draft): bool => '' !== (string) ($draft['author'] ?? '')));
         } catch (\Throwable) {
             $outside = [];
         }
+        $items = array_map(static fn ($p): array => $p->toArray() + ['at' => $p->getCreatedAt()->format(\DATE_ATOM)], \array_slice($open, 0, 40));
         foreach ($outside as $draft) {
             array_unshift($items, [
                 'proposalId' => 'outside-'.$draft['draftId'], 'draftId' => (int) $draft['draftId'], 'summary' => (string) ($draft['summary'] ?? ''),
