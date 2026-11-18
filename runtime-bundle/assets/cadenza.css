@@ -297,3 +297,7 @@ a.cz-card:hover, .cz-card-link:hover { transform: translateY(-3px); box-shadow: 
     body:has(#cz-panel[data-state="open"]:not([data-wide])):not(.cz-embed) { padding-right: 452px; }
     #cz-panel:not([data-wide]) .cz-sheet { width: 440px; }
 }
+/* In the narrower panel the header keeps its status ("Waiting for you") readable; the model's name is in Connections. */
+@media (max-width: 1599px) {
+    #cz-panel [data-cz="model"] { display: none; }
+}
