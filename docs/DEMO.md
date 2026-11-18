@@ -1,6 +1,6 @@
 # Cadenza — the 90-second demo
 
-Watch: [the 90-second demo](https://youtu.be/zRyvtNRywtg) · [the quick start](https://youtu.be/5lIGgQTJouU)
+Watch: [the 90-second demo](https://youtu.be/zRyvtNRywtg) · [the quick start](https://youtu.be/7k3XpjldjQw)
 
 The video states the problem first, then shows **one continuous screen recording** of the real thing: a scripted browser
 performs the story on a fresh Cadenza site (the agent is `deepseek-flash`). There are no cuts: only the waits for the

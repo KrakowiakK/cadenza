@@ -43,7 +43,7 @@ are forgotten after two hours.
 
 ## Run it yourself (3 minutes)
 
-**Watch first:** the [90-second demo](https://youtu.be/zRyvtNRywtg), or the [4½-minute quick start](https://youtu.be/5lIGgQTJouU) (the commands, connecting a model, a full tour). Then run it yourself:
+**Watch first:** the [90-second demo](https://youtu.be/zRyvtNRywtg), or the [4½-minute quick start](https://youtu.be/7k3XpjldjQw) (the commands, connecting a model, a full tour). Then run it yourself:
 
 ```bash
 git clone https://github.com/KrakowiakK/cadenza.git && cd cadenza
