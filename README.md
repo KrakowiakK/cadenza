@@ -107,7 +107,8 @@ Each of these, with how it works: **[docs/FEATURES.md](docs/FEATURES.md)**.
 
 ## Things to try
 
-Sample files are in [`examples/`](examples/): attach `pottery-price-list.xlsx` and say *"Make a shop out of this"*, or
+Sample files are in [`examples/`](examples/): attach `pottery-price-list.xlsx` and say *"Make a shop out of this"*,
+`bakery-breads.xlsx` and say *"Here is what we bake. Put it on the site as a list with filters"*, or
 `tidewater-classes.xlsx` and say *"Put my class schedule on the site, with filters"* (the two Polish files show the same
 with an owner who writes in Polish). The 90-second demo and the 4½-minute
 quick-start film were recorded by scripts on a real site: see [`docs/DEMO.md`](docs/DEMO.md).
