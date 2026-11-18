@@ -38,7 +38,7 @@ The demo runs the code of this repository in `prod` mode. Only the visitors' ass
 the owner's side of the product is what the films and your own installation show. Sketches left by visitors' agents
 are forgotten after two hours.
 
-## Try it in 3 minutes
+## Run it yourself (3 minutes)
 
 **Watch first:** the [90-second demo](https://youtu.be/Y2LkjUQom2Y), or the [4½-minute quick start](https://youtu.be/au5jg6GXCtY) (the commands, connecting a model, a full tour). Then run it yourself:
 
@@ -66,108 +66,33 @@ agent writes).
    my site, as a sketch."* About 15 seconds later the sketch is waiting in the panel, signed with the agent's name. It
    cannot publish; you approve or reject.
 
-Stuck? `./cadenza doctor` checks PHP, extensions, Composer, ports and Chrome in one go and says what to fix; `./cadenza stop` and `./cadenza start` restart both servers; `./cadenza reset` starts the site over; the full
-description is in [Quick start](#quick-start-5-minutes) and [Models](#models) below.
+Stuck? `./cadenza doctor` checks PHP, extensions, Composer, ports and Chrome in one go and says what to fix; `./cadenza stop` and `./cadenza start` restart both servers; `./cadenza reset` starts the site over; `./cadenza test` runs all
+test suites. A forgotten owner password is reset with `bin/console cadenza:owner` in `demo-app/`. More about models:
+[docs/MODELS.md](docs/MODELS.md).
 
 ## What it does
 
-- **Chat on your own site.** A bar at the bottom, a side panel that slides out. Point at anything with the
-  crosshair (“make *this* bigger”), attach photos, draw a layout with the pencil, or drop a spreadsheet.
-- **Sketches, not surprises.** The agent proposes changes as a draft rendered on the real page; changes highlight on
-  hover, *Before / After* toggles, and *Approve* publishes with a View Transition. Every published state is a version:
-  preview, restore, undo, start over — history is never rewritten.
-- **“How could my site look?”** Content written once, three design directions side by side as live thumbnails; keep
-  one.
-- **Beautiful by construction.** Pages are composed from designed **section patterns** (hero, feature split, menu,
-  bento, steps, timeline, team, pricing, testimonials, logos, visit us, quiz, form, countdown, map, collection
-  grid/table, call to action)
-  and six **design directions** (minimal, editorial, warm, bold, elegant, fresh) built on UX Toolkit's shadcn kit.
-- **Your data, not lorem ipsum.**
-  - *Spreadsheet → shop/catalogue*: columns are analysed (price, category, image, date…), rows become records with
-    their own pages, shown as cards with filter chips and search or as a sortable table.
-  - *Photos from your phone*: a QR code, pick photos from the camera roll — no account, no app. EXIF dates and
-    places group them into trip albums (“Zakopane, lipiec 2024”); live galleries update by themselves.
-  - *Instagram*: the official export ZIP, or Instagram Login for Business/Creator accounts with a daily sync.
-  - *Free photos*: the agent offers a grid of Wikimedia Commons photos (Pexels/Unsplash with a key) with author and
-    licence; one click puts the chosen one into the sketch. Images are always stored by the site, never hot-linked.
-- **A site that answers back.**
-  - *Forms* for RSVPs, sign-ups with limited places (per form, or per date / class / time slot), orders, bookings,
-    messages, surveys. Answers are validated against
-    the form's own fields, stored, and announced as a `FormSubmitted` event (optional e-mail to the owner). The owner sees
-    them on the page — only they do — downloads them as Excel, or simply asks: *“How many guests are coming, how many
-    vegetarian meals, who has allergies?”*
-  - *An assistant for visitors.* *"Add an assistant that answers my guests' questions."* Visitors type a question in
-    their own words (in any language) and get a short answer in about a second, taken only from what the published site
-    says: the model receives that text and the question, no tools, nothing of the owner's, and pages for invited people
-    are left out. What the site could not answer is kept: the dashboard lists it, and each unanswered question is a
-    link that opens the panel with the question written out; the owner types the answer and the agent puts it on the
-    site as a sketch (seven seconds in our test). *"What do visitors ask that my site does not answer?"* gets the same
-    list from the agent in the conversation.
-    The site learns from its visitors, and the owner still approves every word. Rate limits per visitor and per day
-    keep a script from spending the owner's model budget.
-  - *Countdown* to an event with an *Add to calendar* file, and an *announcement bar* that hides itself after a date.
-  - *Maps*: “our trips” drawn from the GPS of the owner's phone photos as a route in time order, or pins for addresses
-    (venues, shops) located automatically.
-- **No ceiling: the agent writes new blocks.** When none of the patterns fits (*“a 4-week course plan with difficulty
-  shown as dots”*), the agent defines a new block type — a prop schema and a Twig template — and uses it in the sketch.
-  Its templates live in the database and run behind three walls: a separate Twig environment with no globals or
-  services, the **Twig sandbox** (allow-listed tags, filters and functions), and Symfony's **HtmlSanitizer** on the
-  output (no scripts, event handlers, styles, forms or foreign images). Tailwind picks up the new classes in the
-  background.
-- **Things that move: games, 3D, animation.** *“A Tetris for the guests”*, *“make the opening come alive with soft
-  3D shapes”*, *“a breathing exercise: a circle that grows as you breathe in”*. The agent writes a **widget** — real
-  HTML, CSS and JavaScript, with three.js, Chart.js, Matter.js or confetti from the site's own importmap — and the
-  studio treats it like a programmer would: syntax checked, then **played in a headless Chrome with Symfony Panther**
-  (start, a few keys, screenshots, the browser's errors); a model that can see looks at the screenshots and what is
-  wrong goes back for a fix, before the owner sees the sketch. Widgets run as documents of their own with the sandbox
-  in the response itself (an opaque origin: no cookies, no storage, no network but the site's libraries and photos);
-  the page keeps a game's best score for each visitor, and a game can have a shared leaderboard. Every version of a
-  widget is kept and a page pins the one it shows: *“make the snake slower”* becomes a sketch with the new version
-  while visitors keep playing the approved one, and restoring an old version of the site brings its games back too.
-- **Content that grows, by chat.** *“Add a post: the bus for guests leaves at 11:00”*, *“change the price of the vase
-  to 140 zł”* — news, events, menus and products are collections the agent writes entry by entry. Every entry is a
-  draft the owner sees marked on the page and publishes from a card in the panel; visitors keep the live version.
-- **Other languages.** *“Lots of tourists come to Gdynia — make an English version.”* The page's texts are taken out
-  of its tree, the model translates only that list, and the same page is rebuilt at `/en/…` with a language switcher,
-  its own menu, and forms that speak English. Names of people, places and the business stay as they are.
-- **Documents to download.** Attach a PDF (a menu, rules, a price list) and say where it belongs: it is stored by the
-  site and shown with its type, size and number of pages.
-- **Made for phones too** — visitors get a compact menu with the language switch, the owner gets the whole studio in a
-  full-screen panel. *“How does my site look on a phone?”* — the owner sees the page (or its sketch) in a phone frame,
-  and the agent opens it in a headless Chrome at phone size: it measures what sticks out, text too small to read and
-  buttons too small for a thumb, and a model that can see looks at the screens.
-- **The owner stays in charge.** Nothing goes live without approval — new pages, a moved section, a new version of a
-  game, an undo (*“bring back how it was”* is a sketch of an earlier version too). Sketches from earlier conversations
-  wait in a card of their own; *“what is waiting for me?”* gets a short answer and *“drop the weather one”* drops
-  just that. The agent asks before removing pages, never writes reviews or prices it was not given, and says plainly
-  what it could not do.
-- **Pages for invited people only.** *“Make the accommodation page visible only to our guests”* — the page gets a lock;
-  the owner adds guests (or tells the agent *“invite Kasia and Piotr…”*) and copies each one's personal sign-in link
-  (Symfony login links: signed, expiring, no passwords). Strangers see a closed door that does not reveal what is
-  behind it; a guest who lost the link asks for a new one by e-mail.
-- **Bring your own agent.** The site is an MCP server with three doors. The studio uses two (`agent`: read and draft;
-  `control`: publish after the owner's click). The third, `guest`, is for an agent the owner already has: Claude Code,
-  Claude Desktop, Cursor, anything that speaks MCP. *Connections* shows the line to paste (so does `./cadenza mcp`). The
-  guest gets a token of its own and six tools: read the outline, a page, a node, the editing guide, `draft_propose`,
-  and `draft_status` to learn what the owner decided. Its sketch shows up in the open panel within seconds, signed (*by Claude Code · MCP*), with the same
-  Before / After, Approve and Reject as any other. The guest token opens neither the other two servers nor the
-  visitors' answers, the members or the keys, and a runaway client can leave at most twelve sketches waiting.
-- **Found by search engines and by AI assistants.** Every published page carries a description, a canonical address
-  and a share preview (Open Graph, with the page's first photo); `/sitemap.xml` and `/robots.txt` follow the site by
-  themselves; and `/llms.txt` gives the whole published site as plain text for AI assistants, the same text the
-  visitors' assistant answers from. Pages for invited people are in none of them.
-- **A dashboard for the owner** (grid icon in the panel): visits counted without cookies or personal data, answers to
-  forms with places taken, recent changes, content, and the application's health — errors in the logs, whether the
-  background worker is alive, jobs waiting or failed, imports, connected accounts. The agent reads the same numbers:
-  *“How is the site doing?”*
-- **Checked by code, not by hope.** *"Check my site: is anything broken or missing?"* runs a review that needs no
-  model: links that lead nowhere, placeholders left behind, filler text, pages without a description, no way to get in
-  touch, questions visitors asked that the site could not answer. The agent reports it in plain words and fixes in one
-  sketch what needs no facts from the owner. And a button of a new block never leads nowhere to begin with: a `#` the
-  model left is pointed at the section it means (the form for *Get in touch*, otherwise the next section) before the
-  sketch is saved.
-- **Self-aware.** The agent reads the app's logs and profiler through **Symfony AI Mate**; one broken block never takes
-  a page down; a busy model hands over to a fallback model.
+- **Chat on your own site.** A bar at the bottom and a panel beside the page. Describe what you want, point at
+  anything with the crosshair, attach photos, draw a layout, or drop a spreadsheet.
+- **Sketches, not surprises.** Every change is a draft on the real page with *Before / After*; only *Approve*
+  publishes. Every published state is a version to preview and restore, and *"undo that"* is exactly the version
+  before.
+- **Three looks to choose from.** Content written once, three design directions as live thumbnails. Pages are built
+  from designed section patterns and six design directions on UX Toolkit's shadcn kit.
+- **Your data, not lorem ipsum.** A spreadsheet becomes a catalogue or timetable with filters; photos arrive from a
+  phone by QR code; free photos come with author and licence.
+- **A site that answers back.** Forms with limited places, a visitors' assistant that answers only from what the site
+  says and shows the owner what it could not answer, countdowns, maps, pages for invited people, other languages.
+- **No ceiling.** When no pattern fits, the agent writes a new block (Twig sandbox and HtmlSanitizer) or a widget: a
+  game, a 3D scene, an animation, played in a headless Chrome with Symfony Panther before the owner sees it.
+- **Bring your own agent.** The site is an MCP server with three doors; Claude Code, Cursor or any MCP client may
+  read it and leave signed sketches, and can never publish. See [docs/MCP.md](docs/MCP.md).
+- **Checked by code, not by hope.** Reviews and prices the owner never gave are stripped from a sketch, dead links
+  are repaired, and *"check my site"* runs a review that needs no model.
+- **Found by search engines and AI assistants.** Descriptions, share previews, `/sitemap.xml`, `/robots.txt` and
+  `/llms.txt` follow the published site by themselves.
+
+Each of these, with how it works: **[docs/FEATURES.md](docs/FEATURES.md)**.
 
 ![Claude Code left a sketch over MCP: it waits in the panel, signed, for the owner to approve](docs/img/own-agent.jpg)
 
@@ -175,35 +100,11 @@ description is in [Quick start](#quick-start-5-minutes) and [Models](#models) be
 
 ![A spreadsheet became a shop: filter chips, search, a page per product](docs/img/collection-grid.jpg)
 
-## Quick start (5 minutes)
+## Things to try
 
-Requirements: PHP 8.4+ (`pdo_sqlite`, `gd`, `intl`, `zip`, `sodium`), Composer. The Symfony CLI is used when present.
+Sample files are in [`examples/`](examples/) (a class schedule, a price list). The 90-second demo and the 4½-minute
+quick-start film were recorded by scripts on a real site: see [`docs/DEMO.md`](docs/DEMO.md).
 
-```bash
-git clone https://github.com/KrakowiakK/cadenza.git && cd cadenza
-./cadenza setup        # dependencies, SQLite databases, assets, a shared secret — nothing to configure by hand
-```
-
-```bash
-./cadenza start        # → open http://127.0.0.1:8010
-```
-
-No file to edit for the model: with none connected yet, the panel opens **Connections**. It lists what this computer
-already has, so connecting takes one click (Ollama or LM Studio running here, a key already in your environment); for
-the rest you paste a key, which is checked with one request and kept encrypted. Ollama Cloud and OpenRouter have free
-plans that Cadenza was tested with.
-
-The first visit asks you to create the **owner account** (e-mail and password; possible only from the computer that runs
-the site, or with the setup token). Then the Cadenza bar is at the bottom; later you sign in at `/_cadenza/login`, and a
-forgotten password is reset with `bin/console cadenza:owner` in `demo-app/`.
-
-Try: *“I run a small yoga studio in Gdynia. How could my website look?”*, attach
-[`examples/tidewater-classes.xlsx`](examples/tidewater-classes.xlsx) (*“Here is my weekly class schedule. Put it on the
-site, with filters.”*), or click the phone icon and send photos from your phone (same Wi-Fi, or deploy it). The
-90-second demo video and a 4½-minute quick-start film (commands, connecting a model, a tour) were recorded by scripts on a real
-site: see [`docs/DEMO.md`](docs/DEMO.md).
-
-### Things people have built with it
 
 | The owner says | Cadenza builds |
 |---|---|
@@ -219,7 +120,7 @@ site: see [`docs/DEMO.md`](docs/DEMO.md).
 | “Check my site: is anything broken or missing?” | a real check (links, placeholders, descriptions, contact) and one sketch that fixes what needs no facts |
 | *(in Claude Code, after `./cadenza mcp`)* “Add a short FAQ before the contact form on my site, as a sketch.” | Claude Code reads the site over MCP and leaves a signed sketch; it appears in the open panel and waits for the owner |
 
-`./cadenza test` runs all test suites (CI runs them, after `./cadenza setup` on a clean machine, on PHP 8.4 and 8.5); `./cadenza mcp` prints how to connect your own agent; `./cadenza doctor` checks this computer; `./cadenza reset` starts the site over; `./cadenza stop`.
+CI runs `./cadenza setup` on a clean machine, all test suites, PHPStan (level 5) and the Symfony coding standard, on PHP 8.4 and 8.5.
 
 ## Architecture
 
@@ -254,7 +155,7 @@ library/sources/instagram — first block package (Composer, cadenza.json manife
   plug into events instead of calling each other.
 
 More: [docs/MCP.md](docs/MCP.md) (the three MCP servers, their tools, and what a guest agent cannot do),
-[PROJECT_SPEC.md](PROJECT_SPEC.md) (vision and design, in Polish), [docs/DEMO.md](docs/DEMO.md) (90-second demo
+[docs/PROJECT_SPEC.pl.md](docs/PROJECT_SPEC.pl.md) (the original design notes, in Polish), [docs/DEMO.md](docs/DEMO.md) (90-second demo
 script), [docs/UPSTREAM_ISSUES.md](docs/UPSTREAM_ISSUES.md) (what we found in the betas: six reports filed upstream,
 [symfony/ai#2983](https://github.com/symfony/ai/issues/2983)–[#2987](https://github.com/symfony/ai/issues/2987) and [symfony/recipes#1630](https://github.com/symfony/recipes/issues/1630)).
 
@@ -290,112 +191,12 @@ Three things in Cadenza exist only because of them:
 
 ## Models
 
-The studio talks to any OpenAI-compatible chat API with tool calling. The owner connects one in the panel
-(**Connections**, the plug icon): Cadenza finds model servers running on this computer (Ollama, LM Studio, the port LM
-Studio says), keys in the environment it was started with (`OLLAMA_API_KEY`, `OPENROUTER_API_KEY`, `HF_TOKEN`,
-`OPENAI_API_KEY`…; used by reference, not copied) and the coding CLIs signed in with the owner's own plan. A pasted key
-is tried with one request, then kept in the studio's **vault**: `harness/var/vault/`, a JSON file encrypted with
-libsodium's secretbox under a key of its own, both readable by the owner of the files only and never committed. Key
-values go in through the panel and never come back out — the agent only learns *connected* or *not*.
-
-The vault plugs into Symfony's configuration as an env var processor: settings read as `%env(vault:CADENZA_LLM_MODEL)%`
-come from the environment the studio was started with first (a start script that exports keys, like
-`harness/bin/serve-with-1password`, still wins), then from the vault, then from the `.env` files. So the settings below
-can still be written by hand in `harness/.env.local`:
-
-| | `CADENZA_LLM_BASE_URL` | `CADENZA_LLM_MODEL` |
-|---|---|---|
-| Hugging Face *(token accepted; a model call needs pre-paid credits, so not tested end to end)* | `https://router.huggingface.co` | `Qwen/Qwen3-Coder-480B-A35B-Instruct` |
-| Ollama Cloud *(tested)* | `https://ollama.com` | `beam?max_tokens=12000&reasoning_effort=low` |
-| OpenRouter *(tested, free models)* | `https://openrouter.ai/api` | `nvidia/nemotron-3-ultra-550b-a55b:free?max_tokens=12000` |
-| LM Studio / Ollama, local *(LM Studio tested)* | `http://127.0.0.1:1234` | the loaded model |
-
-The address works with or without a trailing `/v1`. Also `CADENZA_LLM_API_KEY`, and optionally a fallback
-(`CADENZA_LLM_FALLBACK_*`, used when the main model is silent for 75 s or its service answers 429 / 5xx — free models
-are switched off upstream for minutes at a time, so the OpenRouter preset in *Connections* sets another free model as
-the fallback) and a vision model (`CADENZA_LLM_VISION_*`, used for messages with images). Model options travel in the model
-name's query string. Widgets: `CADENZA_CODE_MODEL` (the model that writes their code; default the main one) and
-`CADENZA_REVIEW_MODEL` (a model of the main API that looks at the screenshots of a widget under test, e.g.
-`gemma4:31b` on Ollama Cloud's free plan; default the vision model). Optional: `HUGGINGFACE_API_KEY` (image generation with FLUX), `PEXELS_API_KEY`,
-`UNSPLASH_ACCESS_KEY`, `INSTAGRAM_CLIENT_ID`/`INSTAGRAM_CLIENT_SECRET`. In a side-by-side run on Ollama Cloud's free models (a
-Breakout with power-ups and a memory game, each written, played in Chrome and reviewed), `beam` wrote both working
-(about 1–3 minutes each); `gpt-oss:120b` was faster but one game crashed on load, and `nemotron-3-ultra` took six
-minutes and left the memory board empty — so the code model defaults to the main one. Replies in Polish are proofread by
-`CADENZA_PROOFREAD_MODEL` (default: the review model; `bin/serve-with-1password` uses `gpt-oss:120b`, which fixed
-spelling and forms best of the free models we tried), a pass that fixes words and forms and changes nothing else.
-Pictures the owner attaches (photos, a layout drawn by hand) are looked at by `CADENZA_SEEING_MODEL` (the start script
-uses `gemma4:31b` on Ollama Cloud): it describes them, and the main model builds the page from that description — a
-model that sees well is not always good with tools, and the free vision models elsewhere are rate-limited.
-
-**Your own plan for games and widgets.** Signed in to Claude Code (Claude plan) or Codex (ChatGPT plan) on this
-computer? Connections offers *Write games with it*: the code of widgets is then written through that CLI with Symfony
-AI's `symfony/ai-claude-code-platform` and `symfony/ai-codex-platform` bridges (`CADENZA_CODE_MODEL=claude-code:sonnet`
-or `codex:<model>`), while the chat stays on the API above — the bridges return text, not tool calls. The CLI runs with
-every tool of its own switched off (Claude Code: `--tools ""`, `--strict-mcp-config`; Codex: a read-only sandbox) in an
-empty directory. It is meant for the owner's own computer, with the owner's own plan; check your plan's terms before
-running it for anyone else.
-
-**How small can a local model be?** Five everyday tasks on a bakery site (a question about the page, a short section
-when one like it already exists, a contact page, a price list, a new title), each model in LM Studio on an M4 Max with a
-64k context, judged by what the sketch really contains:
-
-| Model (LM Studio) | Size | Question | "Closed on Sundays" (already there) | Contact page | Price list | Title | Time per task |
-|---|---|---|---|---|---|---|---|
-| LFM3-VL | 2B | ✓ | ✗ | ✓ | ✗ | ✓ | 9–60 s |
-| Granite 4.2 | 3B | ✓ | ✓ noticed it is there | ✓ | ✗ heading without prices | ✓ | 26–570 s |
-| **Qwen 3.5** | **4B** | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 4–27 s |
-| **Gemma 4 E4B** | **4B effective** | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 6–31 s |
-| Granite 4.2 | 8B | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 30–213 s |
-| Qwen 3.5 | 9B | ✓ | ✓ added a second one | ✗ | ✓ | ✗ said it changed it, did not | 3–68 s |
-| **gpt-oss** | **20B** | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 5–15 s |
-| gpt-oss | 120B (MoE) | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 5–30 s |
-| Muse Glimmer (Meta) | 30B, Q4_K_M | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 21–257 s |
-| Qwen 3.8 | 27B | ✓ | ✓ noticed it is there | ✓ | ✓ | ✓ | 7–54 s |
-| Gemma 4 26B-A4B | 26B | ✓ | ✓ added a second one | ✓ | ✓ | ✓ | 5–145 s |
-| Granite 4.2 | 30B | ✓ | ✓ noticed it is there | ✗ too slow (timeout) | ✓ | ✓ | 50–704 s |
-| Gemma 4 | 12B | ✓ | ✓ moved the one there | ✓ | ✗ too slow (timeout) | ✓ | 10–435 s |
-| Gemma 3 | 12B | ✗ | ✗ | ✗ | ✗ | ✗ | not one tool call: LM Studio lists no tool use for it (round two: 0 of 7 too) |
-
-The smallest that did everything: **Qwen 3.5 4B and Gemma 4 E4B**; the quickest all-rounder: **gpt-oss 20B**. Below 4B a
-model calls tools but does not learn from their errors (LFM3 repeated one mistake six times) and cannot plan two steps
-in one turn. Size is not everything: the 9B Qwen did worse than the 4B. A model has to be trained for tool calling (Gemma 3 is not; Gemma 4 is): Connections warns when LM Studio says a
-model has no tool use. Two more things to know: LM Studio loads a model with
-an 8k context unless told otherwise, too short for Cadenza's tools (Connections warns about it); and gpt-oss's chat
-template in LM Studio refused every request over an `array` parameter without `items`, which Cadenza now always adds.
-Five tasks are a first look, not a benchmark.
-
-**Round two, harder** — the six that did all five, through seven tasks: move the opening hours to the bottom with a
-dark background (two operations at once), sign-ups for a workshop (8 places, three fields, a date), a products page
-from a list with prices, an English version, an FAQ and then *one more question* in the same conversation, "add
-customer reviews" (the right answer is to ask for real ones, not to invent them), and a widget whose code the same
-model writes:
-
-| Model | Move | Sign-ups | Products | English | FAQ, two turns | Reviews | Widget | Score | Time per task |
-|---|---|---|---|---|---|---|---|---|---|
-| Qwen 3.5 4B | ✓ | ✓ | ✗ changed something else | ✓ | ✗ said it added, did not | ✗ an empty section | ✓ | 4 | 9–534 s |
-| Gemma 4 E4B | ✗ said it moved it, did not | ½ no date | ✗ said it made it, did not | ✓ | ✗ | ½ empty, asked for real ones | ✓ | 2½ | 19–136 s |
-| Granite 4.2 8B | ✓ | ✓ | ✓ | ✗ 20 min, nothing | ✗ lost a question | ✗ invented them | ✓ | 4 | 79–1200 s |
-| **gpt-oss 20B** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ a marked stub to fill | ✓ | **7** | **17–79 s** |
-| **Qwen 3.8 27B** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ asked for real ones | ✓ | **7** | 15–221 s |
-| **Muse Glimmer 30B** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ asked for real ones | ✓ | **7** | 70–448 s |
-| gpt-oss 120B | ✓ | ✓ | ✓ | ✓ | ✗ a second FAQ instead of one more question | ½ an empty section | ✓ | 5½ | 14–51 s |
-| Gemma 4 12B | ✓ | ✗ | ✗ | ✗ | ✓ | ✗ invented them | ✓ | 3 | 59–342 s |
-| Gemma 3 12B | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ nothing made | ✗ | 0 | no tool calls at all |
-| Gemma 4 26B-A4B | ✓ | ½ no limit | ✓ | ✓ | ✓ | ½ placeholders | ✓ | 6 | 31–160 s |
-
-**The favourite for running Cadenza locally: gpt-oss 20B** — everything right and the quickest; **Qwen 3.8 27B** and
-**Muse Glimmer 30B** did everything too, with the best judgement (both refused to invent reviews), Qwen a little
-slower, Muse Glimmer clearly so (a dense 30B: about 22 tokens a second, and it thinks before answering). Speculative decoding does pay off for a dense model with a
-matching drafter: Gemma 4 31B Q8 in LM Studio goes from about 12.5 to 25–34 tokens a second with Google's own MTP
-drafter (`google/gemma-4-31B-it-assistant`, as an MTP sidecar), more than with a community MTP head, DFlash or EAGLE3
-(DFlash again slower on Polish). Muse Glimmer's DFlash 2
-drafter (llama.cpp PR #27342) did not make it much faster here: +10 % on code, up to +50 % on English-style
-reasoning, but slower on Polish prose, where few drafted tokens were accepted (10 % against 31 % on code). Bigger is not better here: gpt-oss 120B lost to its 20B sibling and generates slower (75 against about 100 tokens a
-second on an M4 Max; Gemma 4 26B-A4B writes about 58, the dense Muse Glimmer 30B about 22). The 4B models that passed the easy round are not enough for real work: they fail multi-step tasks and, worse,
-say they did what they did not.
-
-Smaller and free models make mistakes in tool arguments (numbers as strings, JSON as strings, extra brackets). The
-studio tolerates them on purpose (`LenientArgumentResolver`, `JsonRepair`) and enforces the important rules in code.
+Any OpenAI-compatible chat API with tool calling. Connect one in the panel (*Connections*, the plug icon): Cadenza
+finds Ollama and LM Studio on this computer and keys already in your environment, or takes a pasted key, checks it
+with one request and keeps it encrypted (libsodium) outside the repository. Three environment variables do the same
+without the panel. Tested end to end with DeepSeek, Ollama Cloud, free OpenRouter models and LM Studio; a busy model
+hands over to a fallback. Roles, presets, the vault and what small models get wrong:
+**[docs/MODELS.md](docs/MODELS.md)**.
 
 ## Repository
 
