@@ -84,6 +84,20 @@ final class GuestAgentTest extends WebTestCase
         self::assertStringContainsString('cz-visitor', $html);
         self::assertStringNotContainsString($guest, $html, 'tokens are for the owner\'s eyes');
 
+        // The guest's own sketch has a private preview link: the page as it would be, nothing to decide, not for
+        // search engines. A wrong key, or the key of another draft, shows the live site.
+        self::assertMatchesRegularExpression('~^/\\?cz_draft=\\d+&cz_key=[0-9a-f]{32} ~', $result['preview']);
+        $link = strtok($result['preview'], ' ');
+        $client->request('GET', $link);
+        $preview = (string) $client->getResponse()->getContent();
+        self::assertStringContainsString('Good bread takes its time', $preview);
+        self::assertStringContainsString('waiting for the owner', $preview);
+        self::assertStringNotContainsString('data-cz-action="approve"', $preview);
+        self::assertStringNotContainsString('Send me the hours', $preview);
+        self::assertSame('noindex', $client->getResponse()->headers->get('X-Robots-Tag'));
+        $client->request('GET', preg_replace('~cz_key=.{4}~', 'cz_key=0000', $link));
+        self::assertStringNotContainsString('Good bread takes its time', (string) $client->getResponse()->getContent());
+
         // The owner approves: the guest learns it was published.
         $site->publish((int) $result['draftId']);
         self::assertSame('published', $tools->status((int) $result['draftId'])['status']);

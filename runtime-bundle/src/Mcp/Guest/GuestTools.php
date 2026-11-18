@@ -30,6 +30,11 @@ final class GuestTools
         private readonly SiteManager $manager,
         private readonly SiteVersionRepository $versions,
         private readonly EntityManagerInterface $em,
+        #[\Symfony\Component\DependencyInjection\Attribute\Autowire('%cadenza.token%')]
+        private readonly string $token = '',
+        /** A public demo forgets outside sketches nobody decided on after this many hours; 0 keeps them until the owner decides. */
+        #[\Symfony\Component\DependencyInjection\Attribute\Autowire('%env(int:CADENZA_GUEST_SKETCH_HOURS)%')]
+        private readonly int $forgetAfterHours = 0,
     ) {
     }
 
@@ -87,6 +92,14 @@ final class GuestTools
         if (null !== $draftId && null === $this->versions->draft($draftId)?->getAuthor()) {
             return ['ok' => false, 'errors' => ['You can only revise a draft you proposed yourself.']];
         }
+        if ($this->forgetAfterHours > 0) {
+            $limit = new \DateTimeImmutable(\sprintf('-%d hours', $this->forgetAfterHours));
+            foreach ($this->versions->drafts(40, true) as $old) {
+                if ($old->getCreatedAt() < $limit && $old->getId() !== $draftId) {
+                    $this->manager->discard((int) $old->getId());
+                }
+            }
+        }
         if (null === $draftId && \count($this->versions->drafts(self::MAX_WAITING, true)) >= self::MAX_WAITING) {
             return ['ok' => false, 'errors' => [\sprintf('%d sketches of outside agents are already waiting for the owner. Ask them to decide on those first.', self::MAX_WAITING)]];
         }
@@ -95,7 +108,8 @@ final class GuestTools
             $this->versions->draft((int) $result['draftId'])?->signedBy($agent);
             $this->em->flush();
             $result['next'] = 'The sketch now waits in the owner\'s panel. Only the owner can publish it; tell them it is there.';
-            $result['preview'] = ($result['focusPath'] ?? '/').'?cz_draft='.$result['draftId'].' (the owner sees it when signed in)';
+            $result['preview'] = ($result['focusPath'] ?? '/').'?cz_draft='.$result['draftId'].'&cz_key='.\Cadenza\Runtime\EventSubscriber\McpGuardSubscriber::previewKey($this->token, (int) $result['draftId'])
+                .' (on the site\'s address: a private link that shows the page as it would be; give it to the person you work for. Nothing is published.)';
         }
 
         return $result;

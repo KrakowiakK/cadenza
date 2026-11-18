@@ -30,6 +30,8 @@ final class PageController
         private readonly Environment $twig,
         private readonly \Cadenza\Runtime\Collection\Collections $collections,
         private readonly \Cadenza\Runtime\Account\Accounts $accounts,
+        #[\Symfony\Component\DependencyInjection\Attribute\Autowire('%cadenza.token%')]
+        private readonly string $token = '',
     ) {
     }
 
@@ -44,7 +46,14 @@ final class PageController
         }
 
         $draftId = $request->query->getInt('cz_draft');
-        if ($this->state->owner && $draftId > 0 && null !== $draft = $this->versions->draft($draftId)) {
+        // A sketch left by an outside agent has a private preview link (draft_propose returns it): the page as it would
+        // be, for whoever holds the link, with nothing to decide on it.
+        $key = (string) $request->query->get('cz_key', '');
+        $guestPreview = !$this->state->owner && $draftId > 0 && '' !== $key && '' !== $this->token
+            && hash_equals(\Cadenza\Runtime\EventSubscriber\McpGuardSubscriber::previewKey($this->token, $draftId), $key)
+            && null !== $this->versions->draft($draftId)?->getAuthor();
+        $this->state->guestPreview = $guestPreview;
+        if (($this->state->owner || $guestPreview) && $draftId > 0 && null !== $draft = $this->versions->draft($draftId)) {
             $sketch = $this->site->rebased($draft);
             $this->state->diff = Diff::between($document, $sketch);
             $this->state->draftId = $draftId;
@@ -82,8 +91,11 @@ final class PageController
         if ('members' === ($page['access'] ?? 'public')) {
             $response->headers->set('Cache-Control', 'private, no-store');
         }
-        if ($this->state->owner) {
+        if ($this->state->owner || $this->state->guestPreview) {
             $response->headers->set('Cache-Control', 'no-store');
+        }
+        if ($this->state->guestPreview) {
+            $response->headers->set('X-Robots-Tag', 'noindex');
         }
 
         return $response;

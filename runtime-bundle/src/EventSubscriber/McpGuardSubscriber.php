@@ -23,6 +23,15 @@ final class McpGuardSubscriber
     ) {
     }
 
+    /**
+     * The key of a sketch's private preview link: whoever proposed the sketch gets it back from draft_propose and can
+     * look at the page as it would be, without being the owner. It opens that one sketch and nothing else.
+     */
+    public static function previewKey(string $token, int $draftId): string
+    {
+        return substr(hash_hmac('sha256', 'cadenza sketch preview '.$draftId, $token), 0, 32);
+    }
+
     public static function guestToken(string $token): string
     {
         return 'czg_'.substr(hash_hmac('sha256', 'cadenza guest agent', $token), 0, 40);

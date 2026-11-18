@@ -13,6 +13,9 @@
             {%- if sum.site|default(false) %}<span class="rounded-full bg-violet-600/15 px-2 py-0.5 font-medium text-violet-800 dark:text-violet-200" data-cz-i18n="siteChanged">site</span>{% endif %}
             {%- if sum.pagesAdded|default(0) %}<span class="rounded-full bg-emerald-600/15 px-2 py-0.5 font-medium text-emerald-800 dark:text-emerald-200">+{{ sum.pagesAdded }} <span data-cz-i18n="pages">pages</span></span>{% endif %}
         </span>
+        {%- if s.guestPreview %}
+        <span class="rounded-lg bg-amber-900/10 px-3 py-1.5 text-xs font-medium dark:bg-white/10">Not published · waiting for the owner's decision</span>
+        {%- else %}
         <label class="inline-flex cursor-pointer items-center gap-1.5 text-xs select-none"><input type="checkbox" data-cz-action="marks" class="accent-amber-800"><span data-cz-i18n="showChanges">Show changes</span></label>
         <div class="inline-flex rounded-lg bg-amber-900/10 p-0.5 text-xs dark:bg-white/10">
             <button type="button" data-cz-action="before" class="rounded-md px-2.5 py-1 {{ s.showBefore ? 'bg-white font-semibold shadow-sm dark:bg-white/20' : '' }}" data-cz-i18n="before">Before</button>
@@ -20,5 +23,6 @@
         </div>
         <button type="button" data-cz-action="reject" class="rounded-lg px-3 py-1.5 text-xs font-medium hover:bg-amber-900/10 dark:hover:bg-white/10" data-cz-i18n="reject">Reject</button>
         <button type="button" data-cz-action="approve" class="rounded-lg bg-amber-900 px-3 py-1.5 text-xs font-semibold text-amber-50 shadow-sm hover:bg-amber-800 dark:bg-amber-200 dark:text-amber-950" data-cz-i18n="approve">Approve</button>
+        {%- endif %}
     </div>
 </div>

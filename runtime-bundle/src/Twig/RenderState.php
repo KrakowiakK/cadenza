@@ -20,6 +20,8 @@ final class RenderState
     public ?string $draftSummary = null;
     /** The outside agent that left this sketch over MCP, if it was not the studio. */
     public ?string $draftAuthor = null;
+    /** An outside agent's sketch opened through its private preview link: looked at, never decided on. */
+    public bool $guestPreview = false;
 
     /** Published version shown read-only (timeline preview). */
     public ?\Cadenza\Runtime\Entity\SiteVersion $previewVersion = null;

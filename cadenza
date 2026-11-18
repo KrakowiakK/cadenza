@@ -66,6 +66,9 @@ setup() {
     env_local "$STUDIO/.env.local" CADENZA_TOKEN "$token"
     env_url "$STUDIO/.env.local" CADENZA_APP_URL "http://127.0.0.1:$APP_PORT"
     env_url "$STUDIO/.env.local" CADENZA_PUBLIC_URL "http://127.0.0.1:$STUDIO_PORT"
+    # each installation gets its own secret (cookies, signed links); needed as soon as APP_ENV=prod
+    env_local "$APP/.env.local" APP_SECRET "$(php -r 'echo bin2hex(random_bytes(16));')"
+    env_local "$STUDIO/.env.local" APP_SECRET "$(php -r 'echo bin2hex(random_bytes(16));')"
 
     for dir in "$APP" "$STUDIO"; do
         step "$(basename "$dir"): dependencies"
@@ -127,6 +130,8 @@ stop() {
         kill "$(cat "$pid")" 2>/dev/null || true
         rm -f "$pid"
     done
+    # wait until the workers have let go of the ports, so that a start right after a stop finds them free
+    for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do pgrep -f "$ROOT/bin/router.php" >/dev/null 2>&1 || break; sleep 0.2; done
     echo "Stopped."
 }
 

@@ -59,7 +59,9 @@ final class CadenzaRuntimeBundle extends AbstractBundle
             // Texts come from the agent and from spreadsheets: Markdown yes, raw HTML and javascript: links no.
             $builder->prependExtensionConfig('twig_extra', ['commonmark' => ['html_input' => 'escape', 'allow_unsafe_links' => false]]);
         }
-                $builder->prependExtensionConfig('framework', [
+        $builder->setParameter('env(CADENZA_ASK_PER_DAY)', '400');
+        $builder->setParameter('env(CADENZA_GUEST_SKETCH_HOURS)', '0');
+        $builder->prependExtensionConfig('framework', [
             'asset_mapper' => ['paths' => [$this->getPath().'/assets' => '@cadenza/runtime']],
             'messenger' => [
                 'buses' => [
@@ -79,7 +81,8 @@ final class CadenzaRuntimeBundle extends AbstractBundle
                 'cadenza_form' => ['policy' => 'sliding_window', 'limit' => 6, 'interval' => '10 minutes'],
                 // Questions to the visitors' assistant cost the owner a model call each: a person asks a few, a site gets a few hundred a day.
                 'cadenza_ask' => ['policy' => 'sliding_window', 'limit' => 8, 'interval' => '10 minutes'],
-                'cadenza_ask_site' => ['policy' => 'fixed_window', 'limit' => 400, 'interval' => '1 day'],
+                // the whole site's budget of model calls per day; CADENZA_ASK_PER_DAY lowers or raises it
+                'cadenza_ask_site' => ['policy' => 'fixed_window', 'limit' => '%env(int:CADENZA_ASK_PER_DAY)%', 'interval' => '1 day'],
             ],
         ]);
     }
