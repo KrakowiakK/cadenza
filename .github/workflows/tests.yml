@@ -60,4 +60,4 @@ jobs:
       - run: (cd runtime-bundle && composer install --no-interaction --no-progress && vendor/bin/phpstan analyse --no-progress)
       - run: (cd harness && vendor/bin/phpstan analyse --no-progress)
       - run: (cd demo-app && vendor/bin/phpstan analyse --no-progress)
-      - run: PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.dist.php
+      - run: PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix --using-cache=no --dry-run --diff --config=.php-cs-fixer.dist.php

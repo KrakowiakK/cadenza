@@ -74,7 +74,7 @@ final class MediaLibrary
         // Phones store rotation as an EXIF flag; resizing drops EXIF, so turn the pixels upright first.
         if (null !== $exif && \in_array($exif['orientation'], [3, 6, 8], true) && false !== $upright = imagecreatefromstring($bytes)) {
             $upright = imagerotate($upright, match ($exif['orientation']) {
-                3 => 180, 6 => -90, 8 => 90
+                3 => 180, 6 => -90, 8 => 90,
             }, 0);
             ob_start();
             imagejpeg($upright, null, 88);
