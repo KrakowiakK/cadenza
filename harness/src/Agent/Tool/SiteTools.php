@@ -181,7 +181,8 @@ final class SiteTools
 
     /**
      * Three looks worth choosing between: the model's own picks in its order, but a second look from a family
-     * already shown gives way to one from a family that is not, and two picks are filled up to three.
+     * already shown gives way to one from a family that is not, two picks are filled up to three, and one of
+     * the three is always the dark, loud one, so the choice spans the range.
      *
      * @param list<string> $directions known direction names
      *
@@ -202,6 +203,10 @@ final class SiteTools
                 $kept[] = $direction;
                 $families[self::FAMILIES[$direction]] = true;
             }
+        }
+        // One of the three is always the daring one: the choice then spans the whole range, quiet to loud.
+        if (3 === \count($kept) && !isset($families['stage'])) {
+            $kept[2] = 'bold';
         }
 
         return $kept;
