@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process';
 import { openRecorder, waitIdle, buildVideo } from './lib.mjs';
 
 const OUT = process.env.OUT || 'out/take-tour';
-const XLSX = process.env.XLSX || `${process.env.CZ}/examples/tidewater-classes.xlsx`;
+const XLSX = process.env.XLSX || `${process.env.CZ}/examples/bakery-breads.xlsx`;
 const rec = await openRecorder({ outDir: OUT, cred: {}, login: false });
 const { page } = rec;
 const shot = n => page.screenshot({ path: `${OUT}/${n}.png` });
@@ -13,7 +13,7 @@ const bar = () => page.locator('input[placeholder^="Tell me what to change"]').f
 const box = () => page.locator('textarea[placeholder^="Tell me"], textarea[placeholder^="What should"]').first();
 const inView = async l => { const bb = await l.boundingBox().catch(() => null); return !!bb && bb.x >= 0 && bb.x + bb.width <= 1920; };
 const TYPE = { delay: 42 };
-const PROMPT_CC = 'Add a short FAQ with three questions to my yoga studio website, as a sketch. Put it near the end of the home page. Sign it as Claude Code. Write everything, the summary too, in English, and keep the summary to one short sentence. Do not add any note about the sketch to the page itself.';
+const PROMPT_CC = 'Add a short FAQ with three questions to my bakery website, as a sketch. Put it near the end of the home page. Sign it as Claude Code. Write everything, the summary too, in English, and keep the summary to one short sentence. Do not add any note about the sketch to the page itself.';
 async function smoothIntoView(loc) { await loc.evaluate(el => el.scrollIntoView({ behavior: 'smooth', block: 'center' })); await page.waitForTimeout(650); }
 async function say(text) { const t = (await inView(box())) ? box() : bar(); await rec.type(t, text, TYPE); await rec.wait(350); await page.keyboard.press('Enter'); }
 async function panelButton(name) {
@@ -59,73 +59,56 @@ rec.mark('conn_end');
 await rec.click(page.locator('button[title="Conversation"], button[title="Chat"]').first(), { ms: 800 }).catch(async () => { await rec.click(page.locator('button[title="Connections"]').first(), { ms: 800 }); });
 await rec.wait(900);
 
-// ── 3. describe → looks → choose → sketch → approve ──────────────────────────────────────────────────
+// ── 3. describe → three looks side by side → choose → a sketch → a photo → approve ───────────────────
 rec.mark('type1');
-await say('I run Tidewater Yoga in Gdynia. How could my website look? No photos.');
+await say('I run Hearth & Crumb, a sourdough bakery in Bristol. How could my website look?');
 rec.mark('sent1'); await rec.wait(2500); await waitIdle(page, { log: true });
-rec.mark('variants'); await rec.wait(3000); await shot('t-variants');
-const choose = page.getByText('Choose this one');
+await page.locator('#cz-stage [data-do="pick"]').first().waitFor({ state: 'visible', timeout: 20000 });
+rec.mark('variants'); await rec.wait(3600); await shot('t-variants');
+const looks = page.locator('#cz-stage [data-stage-variant]');
 let pick = 0;
-{ const pref = ['elegant', 'warm', 'fresh']; let best = 99; const n = await choose.count();
-  for (let i = 0; i < n; i++) { const txt = (await choose.nth(i).evaluate(e => (e.closest('div[class*="border"]') || e.parentElement.parentElement).innerText)).toLowerCase(); const r = pref.findIndex(p => txt.includes(p)); if (r >= 0 && r < best) { best = r; pick = i; } } }
-await smoothIntoView(choose.nth(pick)).catch(() => {});
-rec.mark('choose'); await rec.click(choose.nth(pick), { ms: 900, pause: 300 });
+{ const pref = ['warm', 'elegant', 'editorial', 'fresh']; let best = 99; const n = await looks.count();
+  for (let i = 0; i < n; i++) { const txt = (await looks.nth(i).innerText()).toLowerCase(); const r = pref.findIndex(p => txt.includes(p)); if (r >= 0 && r < best) { best = r; pick = i; } } }
+rec.mark('choose'); await rec.click(looks.nth(pick).locator('[data-do="pick"]'), { ms: 900, pause: 300 });
 await rec.wait(2500); await waitIdle(page, { log: true });
-rec.mark('sketch1'); await rec.wait(1300); await scrollPage(800, 2600); await rec.wait(500);
-rec.mark('review1'); await approve(); rec.mark('approved1'); await rec.wait(1600); await guardEnglish('1');
-
-// ── 4. a photo for the hero ───────────────────────────────────────────────────────────────────────────
-if (!(await inView(box()))) { await rec.click(page.locator('button[title^="Open"]').first(), { ms: 800 }); await rec.wait(800); }
-rec.mark('type2');
-await say('Let us put a photo in the hero. Show me a few calm yoga room photos to choose from.');
-rec.mark('sent2'); await rec.wait(2500); await waitIdle(page, { log: true });
-rec.mark('grid'); await rec.wait(1200); await shot('t-grid');
-const lastGrid = () => page.getByText('PICK A PHOTO').last().locator('xpath=ancestor::div[contains(@class,"border")][1]');
-// the local vision model (Gemma on this Mac) judges each candidate: the first one that really shows yoga is the pick
-async function findYoga() {
-  const imgs = lastGrid().locator('img');
-  const nImgs = Math.min(await imgs.count(), 8);
-  const dir = `${process.cwd()}/${OUT}/cand`; fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
-  for (let i = 0; i < nImgs; i++) fs.writeFileSync(`${dir}/cand-${i}.jpg`, await imgs.nth(i).screenshot({ type: 'jpeg', quality: 70 }));
-  rec.mark('judge0' + (findYoga.n = (findYoga.n || 0) + 1));
-  const out = await new Promise(res => { const p = spawn('claude', ['-p', `Read the image files cand-0.jpg to cand-${nImgs - 1}.jpg in the current directory. Which is the first one that shows a person practising yoga, or a calm bright room clearly suited to yoga? Reply with that number only, or -1 if none does.`, '--allowedTools', 'Read', '--model', 'haiku'], { stdio: ['ignore', 'pipe', 'pipe'], cwd: dir }); let o = ''; p.stdout.on('data', d => { o += d; }); p.on('close', () => res(o)); });
-  rec.mark('judge1' + findYoga.n);
-  console.log('judge says', out.trim().slice(0, 80));
-  const m = out.match(/-?\d+/); const k = m ? Number(m[0]) : -1;
-  return k >= 0 && k < nImgs ? k : -1;
-}
-let pickIdx = await findYoga();
-if (pickIdx < 0) { // a natural correction, kept in the film: she asks for different photos
-  rec.mark('type2b'); await say('Not quite. Show me photos of someone doing yoga in a bright room.');
-  rec.mark('sent2b'); await rec.wait(2500); await waitIdle(page, { log: true });
-  rec.mark('grid2'); await rec.wait(1200); await shot('t-grid2');
-  pickIdx = await findYoga();
-  if (pickIdx < 0) throw new Error('no yoga photo among the candidates');
-}
-const img = lastGrid().locator('img').nth(pickIdx);
-await smoothIntoView(img).catch(() => {}); await rec.wait(900);
-rec.mark('photo_pick'); await rec.click(img, { ms: 900, pause: 300 });
+rec.mark('sketch1'); await rec.wait(1500); await scrollPage(700, 2400); await rec.wait(500);
+// the panel offers freely licensed photos for the opening; the best of them is chosen off-screen
+const grid = page.getByText('PICK A PHOTO').last().locator('xpath=ancestor::div[contains(@class,"border")][1]');
+await grid.waitFor({ state: 'visible', timeout: 20000 });
+await smoothIntoView(grid); rec.mark('grid'); await rec.wait(2600); await shot('t-grid');
+const imgs = grid.locator('img');
+const nImgs = Math.min(await imgs.count(), 8);
+const dir = `${process.cwd()}/${OUT}/cand`; fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
+for (let i = 0; i < nImgs; i++) fs.writeFileSync(`${dir}/cand-${i}.jpg`, await imgs.nth(i).screenshot({ type: 'jpeg', quality: 70 }));
+rec.mark('judge01');
+const verdict = await new Promise(res => { const p = spawn('claude', ['-p', `Read the image files cand-0.jpg to cand-${nImgs - 1}.jpg in the current directory. Which one is the most appetising, well-lit photograph of sourdough bread or a bakery, good enough for the top of a bakery's website? Reply with that number only, or -1 if none is good enough.`, '--allowedTools', 'Read', '--model', 'haiku'], { stdio: ['ignore', 'pipe', 'pipe'], cwd: dir }); let o = ''; p.stdout.on('data', d => { o += d; }); p.on('close', () => res(o)); });
+rec.mark('judge11');
+const k = Number((verdict.match(/-?\d+/) || ['-1'])[0]);
+console.log('photo judge says', verdict.trim().slice(0, 60));
+if (!(k >= 0 && k < nImgs)) throw new Error('no photo good enough among the candidates');
+await smoothIntoView(imgs.nth(k)).catch(() => {}); await rec.wait(500);
+rec.mark('photo_pick'); await rec.click(imgs.nth(k), { ms: 900, pause: 300 });
 await rec.wait(2500); await waitIdle(page, { log: true });
-rec.mark('sketch2'); await rec.wait(1800);
+rec.mark('sketch2'); await rec.wait(2000);
 rec.mark('review2'); await approve(); rec.mark('approved2'); await rec.wait(2200); await shot('t-photo-live'); await guardEnglish('2');
 
-// ── 5. a spreadsheet becomes a timetable ──────────────────────────────────────────────────────────────
+// ── 5. a spreadsheet becomes a list with filters ──────────────────────────────────────────────────────────────
 if (!(await inView(box()))) { await rec.click(page.locator('button[title^="Open"]').first(), { ms: 800 }); await rec.wait(800); }
 rec.mark('attach');
 const [chooser] = await Promise.all([page.waitForEvent('filechooser'), rec.click(page.locator('button[title^="Attach"]').first(), { ms: 800 })]);
 await chooser.setFiles(XLSX); await rec.wait(600);
 rec.mark('type3');
-await say('Here is my class schedule. Make a timetable with filters. No photos.');
+await say('Here is what we bake. Put it on the site as a list with filters.');
 rec.mark('sent3'); await rec.wait(2500); await waitIdle(page, { log: true });
 rec.mark('sketch3'); await rec.wait(600);
 await showSketch(); await scrollPage(800, 2200); await rec.wait(600);
-const chip = page.getByRole('button', { name: /^(Yin|Tuesday)$/ }).first();
+const chip = page.getByRole('button', { name: /^(Sweet bakes|Savoury|Loaves)$/ }).first();
 if (await chip.count()) { rec.mark('filter'); await rec.click(chip, { ms: 800, pause: 250 }); await rec.wait(1700); }
 rec.mark('review3'); await approve(); rec.mark('approved3'); await rec.wait(1700); await guardEnglish('3');
 
 // ── 6. point at anything ──────────────────────────────────────────────────────────────────────────────
 rec.mark('pick');
-await rec.click(page.locator('a').filter({ hasText: 'Tidewater Yoga' }).first(), { ms: 800 }); await rec.wait(900);
+await rec.click(page.locator('header a, nav a').filter({ hasText: /Hearth|Home/ }).first(), { ms: 800 }); await rec.wait(900);
 await rec.click(page.locator('button[title="Point at an element"]').last(), { ms: 800 }); await rec.wait(500);
 await rec.click(page.locator('h1').first(), { ms: 900 }); await rec.wait(700);
 rec.mark('type5'); await say('Make this shorter and warmer.');
@@ -188,9 +171,9 @@ async function question(q, mark) {
   const a = await page.locator('[data-cz-ask-thread] > div').last().innerText(); console.log('Q:', q, '\nA:', a);
   return a;
 }
-const a1 = await question('Which class is good for a beginner?', 1); await rec.wait(3200); await shot('t-answer1');
+const a1 = await question('How much is the seeded rye?', 1); await rec.wait(3200); await shot('t-answer1');
 if (/does not say|not answering|Too many/i.test(a1)) throw new Error('the assistant did not answer the first question');
-await question('Is there parking nearby?', 2); await rec.wait(3000); await shot('t-answer2'); await guardEnglish('8b');
+await question('Do you deliver?', 2); await rec.wait(3000); await shot('t-answer2'); await guardEnglish('8b');
 
 // ── 9. check my site ──────────────────────────────────────────────────────────────────────────────────
 await openPanel();

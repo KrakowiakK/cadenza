@@ -1,6 +1,6 @@
 # Cadenza — the 90-second demo
 
-Watch: [the 90-second demo](https://youtu.be/l33lnjWC7pA) · [the quick start](https://youtu.be/au5jg6GXCtY)
+Watch: [the 90-second demo](https://youtu.be/l33lnjWC7pA) · [the quick start](https://youtu.be/5lIGgQTJouU)
 
 The video states the problem first, then shows **one continuous screen recording** of the real thing: a scripted browser
 performs the story on a fresh Cadenza site (the agent is `deepseek-flash`). There are no cuts: only the waits for the
@@ -42,8 +42,9 @@ script, [`tools/demo-recording/story.mjs`](../tools/demo-recording/README.md); t
 A second, longer film (about 4½ minutes) walks through running Cadenza, with the real commands and their real output:
 `git clone`, `./cadenza setup`, `./cadenza start` with a model taken from three environment variables, the first-run owner
 account, the **Connections** panel (models found on the computer, a key for OpenAI, DeepSeek, OpenRouter, Ollama Cloud
-or any compatible API, and the picture services), and then the product at work: three designs, a sketch and its
-approval, freely licensed photos with author and licence, a spreadsheet turned into a timetable, *point and change*
-with *Before / After* and the version history, then the newer parts: the line for your own agent in Connections and a
-real Claude Code leaving a signed sketch over MCP, the assistant for visitors (an answer taken from the site, and an
-honest *"this site does not say"*), and *Check my site*. It is recorded in one take by [`tools/demo-recording/tour.mjs`](../tools/demo-recording/tour.mjs).
+or any compatible API, and the picture services), and then the product at work on the same bakery: three designs side
+by side, a sketch, freely licensed photos with author and licence, a spreadsheet
+([`examples/bakery-breads.xlsx`](../examples/bakery-breads.xlsx)) turned into a list with filters, *point and change*
+with *Before / After*, the version history, the line for your own agent in Connections and a real Claude Code leaving a
+signed sketch over MCP, the assistant for visitors (an answer taken from the site, and an honest *"this site does not
+say"*), and *Check my site*. It is recorded in one take by [`tools/demo-recording/tour.mjs`](../tools/demo-recording/tour.mjs).
