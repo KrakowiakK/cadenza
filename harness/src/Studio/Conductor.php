@@ -109,8 +109,8 @@ final class Conductor
     /**
      * What the owner's pictures show, in words the main model can build from; null when no model can see them.
      *
-     * @param list<Image>                       $images
-     * @param list<array<string, mixed>>        $attachments
+     * @param list<Image>                $images
+     * @param list<array<string, mixed>> $attachments
      */
     private function describe(array $images, string $message, array $attachments): ?string
     {
@@ -182,7 +182,7 @@ final class Conductor
 
     /**
      * @param array{path?: string, draftId?: ?int, selection?: list<array<string, string>>, language?: string, viewport?: string} $context
-     * @param list<array{id: string, kind?: string, name?: string}>                                                                $attachments
+     * @param list<array{id: string, kind?: string, name?: string}>                                                               $attachments
      */
     public function answer(Conversation $conversation, string $message, array $context, array $attachments = []): string
     {
@@ -198,7 +198,7 @@ final class Conductor
         };
         $context['language'] = $this->turn->language;
 
-        $this->turn->emit('status', ['text' => 'pl' === ($context['language'] ?? 'en') ? 'Czytam stronę' : 'Reading the site']);
+        $this->turn->emit('status', ['text' => 'pl' === $context['language'] ? 'Czytam stronę' : 'Reading the site']);
         $bag = new MessageBag(
             Message::forSystem($this->systemPrompt($conversation, $context)),
             ...$this->history($conversation),
@@ -233,7 +233,7 @@ final class Conductor
 
         // Some models announce work ("I'll prepare…") and stop. Nudge once: the owner asked for action.
         if (0 === $this->turn->toolCalls && self::announcesWork($text)) {
-            $this->turn->emit('status', ['text' => 'pl' === ($context['language'] ?? 'en') ? 'Biorę się do pracy' : 'Getting to work']);
+            $this->turn->emit('status', ['text' => 'pl' === $context['language'] ? 'Biorę się do pracy' : 'Getting to work']);
             $bag = $bag->with(Message::ofAssistant($text))->with(Message::ofUser('Do it now: call the tools (propose_changes or propose_variants) in this reply instead of describing what you will do.'));
             $text = trim($this->callAgent($bag, $context));
             $text = preg_replace('~<think>.*?</think>~s', '', $text) ?? $text;
@@ -242,7 +242,7 @@ final class Conductor
         // An empty reply with no work done (free models do this now and then): ask once more, then hand over to the
         // fallback model; the owner should never be left looking at nothing.
         for ($try = 0; '' === $text && 0 === $this->turn->toolCalls && $try < 2; ++$try) {
-            $this->turn->emit('status', ['text' => 'pl' === ($context['language'] ?? 'en') ? 'Próbuję jeszcze raz' : 'Trying again']);
+            $this->turn->emit('status', ['text' => 'pl' === $context['language'] ? 'Próbuję jeszcze raz' : 'Trying again']);
             $this->logger?->notice('Empty reply from the model (try {try}, vision: {vision})', ['try' => $try, 'vision' => $this->useVision]);
             // The text-only fallback cannot see the owner's pictures: with pictures, the models that see try again.
             $this->useFallback = $this->useFallback || (1 === $try && !$this->useVision);
@@ -265,7 +265,7 @@ final class Conductor
         }
         if ('' === $text) {
             // Still nothing: the owner gets a word anyway.
-            $pl = 'pl' === ($context['language'] ?? 'en');
+            $pl = 'pl' === $context['language'];
             $text = [] !== $this->turn->proposals
                 ? ($pl ? 'Szkic jest gotowy — zobacz go na stronie i zatwierdź albo napisz, co zmienić.' : 'The sketch is ready — have a look on the page and approve it, or tell me what to change.')
                 : ($pl ? 'Gotowe. Napisz, jeśli mam coś jeszcze zrobić.' : 'Done. Tell me if there is anything else.');
@@ -274,6 +274,7 @@ final class Conductor
         if ([] === $this->turn->proposals && !$this->turn->madeOtherThanSketch && self::claimsSketch($text) && [] === $this->proposals->open($conversation)) {
             $this->logger?->notice('The reply claims a sketch that was not made: {text}', ['text' => mb_substr($text, 0, 300)]);
             $again = trim((string) preg_replace('~<think>.*?</think>~s', '', $this->callAgent($bag->with(Message::ofAssistant($text))->with(Message::ofUser('You wrote that the change is in a sketch, but you did not call propose_changes — nothing was made. Call propose_changes now with the whole change, then answer me in 1–2 sentences.')), $context)));
+            // @phpstan-ignore notIdentical.alwaysFalse (callAgent() above may have added a proposal)
             $text = [] !== $this->turn->proposals ? ('' !== $again ? $again : $text) : ('pl' === substr($this->turn->language, 0, 2)
                 ? 'Nie udało mi się jeszcze przygotować tej zmiany — nic nie zostało zapisane. Spróbuj proszę napisać jeszcze raz, może prościej, albo w dwóch krokach.'
                 : 'I could not prepare that change yet — nothing was saved. Please ask once more, perhaps more simply or in two steps.');
@@ -499,7 +500,7 @@ final class Conductor
                 $lines[] = \sprintf('[Attached document, uploadId %s, name "%s" — to offer it for download put it on the site with add_document and show it in a "downloads" node (or link a button to it)]', $attachment['id'], $attachment['name'] ?? '');
                 continue;
             }
-                        if (str_ends_with($attachment['id'], '.zip')) {
+            if (str_ends_with($attachment['id'], '.zip')) {
                 $lines[] = \sprintf('[Attached archive, uploadId %s, name "%s" — an export file; import it with import_content]', $attachment['id'], $attachment['name'] ?? '');
                 continue;
             }

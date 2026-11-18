@@ -36,7 +36,7 @@ final class MediaLibrary
             throw new \InvalidArgumentException('Only http(s) URLs can be imported.');
         }
         // Photo hosts (Wikimedia) answer 429 to a few quick downloads in a row: wait a moment and try again.
-        for ($attempt = 1; ; ++$attempt) {
+        for ($attempt = 1;; ++$attempt) {
             $response = $this->http->request('GET', $url, ['timeout' => 30, 'max_redirects' => 5, 'headers' => ['User-Agent' => 'Cadenza/0.1 (Symfony AI hackathon; media import)']]);
             if (429 !== $response->getStatusCode() || $attempt >= 3) {
                 break;
@@ -57,7 +57,7 @@ final class MediaLibrary
     }
 
     /**
-     * @param array<string, ?string>         $meta
+     * @param array<string, ?string>       $meta
      * @param (callable(Media): void)|null $describe sets connector details before saving
      */
     public function store(string $bytes, array $meta = [], ?callable $describe = null): Media
@@ -73,7 +73,9 @@ final class MediaLibrary
 
         // Phones store rotation as an EXIF flag; resizing drops EXIF, so turn the pixels upright first.
         if (null !== $exif && \in_array($exif['orientation'], [3, 6, 8], true) && false !== $upright = imagecreatefromstring($bytes)) {
-            $upright = imagerotate($upright, match ($exif['orientation']) { 3 => 180, 6 => -90, 8 => 90 }, 0);
+            $upright = imagerotate($upright, match ($exif['orientation']) {
+                3 => 180, 6 => -90, 8 => 90
+            }, 0);
             ob_start();
             imagejpeg($upright, null, 88);
             $bytes = (string) ob_get_clean();

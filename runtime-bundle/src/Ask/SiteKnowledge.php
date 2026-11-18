@@ -37,8 +37,8 @@ final class SiteKnowledge
     }
 
     /**
-     * @param array<string, mixed>                                                $document
-     * @param array<string, list<array<string, scalar|null>>>                     $collections records by collection name
+     * @param array<string, mixed>                            $document
+     * @param array<string, list<array<string, scalar|null>>> $collections records by collection name
      */
     public static function of(array $document, array $collections = []): string
     {

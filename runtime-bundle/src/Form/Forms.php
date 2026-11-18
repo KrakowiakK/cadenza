@@ -119,7 +119,7 @@ final class Forms
     /**
      * Fields whose chosen option has fewer places left than the answer needs.
      *
-     * @param array<string, mixed> $form
+     * @param array<string, mixed>                                   $form
      * @param list<array{label: string, type: string, value: mixed}> $answers
      *
      * @return array<int, string> field index => "option_full"
@@ -141,7 +141,7 @@ final class Forms
     /**
      * Checks the visitor's input against the form's fields.
      *
-     * @param array<string, mixed> $form
+     * @param array<string, mixed>     $form
      * @param array<int|string, mixed> $input values by field index
      *
      * @return array{answers: list<array{label: string, type: string, value: mixed}>, errors: array<int, string>, people: int}
@@ -178,7 +178,8 @@ final class Forms
                 }
             }
             if ('number' === $type && !isset($errors[$i]) && !$empty) {
-                $value = 0 + str_replace(',', '.', $value);
+                $number = (float) str_replace(',', '.', (string) $value);
+                $value = floor($number) === $number ? (int) $number : $number;
                 if ('' !== $peopleField && mb_strtolower(trim((string) $field['label'])) === $peopleField) {
                     $people = max(0, min(50, (int) $value));
                 }
@@ -190,7 +191,7 @@ final class Forms
     }
 
     /**
-     * @param array<string, mixed> $form
+     * @param array<string, mixed>                                   $form
      * @param list<array{label: string, type: string, value: mixed}> $answers
      */
     public function store(array $form, array $answers, int $people): Submission

@@ -143,9 +143,7 @@ final class InstagramConnector implements ConnectorInterface
             for ($i = 0; $i < $zip->numFiles; ++$i) {
                 $html = $html || str_ends_with((string) $zip->getNameIndex($i), 'posts_1.html');
             }
-            throw new \RuntimeException($html
-                ? 'This export is in HTML format; request it again choosing the JSON format.'
-                : 'No posts found in this archive. Is it the Instagram "Download your information" export?');
+            throw new \RuntimeException($html ? 'This export is in HTML format; request it again choosing the JSON format.' : 'No posts found in this archive. Is it the Instagram "Download your information" export?');
         }
 
         $imported = $skipped = 0;

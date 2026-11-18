@@ -43,9 +43,9 @@ final class RecordTools
     }
 
     /**
-     * @param string               $collection Collection slug
+     * @param string       $collection Collection slug
      * @param array<mixed> $values     An OBJECT of field values by key, e.g. {"tytul": "…", "data": "2027-05-01", "tresc": "Markdown…"}; for a change only the fields that change
-     * @param string|null          $slug       Slug of the existing record to change; empty for a new one
+     * @param string|null  $slug       Slug of the existing record to change; empty for a new one
      */
     public function save(string $collection, array $values, ?string $slug = null): string
     {

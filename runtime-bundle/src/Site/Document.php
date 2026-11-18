@@ -174,8 +174,7 @@ final class Document
     /**
      * Navigation items: explicit ones, or every page in order.
      *
-     * @param array<string, mixed> $doc
-     *
+     * @param array<string, mixed>      $doc
      * @param array<string, mixed>|null $current the page being shown: only pages in its language are listed
      *
      * @return list<array{label: string, href: string, members: bool}>

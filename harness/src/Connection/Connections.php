@@ -28,7 +28,7 @@ final class Connections
     {
         $roles = [];
         foreach (Providers::ROLES as $role => [$baseUrl, $key, $model]) {
-            $url = \App\Vault\VaultEnvVarProcessor::baseUrl((string) $this->value($baseUrl));
+            $url = VaultEnvVarProcessor::baseUrl((string) $this->value($baseUrl));
             $provider = '' !== $url ? Providers::byBaseUrl($url) : null;
             $roles[$role] = [
                 'provider' => $provider,
@@ -72,7 +72,7 @@ final class Connections
         if (null === $preset) {
             return ['ok' => false, 'error' => 'Unknown service.'];
         }
-        $baseUrl = \App\Vault\VaultEnvVarProcessor::baseUrl($baseUrl ?: $preset['baseUrl']);
+        $baseUrl = VaultEnvVarProcessor::baseUrl($baseUrl ?: $preset['baseUrl']);
         if (!preg_match('~^https?://~', $baseUrl)) {
             return ['ok' => false, 'error' => 'The address must start with http:// or https://.'];
         }
@@ -164,7 +164,7 @@ final class Connections
             return null;
         }
         $loaded = (int) ($info['loaded_context_length'] ?? 0);
-        if (\is_array($info) && \array_key_exists('capabilities', $info) && !\in_array('tool_use', (array) $info['capabilities'], true)) {
+        if (\array_key_exists('capabilities', $info) && !\in_array('tool_use', (array) $info['capabilities'], true)) {
             // E.g. Gemma 3: it writes about the changes instead of making them.
             return 'LM Studio says this model cannot call tools, and Cadenza changes the site only through tools: it would talk about changes without making them. Choose a model with tool use (Qwen 3.5, Gemma 4, gpt-oss).';
         }

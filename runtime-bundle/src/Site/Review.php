@@ -25,7 +25,7 @@ final class Review
         if ([] === ($document['pages'] ?? []) || [] === array_filter($document['pages'], static fn (array $p): bool => [] !== ($p['nodes'] ?? []))) {
             return [['kind' => 'empty', 'page' => '/', 'node' => null, 'problem' => 'The site has no content yet: there is nothing to check.', 'fix' => 'Ask the owner what the site is for and sketch a first page.']];
         }
-        if (\in_array(trim((string) ($document['name'] ?? '')), ['', 'My site', 'Moja strona'], true) && [] !== ($document['pages'] ?? [])) {
+        if (\in_array(trim((string) ($document['name'] ?? '')), ['', 'My site', 'Moja strona'], true)) {
             $findings[] = ['kind' => 'name', 'page' => '/', 'node' => null, 'problem' => 'The site has no name yet (the header and the browser tab say "My site").', 'fix' => 'Ask the owner for the name, then site.update "name".'];
         }
         foreach ($document['pages'] ?? [] as $page) {
@@ -60,7 +60,7 @@ final class Review
                 }
             }
         }
-        if (!$contact && [] !== ($document['pages'] ?? [])) {
+        if (!$contact) {
             $findings[] = ['kind' => 'contact', 'page' => '/', 'node' => null, 'problem' => 'A visitor has no way to get in touch: no form, e-mail or phone number anywhere on the site.', 'fix' => 'Offer a contact form, or ask the owner for an e-mail address or phone number.'];
         }
 
@@ -68,9 +68,9 @@ final class Review
     }
 
     /**
-     * @param list<string>        $paths
-     * @param array<string, int>  $ids
-     * @param list<string>        $collections
+     * @param list<string>       $paths
+     * @param array<string, int> $ids
+     * @param list<string>       $collections
      */
     private static function broken(string $href, array $paths, array $ids, array $collections): ?string
     {

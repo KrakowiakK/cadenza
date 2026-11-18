@@ -68,7 +68,9 @@ final class UploadStore
         $id = strtolower((string) new Ulid()).'.'.$ext;
         copy($sourcePath, $this->directory.'/'.$id);
 
-        return ['id' => $id, 'url' => $this->url($id), 'name' => $name, 'mime' => match ($ext) { 'zip' => 'application/zip', 'xlsx', 'ods', 'xls', 'csv' => 'spreadsheet', default => 'document' }, 'size' => (int) filesize($this->directory.'/'.$id)];
+        return ['id' => $id, 'url' => $this->url($id), 'name' => $name, 'mime' => match ($ext) {
+            'zip' => 'application/zip', 'xlsx', 'ods', 'xls', 'csv' => 'spreadsheet', default => 'document'
+        }, 'size' => (int) filesize($this->directory.'/'.$id)];
     }
 
     public function path(string $id): ?string

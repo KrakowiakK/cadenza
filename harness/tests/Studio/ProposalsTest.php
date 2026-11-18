@@ -27,7 +27,7 @@ final class ProposalsTest extends TestCase
 
     public function testSummariesLoseMarkupLeftovers(): void
     {
-        self::assertSame('Nowa podstrona „Nasze podróże”.', Proposals::cleanSummary("Nowa podstrona „Nasze podróże”.</"));
+        self::assertSame('Nowa podstrona „Nasze podróże”.', Proposals::cleanSummary('Nowa podstrona „Nasze podróże”.</'));
         self::assertSame('Ceny < 50 zł bez zmian', Proposals::cleanSummary('<b>Ceny < 50 zł</b> bez  zmian'));
         self::assertSame('Changes', Proposals::cleanSummary(' </p> '));
         self::assertSame('"EN" version of /gry', Proposals::cleanSummary('"EN" version of /gry'));

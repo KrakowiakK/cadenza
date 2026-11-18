@@ -61,7 +61,7 @@ final class PageTranslator
      * The site's own menu for the new language: labels translated, links to sections and pages pointed at their
      * translations. Null when the site uses the automatic menu (it follows the pages by itself).
      *
-     * @param list<array{label: string, href: string}>|null $items the site's explicit menu
+     * @param list<array{label: string, href: string}>|null $items           the site's explicit menu
      * @param list<string>                                  $translatedPaths paths (original language) that have a translation
      *
      * @return array<string, mixed>|null a site.update operation
@@ -150,7 +150,7 @@ final class PageTranslator
             }
             if (\is_string($value) && \in_array($key, ['href', 'buttonHref', 'secondaryHref'], true) && preg_match('~^(/[^#]*)?#([a-z][a-z0-9_-]{2,20})$~', $value, $m)) {
                 // A link to a section of a translated page points at the same section of its translation.
-                return ('' !== ($m[1] ?? '') ? self::path($m[1], $language) : '').'#'.$m[2].'-'.$language;
+                return ('' !== $m[1] ? self::path($m[1], $language) : '').'#'.$m[2].'-'.$language;
             }
             if (null !== $key && \in_array($key, self::KEEP, true)) {
                 return $value;

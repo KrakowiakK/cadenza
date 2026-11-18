@@ -91,8 +91,8 @@ final class WidgetProgrammer
     }
 
     /**
-     * @param array<string, string> $libraries import name => version
-     * @param \Closure(string): void|null $progress told what is happening
+     * @param array<string, string>       $libraries import name => version
+     * @param \Closure(string): void|null $progress  told what is happening
      *
      * @return string the widget's code
      */
@@ -103,7 +103,7 @@ final class WidgetProgrammer
             ? "Write this widget:\n\n".$brief
             : "This is the widget's current code:\n\n```html\n".$current."\n```\n\n"
                 .(null !== $lastError ? 'In the browser it fails with: '.$lastError."\n\n" : '')
-                ."Change it: ".$brief."\n\nAnswer with the complete new code.";
+                .'Change it: '.$brief."\n\nAnswer with the complete new code.";
         $messages = new MessageBag(Message::forSystem($system), Message::ofUser($task));
         $code = self::extract($this->complete($messages));
         $progress?->__invoke('checking');
@@ -124,7 +124,7 @@ final class WidgetProgrammer
     public static function extract(string $answer): string
     {
         $answer = (string) preg_replace('~<think>.*?</think>~s', '', $answer);
-        if (preg_match_all('~```(?:html|HTML)?\s*\n(.*?)(?:\n```|$)~s', $answer, $m) && [] !== $m[1]) {
+        if (preg_match_all('~```(?:html|HTML)?\s*\n(.*?)(?:\n```|$)~s', $answer, $m)) {
             usort($m[1], static fn (string $a, string $b): int => \strlen($b) <=> \strlen($a));
 
             return trim($m[1][0]);

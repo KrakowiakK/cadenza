@@ -45,7 +45,7 @@ final class EventController
         $date = (string) $props['date'];
         $time = \is_string($props['time'] ?? null) && preg_match('/^\d{1,2}:\d{2}$/', $props['time']) ? $props['time'] : null;
         $end = \is_string($props['endTime'] ?? null) && preg_match('/^\d{1,2}:\d{2}$/', $props['endTime']) ? $props['endTime'] : null;
-        $escape = static fn (string $s): string => str_replace(["\\", ';', ',', "\n"], ['\\\\', '\;', '\,', '\n'], $s);
+        $escape = static fn (string $s): string => str_replace(['\\', ';', ',', "\n"], ['\\\\', '\;', '\,', '\n'], $s);
         $lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Cadenza//EN', 'BEGIN:VEVENT', 'UID:'.$uid, 'DTSTAMP:'.gmdate('Ymd\THis\Z')];
         if (null === $time) {
             $lines[] = 'DTSTART;VALUE=DATE:'.date('Ymd', (int) strtotime($date));

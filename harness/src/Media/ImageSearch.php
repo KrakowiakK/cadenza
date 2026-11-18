@@ -171,7 +171,9 @@ final class ImageSearch
         $data = $this->http->request('GET', 'https://api.unsplash.com/search/photos', [
             'timeout' => 15,
             'headers' => ['Authorization' => 'Client-ID '.$this->unsplashKey],
-            'query' => array_filter(['query' => $query, 'per_page' => $count, 'orientation' => match ($orientation) { 'landscape' => 'landscape', 'portrait' => 'portrait', 'square' => 'squarish', default => null }]),
+            'query' => array_filter(['query' => $query, 'per_page' => $count, 'orientation' => match ($orientation) {
+                'landscape' => 'landscape', 'portrait' => 'portrait', 'square' => 'squarish', default => null
+            }]),
         ])->toArray();
 
         return array_map(static fn (array $p): array => [

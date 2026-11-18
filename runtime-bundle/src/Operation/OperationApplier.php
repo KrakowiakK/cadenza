@@ -92,11 +92,11 @@ final class OperationApplier
                     if (!\is_string($v) || !\in_array($k, ['href', 'buttonHref', 'secondaryHref'], true) || !preg_match('~^(/[^#]*)?#([^#\s]+)$~', $v, $m) || isset($pageOf[$m[2]])) {
                         return;
                     }
-                    $page = '' !== ($m[1] ?? '') ? (Document::findPage($doc, $m[1])['id'] ?? null) : $pageOf[$node['id']] ?? null;
+                    $page = '' !== $m[1] ? (Document::findPage($doc, $m[1])['id'] ?? null) : $pageOf[$node['id']] ?? null;
                     $slug = self::slug($m[2]);
                     foreach ($named[$page] ?? [] as $name => $target) {
                         if ($name === $slug || str_starts_with($name, $slug.'-') || str_contains('-'.$name.'-', '-'.$slug.'-')) {
-                            $v = ($m[1] ?? '').'#'.$target;
+                            $v = $m[1].'#'.$target;
 
                             return;
                         }
@@ -104,7 +104,7 @@ final class OperationApplier
                     // No section of that name. A model cannot know the ids of blocks it is only now creating, so this
                     // is no reason to refuse its whole page: the link falls back to the page it names, or to "#",
                     // which LinkRepair then points at the section the button most likely means.
-                    $v = '' !== ($m[1] ?? '') ? $m[1] : '#';
+                    $v = '' !== $m[1] ? $m[1] : '#';
                 });
 
                 return $node;
@@ -157,7 +157,7 @@ final class OperationApplier
             if (!preg_match('~^(/[^#]*)?#([^#\s]+)$~', $href, $m)) {
                 continue;
             }
-            $target = '' !== ($m[1] ?? '') ? Document::findPage($doc, $m[1]) : null;
+            $target = '' !== $m[1] ? Document::findPage($doc, $m[1]) : null;
             if (!isset($pageOf[$m[2]]) || (null !== $target && $pageOf[$m[2]] !== $target['id'])) {
                 $page = $target ?? $doc['pages'][0] ?? null;
                 $sections = null !== $page ? implode(', ', array_map(static fn (array $n): string => $n['id'].' ('.$n['type'].')', $page['nodes'])) : '';

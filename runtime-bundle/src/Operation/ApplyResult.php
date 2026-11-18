@@ -9,7 +9,7 @@ final readonly class ApplyResult
     /**
      * @param array<string, mixed> $document
      * @param list<string>         $errors
-     * @param list<string>         $created ids of pages and nodes created by the batch
+     * @param list<string>         $created  ids of pages and nodes created by the batch
      */
     public function __construct(
         public array $document,

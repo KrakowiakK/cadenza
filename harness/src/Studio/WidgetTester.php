@@ -66,6 +66,7 @@ final class WidgetTester
             usleep(1_500_000);
             $client->takeScreenshot($screenshots[] = $dir.'/'.$name.'-1.png');
             $driver = $client->getWebDriver();
+            \assert($driver instanceof \Facebook\WebDriver\Remote\RemoteWebDriver);
             $code = (string) $driver->executeScript('return document.body.innerHTML');
             if (preg_match('/keydown|keyup|touchstart|pointerdown|click/i', $code)) {
                 // Like a visitor: press the start button (or the middle), then play a little.

@@ -9,8 +9,8 @@ use Cadenza\Runtime\Connector\ImportContext;
 use Cadenza\Runtime\Media\MediaLibrary;
 use Cadenza\Runtime\Message\RunImport;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\DependencyInjection\Attribute\Target;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]

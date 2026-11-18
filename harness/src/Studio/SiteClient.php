@@ -217,7 +217,7 @@ final class SiteClient
      */
     public function widgets(): array
     {
-        return $this->json($this->mcp->get('site')->callTool('widgets_list', []));
+        return array_values($this->json($this->mcp->get('site')->callTool('widgets_list', [])));
     }
 
     /**

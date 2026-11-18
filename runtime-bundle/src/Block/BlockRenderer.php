@@ -48,7 +48,9 @@ final class BlockRenderer
     {
         $twig = $this->twig();
         $key = \sprintf('block_%s_v%d_%s', $name, $version, substr(hash('xxh128', $template), 0, 12));
-        $twig->getLoader()->setTemplate($key, $template);
+        $loader = $twig->getLoader();
+        \assert($loader instanceof ArrayLoader);
+        $loader->setTemplate($key, $template);
         $html = $this->sanitizer()->sanitize($twig->render($key, ['props' => $props]));
 
         // Icons: the only markup added after sanitising, from names the template could not forge into anything else.

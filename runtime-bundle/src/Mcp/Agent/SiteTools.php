@@ -38,7 +38,7 @@ final class SiteTools
         $outline = Outline::site(null !== $draft ? $this->site->rebased($draft) : $this->site->document());
 
         $media = $this->media->recent(20);
-        $outline .= "\n\nMedia library (".\count($media)." recent images, use their paths in image props):";
+        $outline .= "\n\nMedia library (".\count($media).' recent images, use their paths in image props):';
         foreach ($media as $m) {
             $d = $m->toArray();
             $outline .= \sprintf("\n- %s %s %s \"%s\"", $d['path'], $d['orientation'], $d['source'], mb_substr($d['alt'] ?? '', 0, 80));
@@ -66,11 +66,11 @@ final class SiteTools
             'language' => $doc['language'] ?? null,
             'nav' => $doc['nav']['items'] ?? null,
             'navByLanguage' => $doc['nav']['byLanguage'] ?? [],
-            'pages' => array_map(static fn (array $p): array => ['id' => $p['id'], 'path' => $p['path'], 'title' => $p['title'], 'lang' => \Cadenza\Runtime\Site\Document::pageLanguage($doc, $p), 'translationOf' => $p['translationOf'] ?? null], $doc['pages']),
+            'pages' => array_map(static fn (array $p): array => ['id' => $p['id'], 'path' => $p['path'], 'title' => $p['title'], 'lang' => Document::pageLanguage($doc, $p), 'translationOf' => $p['translationOf'] ?? null], $doc['pages']),
         ];
     }
 
-        #[McpTool(name: 'page_tree', description: 'Full JSON of one page: every node with all props. Use when you need exact prop values.', annotations: new ToolAnnotations(readOnlyHint: true))]
+    #[McpTool(name: 'page_tree', description: 'Full JSON of one page: every node with all props. Use when you need exact prop values.', annotations: new ToolAnnotations(readOnlyHint: true))]
     public function pageTree(
         #[Schema(description: 'Page path like "/" or "/menu", or a page id')]
         string $page,

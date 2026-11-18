@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cadenza\Runtime\Mcp\Agent;
 
-use Cadenza\Runtime\Block\BlockRenderer;
 use Cadenza\Runtime\Block\CustomBlocks;
 use Mcp\Capability\Attribute\McpTool;
 use Mcp\Capability\Attribute\Schema;

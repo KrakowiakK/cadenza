@@ -87,6 +87,7 @@ final class PhoneCheck
             $client->request('GET', rtrim($this->appUrl, '/').'/'.ltrim($path, '/'));
             usleep(1_500_000);
             $driver = $client->getWebDriver();
+            \assert($driver instanceof \Facebook\WebDriver\Remote\RemoteWebDriver);
             $measured = (array) $driver->executeScript(self::MEASURE);
             $height = (int) ($measured['height'] ?? self::HEIGHT);
             for ($i = 0, $y = 0; $i < self::SCREENS && $y < $height; ++$i, $y += self::HEIGHT - 80) {

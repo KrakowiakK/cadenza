@@ -44,3 +44,20 @@ jobs:
           ./cadenza stop
       - if: failure()
         run: tail -n 40 .run/*.log demo-app/var/log/*.log harness/var/log/*.log 2>/dev/null || true
+
+  quality:
+    name: Static analysis (PHPStan level 5) and coding standard (Symfony rules)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_sqlite, gd, intl, zip, sodium
+          coverage: none
+          tools: php-cs-fixer
+      - run: ./cadenza setup
+      - run: (cd runtime-bundle && composer install --no-interaction --no-progress && vendor/bin/phpstan analyse --no-progress)
+      - run: (cd harness && vendor/bin/phpstan analyse --no-progress)
+      - run: (cd demo-app && vendor/bin/phpstan analyse --no-progress)
+      - run: PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.dist.php

@@ -69,8 +69,8 @@ final class PropValidator
                     $value = (string) $value;
                 }
                 // {"title": "Spóźnienia", "text": "Wejdź cicho"} where a text is expected: its words, joined.
-                if (\is_array($value) && !array_is_list($value) && [] !== $value && array_filter($value, 'is_string') === $value) {
-                    $parts = array_values(array_filter(array_map('trim', $value), 'strlen'));
+                if (\is_array($value) && [] !== $value && !array_is_list($value) && array_filter($value, 'is_string') === $value) {
+                    $parts = array_values(array_filter(array_map('trim', $value), static fn (string $part): bool => '' !== $part));
                     $value = 2 === \count($parts) && 'markdown' === $schema['type'] ? '**'.$parts[0].'** — '.$parts[1] : implode(' — ', $parts);
                 }
 
@@ -87,7 +87,7 @@ final class PropValidator
                 }
 
                 return [$value, null];
-                        case 'url':
+            case 'url':
                 if (!\is_string($value)) {
                     return [null, $path.' must be a URL string.'];
                 }

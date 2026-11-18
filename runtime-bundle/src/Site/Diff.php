@@ -10,11 +10,11 @@ namespace Cadenza\Runtime\Site;
 final readonly class Diff
 {
     /**
-     * @param array<string, 'added'|'changed'> $nodes   node id => state, for nodes present in the draft
-     * @param array<string, array{node: array<string, mixed>, parent: string, index: int}> $removed node id => where it was in the base
-     * @param list<string> $pagesAdded   paths
-     * @param list<string> $pagesRemoved paths
-     * @param list<string> $pagesChanged paths whose title/path/description changed
+     * @param array<string, 'added'|'changed'>                                             $nodes        node id => state, for nodes present in the draft
+     * @param array<string, array{node: array<string, mixed>, parent: string, index: int}> $removed      node id => where it was in the base
+     * @param list<string>                                                                 $pagesAdded   paths
+     * @param list<string>                                                                 $pagesRemoved paths
+     * @param list<string>                                                                 $pagesChanged paths whose title/path/description changed
      */
     public function __construct(
         public array $nodes,
@@ -138,8 +138,6 @@ final readonly class Diff
     }
 
     /**
-     * @param array<string, mixed> $doc
-     *
      * @return array<string, array{node: array<string, mixed>, parent: string, index: int}> parent = "pageId" or "pageId:nodeId.slot"
      */
     /**

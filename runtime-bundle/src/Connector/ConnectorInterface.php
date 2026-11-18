@@ -46,7 +46,7 @@ interface ConnectorInterface
     /**
      * Imports from the connected account; $progress(done, total) after each item.
      *
-     * @param array<string, mixed>       $credentials
+     * @param array<string, mixed>      $credentials
      * @param callable(int, ?int): void $progress
      *
      * @return array{imported: int, skipped: int, errors: list<string>}

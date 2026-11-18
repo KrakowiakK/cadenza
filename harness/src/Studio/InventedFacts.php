@@ -15,9 +15,8 @@ use App\Entity\Conversation;
 final class InventedFacts
 {
     /**
-     * @param list<mixed> $operations
-     *
-     * @param \Closure():string|null $siteText the text of the published site, asked for only when needed
+     * @param list<mixed>            $operations
+     * @param \Closure():string|null $siteText   the text of the published site, asked for only when needed
      *
      * @return array{0: list<mixed>, 1: int, 2: int} the operations without invented facts, how many reviews and how many prices were taken out
      */
@@ -106,10 +105,10 @@ final class InventedFacts
                 $kept[] = $op;
                 continue;
             }
-            if (\is_array($op) && \is_array($op['nodes'] ?? null)) {
+            if (\is_array($op['nodes'] ?? null)) {
                 $op['nodes'] = $clean($op['nodes']);
             }
-            if (\is_array($op) && \is_array($op['node'] ?? null)) {
+            if (\is_array($op['node'] ?? null)) {
                 $node = $clean([$op['node']]);
                 if ([] === $node) {
                     continue; // the operation only added the invented block

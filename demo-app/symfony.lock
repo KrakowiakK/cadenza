@@ -53,6 +53,9 @@
             "config/packages/http_discovery.yaml"
         ]
     },
+    "phpstan/phpstan": {
+        "version": "2.3.6"
+    },
     "phpunit/phpunit": {
         "version": "13.4",
         "recipe": {

@@ -33,9 +33,9 @@ final class SiteTools
     }
 
     /**
-     * @param list<mixed>                $operations Operations of the editing language (see the guide), e.g. [{"op": "node.update", "id": "nab12c", "props": {"title": "…"}}]
-     * @param string                     $summary    One short sentence in the owner's language saying what the sketch shows
-     * @param int|null                   $reviseDraftId Id of an open draft of this conversation to extend with more operations (to adjust a sketch the owner is looking at); omit to start a new, separate proposal
+     * @param list<mixed> $operations    Operations of the editing language (see the guide), e.g. [{"op": "node.update", "id": "nab12c", "props": {"title": "…"}}]
+     * @param string      $summary       One short sentence in the owner's language saying what the sketch shows
+     * @param int|null    $reviseDraftId Id of an open draft of this conversation to extend with more operations (to adjust a sketch the owner is looking at); omit to start a new, separate proposal
      */
     public function propose(array $operations, string $summary = '', ?int $reviseDraftId = null): string
     {
