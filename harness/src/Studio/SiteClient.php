@@ -126,7 +126,8 @@ final class SiteClient
      */
     public function waitingDrafts(): array
     {
-        $result = $this->mcp->get('control')->callTool('drafts_waiting', []);
+        // (An empty argument list would travel as a JSON array, which the server refuses: name the argument.)
+        $result = $this->mcp->get('control')->callTool('drafts_waiting', ['outsideOnly' => false]);
         $data = \is_array($result->structuredContent) ? $result->structuredContent : json_decode($this->text($result), true);
 
         return array_values(array_filter(\is_array($data) ? ($data['result'] ?? $data) : [], '\is_array'));

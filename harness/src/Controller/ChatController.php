@@ -113,7 +113,10 @@ final class ChatController
             $waiting = $this->site->waitingDrafts();
             // A sketch the site no longer holds (the site was reset, or restored from a backup) is not waiting.
             $held = array_map(static fn (array $draft): int => (int) $draft['draftId'], $waiting);
-            $open = array_values(array_filter($open, static fn ($p): bool => \in_array($p->getDraftId(), $held, true)));
+            // (Only when the site answered with its list: an empty answer must not hide the owner's sketches.)
+            if ([] !== $held) {
+                $open = array_values(array_filter($open, static fn ($p): bool => \in_array($p->getDraftId(), $held, true)));
+            }
             $outside = array_values(array_filter($waiting, static fn (array $draft): bool => '' !== (string) ($draft['author'] ?? '')));
         } catch (\Throwable) {
             $outside = [];
