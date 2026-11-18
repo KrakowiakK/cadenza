@@ -16,11 +16,14 @@ leave sketches but never publish. Visitors get an assistant that answers only fr
 
 ## Try it now, without installing
 
-A demo site built with Cadenza runs at **<https://cadenza.krakowiak.eu>** (Tidewater Yoga: the site from the films).
+A demo site built with Cadenza runs at **<https://cadenza.krakowiak.eu>** (Hearth & Crumb, the bakery from the
+90-second film, a few requests later: prices, a class to sign up for, news, an assistant, a game).
 
-- **Ask it something.** Scroll to *Ask us anything*: "Which class is good for a beginner?", "Is there parking nearby?".
-  The answer comes only from what the site says; "What is the capital of France?" gets an honest *this site does not
-  say*. Then look at [`/llms.txt`](https://cadenza.krakowiak.eu/llms.txt), generated from the same text.
+- **Ask it something.** Scroll to the assistant: "Are you open on Sunday?", "How much is the seeded rye?". The answer
+  comes only from what the site says; "Do you deliver?" gets an honest *this site does not say*. Then look at
+  [`/llms.txt`](https://cadenza.krakowiak.eu/llms.txt), generated from the same text.
+- **Play the game.** *"Add a little game for my visitors"* was the whole request; the agent wrote *Catch the loaves*
+  and tried it in a headless browser before the owner saw it.
 - **Connect your own agent and leave a sketch.** The site's `guest` MCP server is open with a demo token:
 
   ```bash
@@ -28,8 +31,8 @@ A demo site built with Cadenza runs at **<https://cadenza.krakowiak.eu>** (Tidew
     --header "Authorization: Bearer czg_dd6f7a7a80750537457c5d5f245f9c19c0995138"
   ```
 
-  Then, in Claude Code: *"Add a short 'What to bring' section to the yoga site on cadenza-demo, as a sketch, and give
-  me the preview link."* About ten seconds later you get a private link to the page as it would be, marked
+  Then, in Claude Code: *"Add a short 'Allergens' section to the bakery site on cadenza-demo, as a sketch, and give me
+  the preview link."* About ten seconds later you get a private link to the page as it would be, marked
   *Not published · waiting for the owner's decision*. That is all a guest can do: with the same token the `agent`
   and `control` servers answer `401`, and from a public address they do not answer at all.
 
