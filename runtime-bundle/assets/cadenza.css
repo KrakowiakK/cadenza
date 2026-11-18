@@ -300,4 +300,6 @@ a.cz-card:hover, .cz-card-link:hover { transform: translateY(-3px); box-shadow: 
 /* In the narrower panel the header keeps its status ("Waiting for you") readable; the model's name is in Connections. */
 @media (max-width: 1599px) {
     #cz-panel [data-cz="model"] { display: none; }
+    #cz-panel .cz-sheet > header button { width: 1.75rem; height: 1.75rem; }
+    #cz-panel .cz-sheet > header { gap: 0.125rem; padding-left: 0.75rem; padding-right: 0.5rem; }
 }

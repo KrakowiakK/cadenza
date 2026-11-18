@@ -1142,7 +1142,7 @@ ${c.connection ? `<div class="mt-2 text-xs text-emerald-700 dark:text-emerald-30
         try { s = await this.api('/api/services'); } catch (e) { card.innerHTML += `<p class="mt-2 text-rose-600">${escapeHtml(e.message)}</p>`; return; }
         this.renderServices(card, s, focus);
         // Opened because no model is connected: start at the card's top, where the model is chosen, not at its end.
-        if (fromTop) setTimeout(() => { this.messages.scrollTop = Math.max(0, card.offsetTop - 8); }, 350);
+        if (fromTop) setTimeout(() => { this.messages.scrollTop = Math.max(0, card.getBoundingClientRect().top - this.messages.getBoundingClientRect().top + this.messages.scrollTop - 8); }, 350);
     }
 
     renderServices(card, s, focus = null) {

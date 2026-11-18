@@ -63,8 +63,12 @@ final class TranslateTools
             $operations[] = $nav;
         }
         // The summary names the pages of this sketch only (pages translated earlier are live already).
-        $paths = implode(', ', array_values(array_unique([...$inSketch, $tree['path']])));
-        $summary = \sprintf('pl' === substr($this->turn->language, 0, 2) ? 'Wersja „%s”: %s' : '"%s" version: %s', strtoupper($language), $paths);
+        $pl = 'pl' === substr($this->turn->language, 0, 2);
+        $pages = array_values(array_unique([...$inSketch, $tree['path']]));
+        // In words an owner reads at a glance: "Polish version of the home page", not '"PL" version: /'.
+        $name = \Locale::getDisplayLanguage($language, $pl ? 'pl' : 'en') ?: strtoupper($language);
+        $what = implode(', ', array_map(static fn (string $path): string => '/' === $path ? ($pl ? 'strona główna' : 'the home page') : $path, $pages));
+        $summary = $pl ? \sprintf('Wersja w języku: %s (%s)', $name, $what) : \sprintf('%s version of %s', ucfirst($name), $what);
         $result = $this->proposals->propose($this->turn->conversation, $operations, $summary, $sketch?->getDraftId());
         if (null === $result['proposal']) {
             return 'The translated page was rejected: '.implode(' ', $result['errors']);
