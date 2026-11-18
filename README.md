@@ -92,8 +92,8 @@ test suites. A forgotten owner password is reset with `bin/console cadenza:owner
   game, a 3D scene, an animation, played in a headless Chrome with Symfony Panther before the owner sees it.
 - **Bring your own agent.** The site is an MCP server with three doors; Claude Code, Cursor or any MCP client may
   read it and leave signed sketches, and can never publish. See [docs/MCP.md](docs/MCP.md).
-- **Checked by code, not by hope.** Reviews and prices the owner never gave are stripped from a sketch, dead links
-  are repaired, and *"check my site"* runs a review that needs no model.
+- **Checked by code, not by hope.** Reviews, prices and opening times the owner never gave are stripped from a
+  sketch, dead links are repaired, and *"check my site"* runs a review that needs no model.
 - **Found by search engines and AI assistants.** Descriptions, share previews, `/sitemap.xml`, `/robots.txt` and
   `/llms.txt` follow the published site by themselves.
 

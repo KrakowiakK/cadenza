@@ -60,6 +60,8 @@ final class SiteTools
         if ([] === $operations) {
             return 'Nothing was saved. '.($invented > 0 ? self::REVIEWS_NOTE : self::PRICES_NOTE);
         }
+        // …and neither do opening times nobody gave ("Open daily.").
+        [$operations, $hours] = \App\Studio\OpeningClaims::strip($operations, $this->turn->conversation, fn (): string => $this->site->siteText());
         // A model sometimes writes the summary in Polish for an English-speaking owner: the generated one is always in the owner's language.
         if (!str_starts_with($this->turn->language, 'pl') && 1 === preg_match('/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/u', $summary)) {
             $summary = '';
@@ -101,7 +103,7 @@ final class SiteTools
             $proposal->getFocusPath(),
             json_encode($proposal->toArray()['changes']),
             implode('; ', \array_slice($result['created'], 0, 40)) ?: 'nothing new',
-        ).($invented > 0 ? "\n".self::REVIEWS_NOTE : '').($prices > 0 ? "\n".self::PRICES_NOTE : '');
+        ).($invented > 0 ? "\n".self::REVIEWS_NOTE : '').($prices > 0 ? "\n".self::PRICES_NOTE : '').($hours > 0 ? "\n".self::HOURS_NOTE : '');
     }
 
     /**
@@ -205,6 +207,7 @@ final class SiteTools
             return 'The site rejected the variants: give 2–3 design directions, e.g. "directions": ["warm", "elegant", "minimal"].';
         }
         [$operations, $invented, $prices] = InventedFacts::strip(Proposals::normalise($operations), $this->turn->conversation, fn (): string => $this->site->siteText());
+        [$operations] = \App\Studio\OpeningClaims::strip($operations, $this->turn->conversation, fn (): string => $this->site->siteText());
         $group = strtolower((string) new \Symfony\Component\Uid\Ulid());
         $names = self::DIRECTION_NAMES[str_starts_with($this->turn->language, 'pl') ? 'pl' : 'en'];
         $made = [];
@@ -288,6 +291,8 @@ final class SiteTools
             'candidates' => $this->found[$key],
         ]));
     }
+
+    private const HOURS_NOTE = 'IMPORTANT: a sentence about when the place is open ("open daily" and the like) was REMOVED by the site: the owner never gave opening times. Do not say the sketch shows them. Ask the owner for the days and hours.';
 
     private const REVIEWS_NOTE = 'IMPORTANT: the testimonials block you wrote was REMOVED by the site and is NOT in the sketch (a site shows only reviews its owner gave, word for word; none were given in this conversation). In your reply do not say the sketch has testimonials, quotes or placeholder reviews. Say only this about it: when the owner sends real words from real people, you will add a "what people say" section.';
 

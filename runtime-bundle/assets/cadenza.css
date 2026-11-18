@@ -176,7 +176,8 @@ body { font-family: var(--cz-font-body); }
 }
 
 /* The studio keeps its own neutral look whatever theme the site has. */
-#cz-panel, #cz-sketch-banner {
+#cz-panel, #cz-sketch-banner, #cz-stage {
+    --radius: 0.75rem;
     --background: oklch(1 0 0); --foreground: oklch(0.16 0 0); --muted: oklch(0.965 0 0); --muted-foreground: oklch(0.5 0 0);
     --border: oklch(0.91 0 0); --card: oklch(1 0 0); --card-foreground: oklch(0.16 0 0);
     color-scheme: light;
@@ -310,3 +311,8 @@ a.cz-card:hover, .cz-card-link:hover { transform: translateY(-3px); box-shadow: 
 @media (min-width: 1600px) { body:has(#cz-panel[data-state="open"]) #cz-stage { right: 452px; } }
 /* The composer's hint stays on one line in the narrower panel. */
 #cz-panel textarea[data-cz="input"]::placeholder { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* On a phone the panel is the whole screen: its header keeps the buttons that matter there (the phone preview and
+   "collapse" are for wider screens). */
+@media (max-width: 639px) {
+    #cz-panel [data-cz="phone-view"], #cz-panel [data-cz="collapse"] { display: none; }
+}

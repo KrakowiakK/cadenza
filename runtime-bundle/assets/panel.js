@@ -899,6 +899,8 @@ ${decided ? '' : `<div class="mt-3 flex flex-wrap gap-1.5">
         const target = new URL(path || location.pathname, location.origin);
         target.searchParams.set('cz_draft', draftId);
         await this.visit(target.pathname + target.search);
+        // On a phone the panel covers the page: step aside so the sketch (with its own Approve and Reject) can be seen.
+        if (innerWidth < 640 && this.root.dataset.state === 'open') this.setState('closed');
         const first = document.querySelector('.cz-node[data-cz-state]');
         if (first) {
             this.moveCursorTo(first);
