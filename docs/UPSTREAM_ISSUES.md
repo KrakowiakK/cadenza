@@ -1,7 +1,25 @@
 # Findings in the betas (drafts to report)
 
 Found while building Cadenza on Symfony AI 1.0.0-BETA1, MCP Bundle 1.0.0-BETA1, `mcp/sdk` 0.9 and Symfony UX 3.6.
-Each entry is a draft for an issue: what we did, what happened, what we expected. **Not filed yet.**
+Each entry is a draft for an issue: what we did, what happened, what we expected.
+
+**Checked again on 18 November 2026** against the installed code, the upstream default branches and the existing
+issues: [UPSTREAM_VERIFIED.md](UPSTREAM_VERIFIED.md) has the evidence and a ready-to-paste report for each finding
+that is still open and unreported.
+
+| # | Status after the check |
+|---|---|
+| 1 | already reported upstream (symfony/ai#1716, #2944) |
+| 2 | still open: a feature request, with one claim of the draft corrected |
+| 3 | settled upstream (symfony/ai#2240); what remains is the recipe's example value |
+| 4 | not a bug: our own configuration lines were redundant |
+| 5 | still open, reproduced with a minimal kernel |
+| 6 | fixed upstream one day after BETA1 (symfony/ai#2828) |
+| 7 | documented behaviour of the PHP MCP SDK, not a bug |
+| 11 | still open in symfony/ai as two narrow issues; the SDK half is fixed in mcp/sdk 0.10 |
+| 12 | already reported upstream (symfony/ai#2544) |
+| 13 | still open, reproduced |
+| 8, 9, 10 | Symfony UX and Doctrine: not re-checked |
 
 ## symfony/ai
 
