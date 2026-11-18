@@ -16,7 +16,7 @@ const bar = () => page.locator('input[placeholder^="Tell me what to change"]').f
 const box = () => page.locator('textarea[placeholder^="Tell me"], textarea[placeholder^="What should"]').first();
 const inView = async l => { const bb = await l.boundingBox().catch(() => null); return !!bb && bb.x >= 0 && bb.x + bb.width <= 1920; };
 const TYPE = { delay: 42 };
-const PROMPT_CC = 'Add a short FAQ with three questions to my yoga studio website, as a sketch. Put it near the end of the home page. Sign it as Claude Code. Write everything, the summary too, in English, and keep the summary to one short sentence. Do not add any note about the sketch to the page itself.';
+const PROMPT_CC = 'Add a short FAQ with three questions to my bakery website, as a sketch. Put it near the end of the home page. Sign it as Claude Code. Write everything, the summary too, in English, and keep the summary to one short sentence. Do not add any note about the sketch to the page itself.';
 
 async function smoothIntoView(loc) {
   await loc.evaluate(el => el.scrollIntoView({ behavior: 'smooth', block: 'center' }));
@@ -65,31 +65,48 @@ await rec.start();
 rec.mark('s0'); await rec.wait(900);
 await rec.moveTo(960, 650, 800); await rec.wait(250);
 rec.mark('type1');
-await say('I run Tidewater Yoga in Gdynia. How could my website look? No photos.');
+await say('I run Hearth & Crumb, a sourdough bakery in Bristol. How could my website look?');
 rec.mark('sent1');
 await rec.wait(2500); await waitIdle(page, { log: true });
-rec.mark('variants'); await rec.wait(3000); await shot('1-variants');
-const choose = page.getByText('Choose this one');
-// the most attractive look: Elegant, else Warm, else the first
+// the three looks are on the stage, large, where the page will be
+await page.locator('#cz-stage [data-do="pick"]').first().waitFor({ state: 'visible', timeout: 20000 });
+rec.mark('variants'); await rec.wait(3400); await shot('1-variants');
+const looks = page.locator('#cz-stage [data-stage-variant]');
 let pick = 0;
 {
-  const pref = ['elegant', 'warm', 'fresh'];
+  const pref = ['warm', 'elegant', 'editorial', 'fresh'];
   let best = 99;
-  const n = await choose.count();
+  const n = await looks.count();
   for (let i = 0; i < n; i++) {
-    const txt = (await choose.nth(i).evaluate(e => (e.closest('div[class*="border"]') || e.parentElement.parentElement).innerText)).toLowerCase();
+    const txt = (await looks.nth(i).innerText()).toLowerCase();
     const r = pref.findIndex(p => txt.includes(p));
     if (r >= 0 && r < best) { best = r; pick = i; }
   }
 }
-await smoothIntoView(choose.nth(pick)).catch(() => {});
 rec.mark('choose');
-await rec.click(choose.nth(pick), { ms: 900, pause: 300 });
+await rec.click(looks.nth(pick).locator('[data-do="pick"]'), { ms: 900, pause: 300 });
 await rec.wait(2500); await waitIdle(page, { log: true });
-rec.mark('sketch1'); await rec.wait(1300); await shot('1-sketch');
-await scrollPage(800, 2600); await rec.wait(500);
+rec.mark('sketch1'); await rec.wait(1500); await shot('1-sketch');
+// a photo for the opening: the panel offers freely licensed ones; the best of them is chosen off-screen
+const grid = page.getByText('PICK A PHOTO').last().locator('xpath=ancestor::div[contains(@class,"border")][1]');
+await grid.waitFor({ state: 'visible', timeout: 20000 });
+await smoothIntoView(grid); await rec.wait(600);
+const imgs = grid.locator('img');
+const nImgs = Math.min(await imgs.count(), 8);
+const dir = `${process.cwd()}/${OUT}/cand`; fs.mkdirSync(dir, { recursive: true });
+for (let i = 0; i < nImgs; i++) fs.writeFileSync(`${dir}/cand-${i}.jpg`, await imgs.nth(i).screenshot({ type: 'jpeg', quality: 70 }));
+rec.mark('judge0');
+const verdict = await new Promise(res => { const p = spawn('claude', ['-p', `Read the image files cand-0.jpg to cand-${nImgs - 1}.jpg in the current directory. Which one is the most appetising, well-lit photograph of sourdough bread or a bakery, good enough for the top of a bakery's website? Reply with that number only, or -1 if none is good enough.`, '--allowedTools', 'Read', '--model', 'haiku'], { stdio: ['ignore', 'pipe', 'pipe'], cwd: dir }); let o = ''; p.stdout.on('data', d => { o += d; }); p.on('close', () => res(o)); });
+rec.mark('judge1');
+const k = Number((verdict.match(/-?\d+/) || ['-1'])[0]);
+console.log('photo judge says', verdict.trim().slice(0, 60));
+if (!(k >= 0 && k < nImgs)) throw new Error('no photo good enough among the candidates');
+await smoothIntoView(imgs.nth(k)).catch(() => {}); await rec.wait(400);
+rec.mark('photo_pick'); await rec.click(imgs.nth(k), { ms: 800, pause: 300 });
+await rec.wait(2500); await waitIdle(page, { log: true });
+rec.mark('sketch1b'); await rec.wait(1700); await shot('1-photo');
 rec.mark('review1');
-await approve(); rec.mark('approved1'); await rec.wait(1600); await shot('1-live');
+await approve(); rec.mark('approved1'); await rec.wait(1500); await shot('1-live');
 await guardEnglish('1');
 
 // ── 2. point at anything, review the change, every version is kept ─────────────────────────────────
@@ -101,11 +118,11 @@ await say('Make this shorter and warmer.');
 rec.mark('sent5'); await rec.wait(2500); await waitIdle(page, { log: true });
 rec.mark('sketch5'); await rec.wait(900); await shot('5-done');
 rec.mark('changes');
-await rec.click(page.getByText('Show changes').first(), { ms: 800 }); await rec.wait(1300);
-await rec.click(page.getByRole('button', { name: 'Before', exact: true }).first(), { ms: 700 }); rec.mark('before'); await rec.wait(1400);
-await rec.click(page.getByRole('button', { name: 'After', exact: true }).first(), { ms: 600 }); rec.mark('after'); await rec.wait(1300);
+await rec.click(page.getByText('Show changes').first(), { ms: 800 }); await rec.wait(1000);
+await rec.click(page.getByRole('button', { name: 'Before', exact: true }).first(), { ms: 700 }); rec.mark('before'); await rec.wait(1100);
+await rec.click(page.getByRole('button', { name: 'After', exact: true }).first(), { ms: 600 }); rec.mark('after'); await rec.wait(1000);
 rec.mark('review5'); await approve(); rec.mark('approved5'); await rec.wait(1500);
-rec.mark('history'); await rec.click(page.locator('button[title="History"]').first(), { ms: 800 }); await rec.wait(2000); await shot('5-history');
+rec.mark('history'); await rec.click(page.locator('button[title="History"]').first(), { ms: 800 }); await rec.wait(1600); await shot('5-history');
 await guardEnglish('3');
 
 // ── 3. another agent (a real Claude Code, over the site's guest MCP server) leaves a sketch; it cannot publish ──────
@@ -118,11 +135,11 @@ rec.mark('agent_wait');
 const row = page.locator('[data-other-sketches] li [data-do="show"]').first();
 await row.waitFor({ state: 'visible', timeout: 120000 });
 console.log('claude code took', Math.round((Date.now() - t0) / 1000), 's', ccOut.slice(0, 300));
-rec.mark('arrived'); await rec.wait(1700); await shot('9-arrived');
+rec.mark('arrived'); await rec.wait(1400); await shot('9-arrived');
 const who = await page.locator('[data-other-sketches]').innerText();
 if (!/Claude Code/.test(who)) throw new Error('the sketch is not signed by Claude Code: ' + who.slice(0, 120));
 await rec.click(row, { ms: 800, pause: 250 });
-rec.mark('sketch9'); await rec.wait(2600); await shot('9-sketch');
+rec.mark('sketch9'); await rec.wait(2300); await shot('9-sketch');
 rec.mark('end'); await rec.wait(900);
 await guardEnglish('9');
 
