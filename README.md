@@ -14,6 +14,30 @@ leave sketches but never publish. Visitors get an assistant that answers only fr
 
 ![Three looks of the same content, as live thumbnails, side by side](docs/img/variants.jpg)
 
+## Try it now, without installing
+
+A demo site built with Cadenza runs at **<https://cadenza.krakowiak.eu>** (Tidewater Yoga: the site from the films).
+
+- **Ask it something.** Scroll to *Ask us anything*: "Which class is good for a beginner?", "Is there parking nearby?".
+  The answer comes only from what the site says; "What is the capital of France?" gets an honest *this site does not
+  say*. Then look at [`/llms.txt`](https://cadenza.krakowiak.eu/llms.txt), generated from the same text.
+- **Connect your own agent and leave a sketch.** The site's `guest` MCP server is open with a demo token:
+
+  ```bash
+  claude mcp add --transport http cadenza-demo https://cadenza.krakowiak.eu/_cadenza/mcp/guest \
+    --header "Authorization: Bearer czg_dd6f7a7a80750537457c5d5f245f9c19c0995138"
+  ```
+
+  Then, in Claude Code: *"Add a short 'What to bring' section to the yoga site on cadenza-demo, as a sketch, and give
+  me the preview link."* About ten seconds later you get a private link to the page as it would be, marked
+  *Not published · waiting for the owner's decision*. That is all a guest can do: with the same token the `agent`
+  and `control` servers answer `401`, and from a public address they do not answer at all.
+
+The demo runs the code of this repository in `prod` mode. Only the visitors' assistant can spend model tokens there
+(150 questions a day for the whole site, a few per visitor); the studio with the agent listens on `127.0.0.1` only, so
+the owner's side of the product is what the films and your own installation show. Sketches left by visitors' agents
+are forgotten after two hours.
+
 ## Try it in 3 minutes
 
 **Watch first:** the [90-second demo](https://youtu.be/Y2LkjUQom2Y), or the [4½-minute quick start](https://youtu.be/au5jg6GXCtY) (the commands, connecting a model, a full tour). Then run it yourself:

@@ -35,6 +35,7 @@ final class GuestTools
         /** A public demo forgets outside sketches nobody decided on after this many hours; 0 keeps them until the owner decides. */
         #[\Symfony\Component\DependencyInjection\Attribute\Autowire('%env(int:CADENZA_GUEST_SKETCH_HOURS)%')]
         private readonly int $forgetAfterHours = 0,
+        private readonly ?\Symfony\Component\HttpFoundation\RequestStack $requests = null,
     ) {
     }
 
@@ -108,8 +109,8 @@ final class GuestTools
             $this->versions->draft((int) $result['draftId'])?->signedBy($agent);
             $this->em->flush();
             $result['next'] = 'The sketch now waits in the owner\'s panel. Only the owner can publish it; tell them it is there.';
-            $result['preview'] = ($result['focusPath'] ?? '/').'?cz_draft='.$result['draftId'].'&cz_key='.\Cadenza\Runtime\EventSubscriber\McpGuardSubscriber::previewKey($this->token, (int) $result['draftId'])
-                .' (on the site\'s address: a private link that shows the page as it would be; give it to the person you work for. Nothing is published.)';
+            $result['preview'] = ($this->requests?->getMainRequest()?->getSchemeAndHttpHost() ?? '').($result['focusPath'] ?? '/').'?cz_draft='.$result['draftId'].'&cz_key='.\Cadenza\Runtime\EventSubscriber\McpGuardSubscriber::previewKey($this->token, (int) $result['draftId'])
+                .' (a private link that shows the page as it would be; give it to the person you work for. Nothing is published.)';
         }
 
         return $result;

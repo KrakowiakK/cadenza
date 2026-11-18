@@ -58,6 +58,14 @@ What a guest cannot do, by construction:
 - **Break the page**: its operations pass the same validation as the studio's (typed props per block, image props only
   from the site's media library, links must lead somewhere).
 
+`draft_propose` answers with a **private preview link** (`?cz_draft=N&cz_key=…`, the key is an HMAC of the draft's id):
+the page as it would be, with a banner that says it is not published, and nothing to decide on it. The agent hands that
+link to the person it works for.
+
+On a public address only this server is reachable: it lists the site's host in `allowed_hosts`
+(`CADENZA_PUBLIC_HOST`), while `agent` and `control` keep the SDK's DNS-rebinding default (localhost only). A live
+one to try: see *Try it now* in the README.
+
 The guest token is derived from the shared token (HMAC), so there is nothing extra to configure or store, and changing
 the shared token revokes it.
 

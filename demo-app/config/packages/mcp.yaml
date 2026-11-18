@@ -1,3 +1,6 @@
+parameters:
+    env(CADENZA_PUBLIC_HOST): 'localhost'
+
 mcp:
     servers:
         # What any agent may do: read the site and propose drafts (sketches).
@@ -14,6 +17,9 @@ mcp:
             instructions: 'You are a guest on this website. Read it (site_outline, editor_guide), then leave a sketch with draft_propose. Only the owner can publish: your sketch waits in their panel.'
             http:
                 path: /_cadenza/mcp/guest
+                # On a public address only this server answers: set CADENZA_PUBLIC_HOST to the site's host name. The
+                # agent and control servers keep the SDK's default (localhost only), so they cannot be reached from outside.
+                allowed_hosts: ['localhost', '127.0.0.1', '[::1]', '%env(CADENZA_PUBLIC_HOST)%']
             registry: ['Cadenza\Runtime\Mcp\Guest\']
         # Owner decisions, used by the Cadenza harness after the owner approved in the panel.
         control:
