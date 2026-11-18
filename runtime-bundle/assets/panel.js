@@ -196,11 +196,11 @@ class Studio {
 </div>
 
 <aside class="cz-sheet fixed inset-y-3 right-3 z-50 flex w-[min(440px,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-[0_30px_80px_-20px_rgba(0,0,0,.45)]">
-  <header class="flex items-center gap-2 border-b border-border px-4 py-3">
+  <header class="flex items-center gap-1 border-b border-border px-4 py-3">
     <span class="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white">${icon('sparkle')}</span>
-    <div class="min-w-0 flex-1">
+    <div class="ml-1.5 min-w-0 flex-1">
       <div class="text-sm font-semibold leading-tight">Cadenza</div>
-      <div class="flex min-w-0 items-center gap-2 text-xs text-muted-foreground"><span data-cz="status" class="flex shrink-0 items-center gap-1.5 whitespace-nowrap"></span><span data-cz="model" class="min-w-0 truncate opacity-70"></span></div>
+      <div class="flex min-w-0 items-center gap-2 overflow-hidden text-xs text-muted-foreground"><span data-cz="status" class="flex min-w-0 items-center gap-1.5 whitespace-nowrap"></span><span data-cz="model" class="min-w-0 truncate opacity-70" style="flex-shrink:999"></span></div>
     </div>
     <a href="/_cadenza/dashboard" data-cz="dashboard" title="${t('dashboard')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('dashboard')}</a>
     <button type="button" data-cz="tab-history" title="${t('history')}" class="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">${icon('clock')}</button>
@@ -358,7 +358,7 @@ class Studio {
         this.lastStatus = [kind, text];
         const slow = this.slowHint && (kind === 'thinking' || kind === 'working') ? ` · ${t('slow')}` : '';
         const label = escapeHtml(text ?? t(kind)) + escapeHtml(slow);
-        this.el('status').innerHTML = `<span class="size-1.5 rounded-full ${dot}"></span>${label}`;
+        this.el('status').innerHTML = `<span class="size-1.5 shrink-0 rounded-full ${dot}"></span><span class="truncate" title="${label}">${label}</span>`;
         const bar = this.el('bar-status');
         bar.innerHTML = `<span class="size-1.5 rounded-full ${dot}"></span>${label}`;
         bar.classList.toggle('sm:flex', kind !== 'idle');

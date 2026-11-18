@@ -28,6 +28,17 @@ final class UndoRequest
         return false;
     }
 
+    public static function namesAVersion(?Conversation $conversation): bool
+    {
+        foreach (array_reverse($conversation?->getTurns() ?? []) as $turn) {
+            if ('user' === ($turn['role'] ?? '')) {
+                return 1 === preg_match('/\d/', (string) ($turn['text'] ?? ''));
+            }
+        }
+
+        return false;
+    }
+
     public static function matches(string $text): bool
     {
         return mb_strlen($text) <= 140 && 1 === preg_match(self::PATTERN, $text);

@@ -44,9 +44,16 @@ final class SiteTools
         if ([] !== $tools) {
             return \sprintf('Nothing was saved: %s %s a tool of its own, not an operation. Call %s directly first; then call propose_changes with page and node operations only (e.g. a collection-grid node showing the collection).', implode(', ', $tools), 1 === \count($tools) ? 'is' : 'are', implode(' / ', $tools));
         }
-        // "Undo that" is the earlier version itself, not a new change made to resemble it.
-        if (\App\Studio\UndoRequest::isUndo($this->turn->conversation) && !\App\Studio\UndoRequest::restores($operations)) {
-            return 'Nothing was saved: the owner asked to undo. Do not rebuild the earlier look by hand. Call site_overview to see the published versions, then propose exactly one operation: {"op": "site.restore", "version": N}, where N is the version that was live before the change they mean (usually the one before the current).';
+        // "Undo that" is the version that was live before, exactly: whatever the model built to resemble it is replaced
+        // by a restore of that version. (An owner who names a version, "go back to version 3", is taken at their word.)
+        if (\App\Studio\UndoRequest::isUndo($this->turn->conversation) && !\App\Studio\UndoRequest::namesAVersion($this->turn->conversation)) {
+            $versions = $this->site->history(2);
+            if (\count($versions) < 2) {
+                return 'Nothing was saved: there is no earlier published version to go back to. Tell the owner so.';
+            }
+            $operations = [['op' => 'site.restore', 'version' => (int) $versions[1]['version']]];
+            $summary = str_starts_with($this->turn->language, 'pl') ? 'Strona taka, jaka była przed ostatnią zmianą' : 'The site as it was before the last change';
+            $reviseDraftId = null;
         }
         // Reviews the owner never gave do not reach a sketch, whatever the model was told.
         [$operations, $invented, $prices] = InventedFacts::strip(Proposals::normalise($operations), $this->turn->conversation, fn (): string => $this->site->siteText());
